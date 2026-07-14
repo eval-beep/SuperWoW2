@@ -83,9 +83,9 @@ export default function SettingsPage() {
     }
   }
 
-  function handleLogout() {
-    fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
   }
 
   function updateSetting(key: keyof Settings, value: string) {
