@@ -221,8 +221,8 @@ export default function UserInfoPage() {
           </div>
 
           {/* Table */}
-          <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-            <div className="hidden md:block overflow-x-auto">
+          <div className="rounded-2xl" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <div className="hidden md:block overflow-x-auto rounded-t-2xl">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>

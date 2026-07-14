@@ -280,34 +280,36 @@ export function Pagination({
   const end = Math.min(page * perPage, total);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-outline-variant/30">
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-on-surface-variant">
-          Menampilkan {start}-{end} dari {total}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-3 sm:px-4 py-3 gap-2 border-t border-outline-variant/30 overflow-visible">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs sm:text-sm text-on-surface-variant whitespace-nowrap">
+          {start}-{end} dari {total}
         </span>
         {showPerPage && onPerPageChange && (
-          <LgSelect
-            id={`perPage-${Math.random()}`}
-            compact
-            value={String(perPage)}
-            onChange={(v) => onPerPageChange(Number(v))}
-            options={[
-              { value: "10", label: "10" },
-              { value: "25", label: "25" },
-              { value: "50", label: "50" },
-              { value: "100", label: "100" },
-            ]}
-            placeholder="Baris"
-          />
+          <div className="relative">
+            <LgSelect
+              id={`perPage-${Math.random()}`}
+              compact
+              value={String(perPage)}
+              onChange={(v) => onPerPageChange(Number(v))}
+              options={[
+                { value: "10", label: "10" },
+                { value: "25", label: "25" },
+                { value: "50", label: "50" },
+                { value: "100", label: "100" },
+              ]}
+              placeholder="Baris"
+            />
+          </div>
         )}
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         <button
           onClick={() => onPageChange(Math.max(1, page - 1))}
           disabled={page === 1}
-          className="px-3 py-1.5 rounded-lg text-sm hover:bg-surface-container-low disabled:opacity-40"
+          className="w-8 h-8 rounded-lg text-xs sm:text-sm hover:bg-surface-container-low disabled:opacity-40"
         >
-          ←
+          &laquo;
         </button>
         {Array.from({ length: Math.min(5, lastPage) }, (_, i) => {
           const p = page <= 3 ? i + 1 : page + i - 2;
@@ -316,7 +318,7 @@ export function Pagination({
             <button
               key={p}
               onClick={() => onPageChange(p)}
-              className={`w-8 h-8 rounded-lg text-sm ${
+              className={`w-8 h-8 rounded-lg text-xs sm:text-sm ${
                 p === page ? "text-white" : "hover:bg-surface-container-low"
               }`}
               style={p === page ? { background: "var(--color-primary)" } : {}}
@@ -328,9 +330,9 @@ export function Pagination({
         <button
           onClick={() => onPageChange(Math.min(lastPage, page + 1))}
           disabled={page === lastPage}
-          className="px-3 py-1.5 rounded-lg text-sm hover:bg-surface-container-low disabled:opacity-40"
+          className="w-8 h-8 rounded-lg text-xs sm:text-sm hover:bg-surface-container-low disabled:opacity-40"
         >
-          →
+          &raquo;
         </button>
       </div>
     </div>
