@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const [recentAttlogs, setRecentAttlogs] = useState<RecentAttlog[]>([]);
   const [latestPayload, setLatestPayload] = useState<LatestPayload | null>(null);
   const [loading, setLoading] = useState(true);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     loadDashboard();
