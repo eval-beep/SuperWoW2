@@ -71,7 +71,7 @@ export default function UserInfoPage() {
     if (search) params.set("search", search);
     if (cloudIdFilter) params.set("cloud_id", cloudIdFilter);
 
-    const res = await fetch(`/api/supabase?table=userinfos&select=id,cloud_id,pin,name,role,privilege,created_at&count=true&order=created_at.desc&${params.toString()}`);
+    const res = await fetch(`/api/supabase?table=userinfos&count=true&order=created_at.desc&${params.toString()}`);
     const data = await res.json();
     setUsers(data.data || []);
     setTotal(data.count || 0);
@@ -93,7 +93,7 @@ export default function UserInfoPage() {
   }, [actionMenu]);
 
   async function loadCloudIds() {
-    const res = await fetch("/api/supabase?table=userinfos&select=cloud_id&limit=5000");
+    const res = await fetch("/api/supabase?table=userinfos&select=cloud_id");
     const data = await res.json();
     const raw: { cloud_id: string }[] = data.data || [];
     const ids = [...new Set(raw.map((r) => r.cloud_id))];

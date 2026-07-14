@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   // Query 1: Paginated data + total count
   const { data, count } = await supabaseSelect("command_logs", {
-    select: "id,command_type,cloud_id,trans_id,status,created_at,endpoint",
+    select: "*",
     order: { column: "created_at", ascending: false },
     limit: perPage, offset, count: true, filters,
   });

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   // Single query: data + count combined
   const { data, count } = await supabaseSelect("webhook_logs", {
-    select: "id,cloud_id,webhook_type,status_code,received_at",
+    select: "*",
     order: { column: "received_at", ascending: false },
     limit: perPage, offset, count: true, filters,
   });

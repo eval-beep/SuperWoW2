@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
   // Query 1: Paginated data + total count (combined via Prefer: count=exact)
   const { data, count } = await supabaseSelect("attlogs", {
-    select: "id,cloud_id,pin,name,scan_time,status_scan,verify,source,trans_id,created_at",
+    select: "*",
     order: { column: "scan_time", ascending: false },
     limit: perPage, offset, count: true, filters,
   });
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     supabaseSelect("attlogs", { count: true, filters: { ...filters, status_scan: "eq.0" } }),
     supabaseSelect("attlogs", { count: true, filters: { ...filters, status_scan: "eq.1" } }),
     supabaseSelect("attlogs", { count: true, filters: { ...filters, scan_time: [`gte.${todayStr}T00:00:00`, `lt.${tomorrowStr}T00:00:00`] } }),
-    supabaseSelect("attlogs", { select: "pin", filters, limit: 10000 }),
+    supabaseSelect("attlogs", { select: "pin", filters, limit: 5000 }),
   ]);
 
   const uniqueEmployees = new Set((pinsRes.data as { pin: string }[] || []).map((r) => r.pin)).size;
