@@ -115,275 +115,193 @@ export default function AttendanceLogsPage() {
   const endEntry = Math.min(page * perPage, total);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Log Absensi</h1>
-          <p className="text-xs sm:text-sm mt-1" style={{ color: "#737687" }}>Riwayat kehadiran dan aktivitas karyawan</p>
+          <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Log Absensi</h1>
+          <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Riwayat kehadiran karyawan</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setGetAttlogModal(true)} className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 text-white" style={{ background: "#004ccd" }}>
-            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">download</span>
-            <span className="hidden xs:inline">Ambil Log dari Device</span>
-            <span className="xs:hidden">Ambil Log</span>
+        <div className="flex gap-2">
+          <button onClick={() => setGetAttlogModal(true)} className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 text-white" style={{ background: "#004ccd" }}>
+            <span className="material-symbols-outlined text-sm">download</span>Ambil Log
           </button>
-          <button onClick={handleExport} className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>
-            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">file_download</span>
-            Export
+          <button onClick={handleExport} className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>
+            <span className="material-symbols-outlined text-sm">file_download</span>Export
           </button>
         </div>
       </div>
 
-      {/* Filter Row */}
-      <div className="rounded-2xl p-3 sm:p-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-end gap-2 sm:gap-3">
-          <div className="flex-1 min-w-0 sm:min-w-[180px]">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "#737687" }}>PIN</label>
+      {/* Filter */}
+      <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>PIN</label>
             <input
               type="text"
               placeholder="Cari PIN..."
               value={pinSearch}
               onChange={(e) => setPinSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleFilter()}
-              className="w-full px-3 py-2 rounded-xl text-sm"
+              className="w-full px-3 py-2 rounded-lg text-xs"
               style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}
             />
           </div>
-          <div className="min-w-0 sm:min-w-[160px]">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "#737687" }}>Tanggal Mulai</label>
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Dari</label>
             <LgDatepicker id="dpFrom" value={dateFrom} onChange={setDateFrom} placeholder="Tanggal Mulai" />
           </div>
-          <div className="min-w-0 sm:min-w-[160px]">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "#737687" }}>Tanggal Akhir</label>
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Sampai</label>
             <LgDatepicker id="dpTo" value={dateTo} onChange={setDateTo} placeholder="Tanggal Akhir" />
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={handleFilter}
-              className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
-              style={{ background: "#004ccd" }}
-            >
-              Filter
-            </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}
-            >
-              Reset
-            </button>
+            <button onClick={handleFilter} className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-medium text-white" style={{ background: "#004ccd" }}>Filter</button>
+            <button onClick={handleReset} className="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-medium" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>Reset</button>
           </div>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm" style={{ minWidth: "700px" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                {["PIN", "User ID", "Device", "Waktu Scan", "Verifikasi", "Status", "Aksi"].map((h) => (
-                  <th key={h} className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-8" style={{ color: "#737687" }}>
-                    <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>Memuat...
-                  </td>
-                </tr>
-              ) : logs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-8" style={{ color: "#737687" }}>
-                    Tidak ada data
-                  </td>
-                </tr>
-              ) : (
-                logs.map((log, i) => (
-                  <tr key={log.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
-                    <td className="py-3 px-3 font-medium whitespace-nowrap" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
-                    <td className="py-3 px-3 whitespace-nowrap" style={{ color: "#1a1c1c" }}>{log.name || "-"}</td>
-                    <td className="py-3 px-3 whitespace-nowrap" style={{ color: "#737687" }}>{log.cloud_id}</td>
-                    <td className="py-3 px-3 whitespace-nowrap" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatDateTime(log.scan_time)}</td>
-                    <td className="py-3 px-3">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>
-                        {getVerifyLabel(log.verify)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
-                        style={{
-                          background: log.status_scan === 0 ? "#defbe6" : "#fff1f1",
-                          color: log.status_scan === 0 ? "#006e2b" : "#da1e28",
-                        }}
-                      >
-                        {log.status_scan === 0 ? "MASUK" : "GAGAL"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      <button
-                        onClick={() => setDetailModal({ open: true, log })}
-                        className="w-8 h-8 inline-flex items-center justify-center rounded-lg transition-colors hover:bg-[#dbe1ff]"
-                        title="Lihat Detail"
-                      >
-                        <span className="material-symbols-outlined text-[18px]" style={{ color: "#004ccd" }}>visibility</span>
-                      </button>
-                    </td>
+      {/* Content */}
+      {loading ? (
+        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          <span className="material-symbols-outlined animate-spin text-2xl" style={{ color: "#004ccd" }}>progress_activity</span>
+          <p className="text-xs mt-2" style={{ color: "#737687" }}>Memuat data...</p>
+        </div>
+      ) : logs.length === 0 ? (
+        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          <span className="material-symbols-outlined text-3xl" style={{ color: "#c3c6d8" }}>inbox</span>
+          <p className="text-xs mt-2" style={{ color: "#737687" }}>Tidak ada data</p>
+        </div>
+      ) : (
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
+                    {["PIN", "Nama", "Cloud ID", "Waktu", "Verifikasi", "Status"].map((h) => (
+                      <th key={h} className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{h}</th>
+                    ))}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 gap-2" style={{ borderTop: "1px solid rgba(195,198,216,0.2)" }}>
-          <span className="text-xs sm:text-sm whitespace-nowrap" style={{ color: "#737687" }}>
-            {startEntry}-{endEntry} dari {total.toLocaleString()}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className="px-3 py-1.5 rounded-lg text-sm disabled:opacity-40 hover:bg-[#f3f3f3]"
-            >
-              &laquo;
-            </button>
-            {Array.from({ length: Math.min(5, lastPage) }, (_, i) => {
-              const p = page <= 3 ? i + 1 : page + i - 2;
-              if (p < 1 || p > lastPage) return null;
-              return (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className="w-8 h-8 rounded-lg text-sm transition-colors"
-                  style={p === page ? { background: "#004ccd", color: "#ffffff" } : { color: "#424656" }}
-                >
-                  {p}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => setPage(Math.min(lastPage, page + 1))}
-              disabled={page === lastPage}
-              className="px-3 py-1.5 rounded-lg text-sm disabled:opacity-40 hover:bg-[#f3f3f3]"
-            >
-              &raquo;
-            </button>
+                </thead>
+                <tbody>
+                  {logs.map((log, i) => (
+                    <tr key={log.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                      <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
+                      <td className="py-2.5 px-3" style={{ color: "#1a1c1c" }}>{log.name || "-"}</td>
+                      <td className="py-2.5 px-3" style={{ color: "#737687", fontFamily: "JetBrains Mono" }}>{log.cloud_id}</td>
+                      <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatDateTime(log.scan_time)}</td>
+                      <td className="py-2.5 px-3">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: log.status_scan === 0 ? "#defbe6" : "#fff1f1", color: log.status_scan === 0 ? "#006e2b" : "#da1e28" }}>
+                          {log.status_scan === 0 ? "MASUK" : "GAGAL"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-2">
+            {logs.map((log) => (
+              <div key={log.id} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }} onClick={() => setDetailModal({ open: true, log })}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-xs" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</span>
+                    <span className="text-[11px]" style={{ color: "#1a1c1c" }}>{log.name || "-"}</span>
+                  </div>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: log.status_scan === 0 ? "#defbe6" : "#fff1f1", color: log.status_scan === 0 ? "#006e2b" : "#da1e28" }}>
+                    {log.status_scan === 0 ? "MASUK" : "GAGAL"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
+                  <span style={{ fontFamily: "JetBrains Mono" }}>{formatDateTime(log.scan_time)}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between rounded-xl px-3 py-2" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <span className="text-[10px]" style={{ color: "#737687" }}>{startEntry}-{endEntry} dari {total}</span>
+            <div className="flex items-center gap-0.5">
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&laquo;</button>
+              {Array.from({ length: Math.min(5, lastPage) }, (_, i) => {
+                const p = page <= 3 ? i + 1 : page + i - 2;
+                if (p < 1 || p > lastPage) return null;
+                return <button key={p} onClick={() => setPage(p)} className="w-7 h-7 rounded-lg text-[11px] font-medium" style={p === page ? { background: "#004ccd", color: "#fff" } : { color: "#424656" }}>{p}</button>;
+              })}
+              <button onClick={() => setPage(Math.min(lastPage, page + 1))} disabled={page === lastPage} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&raquo;</button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Detail Modal */}
       {detailModal.open && detailModal.log && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, log: null })}>
-          <div className="w-full max-w-lg rounded-2xl p-5 sm:p-6" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail Log</h3>
-            <div className="space-y-3">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, log: null })}>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail Log</h3>
+            <div className="space-y-2">
               {[
                 ["PIN", detailModal.log.pin],
                 ["Nama", detailModal.log.name || "-"],
                 ["Cloud ID", detailModal.log.cloud_id],
-                ["Waktu Scan", formatDateTime(detailModal.log.scan_time)],
+                ["Waktu", formatDateTime(detailModal.log.scan_time)],
                 ["Verifikasi", getVerifyLabel(detailModal.log.verify)],
                 ["Status", detailModal.log.status_scan === 0 ? "MASUK" : "GAGAL"],
                 ["Sumber", detailModal.log.source || "-"],
                 ["Trans ID", detailModal.log.trans_id || "-"],
               ].map(([label, value]) => (
-                <div key={label as string} className="flex justify-between items-start gap-4 py-2" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                  <span className="text-sm shrink-0" style={{ color: "#737687" }}>{label}</span>
-                  <span className="text-sm font-medium text-right break-all" style={{ color: "#1a1c1c" }}>{value}</span>
+                <div key={label as string} className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                  <span style={{ color: "#737687" }}>{label}</span>
+                  <span className="font-medium text-right break-all" style={{ color: "#1a1c1c" }}>{value}</span>
                 </div>
               ))}
             </div>
-            <button
-              onClick={() => setDetailModal({ open: false, log: null })}
-              className="w-full mt-4 py-2.5 text-sm rounded-xl transition-colors"
-              style={{ color: "#424656", background: "#f3f3f3" }}
-            >
-              Tutup
-            </button>
+            <button onClick={() => setDetailModal({ open: false, log: null })} className="w-full mt-3 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>
           </div>
         </div>
       )}
 
       {/* Get Attlog Modal */}
       {getAttlogModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setGetAttlogModal(false)}>
-          <div className="w-full max-w-xl rounded-2xl p-5 sm:p-6" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Ambil Log dari Device</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
-                <select
-                  value={getForm.cloud_id}
-                  onChange={(e) => setGetForm({ ...getForm, cloud_id: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl text-sm"
-                  style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}
-                >
-                  {allCloudIds.map((id) => (
-                    <option key={id} value={id}>{id}</option>
-                  ))}
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setGetAttlogModal(false)}>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Ambil Log dari Device</h3>
+            <div className="space-y-2">
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
+                <select value={getForm.cloud_id} onChange={(e) => setGetForm({ ...getForm, cloud_id: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}>
+                  {allCloudIds.map((id) => <option key={id} value={id}>{id}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>PIN (Opsional)</label>
-                <input
-                  value={getForm.pin}
-                  onChange={(e) => setGetForm({ ...getForm, pin: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl text-sm"
-                  style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}
-                  placeholder="Semua PIN"
-                />
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>PIN (Opsional)</label>
+                <input value={getForm.pin} onChange={(e) => setGetForm({ ...getForm, pin: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }} placeholder="Semua PIN" />
               </div>
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Tanggal Mulai</label>
-                <input
-                  type="date"
-                  value={getForm.start_date}
-                  onChange={(e) => setGetForm({ ...getForm, start_date: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl text-sm"
-                  style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Tanggal Akhir</label>
-                <input
-                  type="date"
-                  value={getForm.end_date}
-                  onChange={(e) => setGetForm({ ...getForm, end_date: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl text-sm"
-                  style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}
-                />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Dari</label>
+                  <input type="date" value={getForm.start_date} onChange={(e) => setGetForm({ ...getForm, start_date: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Sampai</label>
+                  <input type="date" value={getForm.end_date} onChange={(e) => setGetForm({ ...getForm, end_date: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }} />
+                </div>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 mt-4">
-              <a
-                href={`/api-tester?command=get_attlog&cloud_id=${getForm.cloud_id}`}
-                className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-                style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}
-              >
-                <span className="material-symbols-outlined text-[16px]">open_in_new</span>API Tester
-              </a>
-              <div className="flex-1" />
-              <button
-                onClick={() => setGetAttlogModal(false)}
-                className="px-4 py-2.5 rounded-xl text-sm"
-                style={{ color: "#737687" }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleGetAttlog}
-                className="px-6 py-2.5 rounded-xl text-sm font-medium text-white"
-                style={{ background: "#004ccd" }}
-              >
-                Kirim ke Device
-              </button>
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => setGetAttlogModal(false)} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#737687" }}>Batal</button>
+              <button onClick={handleGetAttlog} className="flex-1 py-2 text-xs font-medium text-white rounded-lg" style={{ background: "#004ccd" }}>Kirim</button>
             </div>
           </div>
         </div>
