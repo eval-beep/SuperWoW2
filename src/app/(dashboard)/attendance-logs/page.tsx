@@ -67,7 +67,7 @@ export default function AttendanceLogsPage() {
   }, [loadLogs]);
 
   async function loadCloudIds() {
-    const res = await fetch("/api/supabase?table=attlogs&select=cloud_id");
+    const res = await fetch("/api/supabase?table=attlogs&select=cloud_id&limit=5000");
     const data = await res.json();
     const raw: { cloud_id: string }[] = data.data || [];
     const ids = [...new Set(raw.map((r) => r.cloud_id))];

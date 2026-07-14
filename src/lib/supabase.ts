@@ -67,7 +67,7 @@ export async function supabaseSelect(
     headers["Prefer"] = "count=exact";
   }
 
-  const res = await fetch(url, { headers, next: { revalidate: 0 } });
+  const res = await fetch(url, { headers, next: { revalidate: 30 } });
 
   if (!res.ok) {
     const err = await res.text();

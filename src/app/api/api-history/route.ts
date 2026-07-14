@@ -12,17 +12,28 @@ export async function GET(request: NextRequest) {
   const filters: Record<string, string> = {};
   if (search) filters.or = `(cloud_id.ilike.*${search}*,trans_id.ilike.*${search}*,command_type.ilike.*${search}*)`;
 
+  // Query 1: Paginated data + total count
   const { data, count } = await supabaseSelect("command_logs", {
-    select: "*", order: { column: "created_at", ascending: false },
+    select: "id,command_type,cloud_id,trans_id,status,created_at,endpoint",
+    order: { column: "created_at", ascending: false },
     limit: perPage, offset, count: true, filters,
   });
 
-  const { count: total } = await supabaseSelect("command_logs", { count: true });
-  const { count: success } = await supabaseSelect("command_logs", { count: true, filters: { status: "eq.success" } });
-  const { count: failed } = await supabaseSelect("command_logs", { count: true, filters: { status: "eq.failed" } });
-  const { count: pending } = await supabaseSelect("command_logs", { count: true, filters: { status: "eq.pending" } });
+  // Query 2: Status counts (success + failed + pending) in parallel
+  const [successRes, failedRes, pendingRes] = await Promise.all([
+    supabaseSelect("command_logs", { count: true, filters: { ...filters, status: "eq.success" } }),
+    supabaseSelect("command_logs", { count: true, filters: { ...filters, status: "eq.failed" } }),
+    supabaseSelect("command_logs", { count: true, filters: { ...filters, status: "eq.pending" } }),
+  ]);
 
-  return NextResponse.json({ data, total: count, lastPage: Math.ceil(count / perPage), page, perPage, stats: { total, success, failed, pending } });
+  return NextResponse.json({
+    data,
+    total: count,
+    lastPage: Math.ceil(count / perPage),
+    page,
+    perPage,
+    stats: { total: count, success: successRes.count, failed: failedRes.count, pending: pendingRes.count },
+  });
 }
 
 export async function POST(request: NextRequest) {

@@ -19,7 +19,9 @@ export async function POST(request: NextRequest) {
     } catch { /* continue */ }
   }
 
-  await supabaseDelete("pins", { cloud_id: `eq.${cloud_id}`, pin: `eq.${pin}` });
-  await supabaseDelete("userinfos", { cloud_id: `eq.${cloud_id}`, pin: `eq.${pin}` });
+  await Promise.all([
+    supabaseDelete("pins", { cloud_id: `eq.${cloud_id}`, pin: `eq.${pin}` }),
+    supabaseDelete("userinfos", { cloud_id: `eq.${cloud_id}`, pin: `eq.${pin}` }),
+  ]);
   return NextResponse.json({ success: true, message: "Berhasil dihapus" });
 }

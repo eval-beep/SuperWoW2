@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseSelect, supabaseUpdate } from "@/lib/supabase";
+import { supabaseSelect, supabaseInsert } from "@/lib/supabase";
 
 const SETTINGS_DEFAULTS = {
   api_token: "Z5B2BKUMQV4ED3G7",
@@ -31,9 +31,11 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   const body = await request.json();
   try {
-    for (const [key, value] of Object.entries(body)) {
-      await supabaseUpdate("settings", { value, updated_at: new Date().toISOString() }, { key });
-    }
+    // Batch upsert: insert or update each setting in parallel
+    const upserts = Object.entries(body).map(([key, value]) =>
+      supabaseInsert("settings", { key, value, updated_at: new Date().toISOString() })
+    );
+    await Promise.all(upserts);
   } catch { /* ignore */ }
   return NextResponse.json({ success: true, ...body });
 }

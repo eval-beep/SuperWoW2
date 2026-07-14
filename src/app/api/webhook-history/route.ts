@@ -11,18 +11,20 @@ export async function GET(request: NextRequest) {
   const filters: Record<string, string> = {};
   if (search) filters.or = `(cloud_id.ilike.*${search}*,webhook_type.ilike.*${search}*)`;
 
+  // Single query: data + count combined
   const { data, count } = await supabaseSelect("webhook_logs", {
-    select: "*", order: { column: "received_at", ascending: false },
+    select: "id,cloud_id,webhook_type,status_code,received_at",
+    order: { column: "received_at", ascending: false },
     limit: perPage, offset, count: true, filters,
   });
 
-  const { count: total } = await supabaseSelect("webhook_logs", { count: true });
+  // Compute type counts from current page data
   const typeCounts: Record<string, number> = {};
   for (const row of (data || []) as { webhook_type: string }[]) {
     typeCounts[row.webhook_type] = (typeCounts[row.webhook_type] || 0) + 1;
   }
 
-  return NextResponse.json({ data, total: count, lastPage: Math.ceil(count / perPage), page, perPage, stats: { total, types: typeCounts } });
+  return NextResponse.json({ data, total: count, lastPage: Math.ceil(count / perPage), page, perPage, stats: { total: count, types: typeCounts } });
 }
 
 export async function DELETE() {

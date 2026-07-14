@@ -42,29 +42,36 @@ export async function GET(request: NextRequest) {
     filters.scan_time = `lt.${toStr}T00:00:00`;
   }
 
+  // Query 1: Paginated data + total count (combined via Prefer: count=exact)
   const { data, count } = await supabaseSelect("attlogs", {
-    select: "*",
+    select: "id,cloud_id,pin,name,scan_time,status_scan,verify,source,trans_id,created_at",
     order: { column: "scan_time", ascending: false },
     limit: perPage, offset, count: true, filters,
   });
 
-  const { count: total } = await supabaseSelect("attlogs", { count: true });
-  const { count: success } = await supabaseSelect("attlogs", { count: true, filters: { status_scan: "eq.0" } });
-  const { count: failed } = await supabaseSelect("attlogs", { count: true, filters: { status_scan: "eq.1" } });
-
+  // Query 2: Stats (success + failed + today + unique pins) — run in parallel
   const todayStr = getWIBDateStr(new Date());
   const tomorrowDate = new Date();
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrowStr = getWIBDateStr(tomorrowDate);
-  const { count: todayCount } = await supabaseSelect("attlogs", {
-    count: true, filters: { scan_time: [`gte.${todayStr}T00:00:00`, `lt.${tomorrowStr}T00:00:00`] },
-  });
 
-  const { data: allPins } = await supabaseSelect("attlogs", { select: "pin" });
-  const uniqueEmployees = new Set((allPins as { pin: string }[] || []).map((r) => r.pin)).size;
+  const [successRes, failedRes, todayRes, pinsRes] = await Promise.all([
+    supabaseSelect("attlogs", { count: true, filters: { ...filters, status_scan: "eq.0" } }),
+    supabaseSelect("attlogs", { count: true, filters: { ...filters, status_scan: "eq.1" } }),
+    supabaseSelect("attlogs", { count: true, filters: { ...filters, scan_time: [`gte.${todayStr}T00:00:00`, `lt.${tomorrowStr}T00:00:00`] } }),
+    supabaseSelect("attlogs", { select: "pin", filters, limit: 10000 }),
+  ]);
+
+  const uniqueEmployees = new Set((pinsRes.data as { pin: string }[] || []).map((r) => r.pin)).size;
 
   return NextResponse.json({
     data, total: count, lastPage: Math.ceil(count / perPage), page, perPage,
-    stats: { total, success, failed, today: todayCount, unique_employees: uniqueEmployees },
+    stats: {
+      total: count,
+      success: successRes.count,
+      failed: failedRes.count,
+      today: todayRes.count,
+      unique_employees: uniqueEmployees,
+    },
   });
 }

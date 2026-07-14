@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboard();
-    const interval = setInterval(loadDashboard, 30000);
+    const interval = setInterval(loadDashboard, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -62,17 +62,23 @@ export default function DashboardPage() {
 
   async function loadDashboard() {
     try {
-      const [usersRes, attlogsRes, webhooksRes, commandsRes] = await Promise.all([
-        fetch("/api/supabase?table=userinfos&count=true"),
-        fetch("/api/supabase?table=attlogs&count=true"),
-        fetch("/api/supabase?table=webhook_logs&count=true"),
-        fetch("/api/supabase?table=command_logs&select=command_type,cloud_id,status,created_at,endpoint&order=created_at.desc&limit=500"),
+      // 4 parallel queries: counts + commands + recent attlogs + latest payload
+      const [usersRes, attlogsRes, webhooksRes, commandsRes, attlogsListRes, latestRes] = await Promise.all([
+        fetch("/api/supabase?table=userinfos&count=true&limit=0"),
+        fetch("/api/supabase?table=attlogs&count=true&limit=0"),
+        fetch("/api/supabase?table=webhook_logs&count=true&limit=0"),
+        fetch("/api/supabase?table=command_logs&select=command_type&order=created_at.desc&limit=500"),
+        fetch("/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6"),
+        fetch("/api/supabase?table=command_logs&select=command_type,response_payload,created_at&order=created_at.desc&limit=1"),
       ]);
 
-      const [users, attlogs, webhooks] = await Promise.all([
+      const [users, attlogs, webhooks, commandsData, attlogsList, latestData] = await Promise.all([
         usersRes.json(),
         attlogsRes.json(),
         webhooksRes.json(),
+        commandsRes.json(),
+        attlogsListRes.json(),
+        latestRes.json(),
       ]);
 
       setStats({
@@ -81,7 +87,7 @@ export default function DashboardPage() {
         totalWebhooks: webhooks.count || 0,
       });
 
-      const commandsData = await commandsRes.json();
+      // Compute top commands from fetched data
       const commandCounts: Record<string, number> = {};
       for (const row of commandsData.data || []) {
         commandCounts[row.command_type] = (commandCounts[row.command_type] || 0) + 1;
@@ -98,8 +104,7 @@ export default function DashboardPage() {
         }));
       setTopCommands(sorted);
 
-      const attlogsListRes = await fetch("/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6");
-      const attlogsList = await attlogsListRes.json();
+      // Format recent attlogs
       const attlogsFormatted = (attlogsList.data || []).map((row: Record<string, unknown>) => ({
         pin: row.pin as string,
         name: (row.name as string) || "-",
@@ -109,8 +114,7 @@ export default function DashboardPage() {
       }));
       setRecentAttlogs(attlogsFormatted);
 
-      const latestRes = await fetch("/api/supabase?table=command_logs&select=command_type,response_payload,created_at&order=created_at.desc&limit=1");
-      const latestData = await latestRes.json();
+      // Latest payload
       if (latestData.data?.[0]) {
         setLatestPayload({
           payload: latestData.data[0].response_payload || {},
