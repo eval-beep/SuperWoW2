@@ -30,20 +30,16 @@ export default function PinListPage() {
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/pin-list");
+      const res = await fetch("/api/supabase?table=userinfos&select=*&order=created_at.desc&count=true");
       const result = await res.json();
-      let raw: Record<string, unknown>[] = [];
-      if (result.data) {
-        if (Array.isArray(result.data)) raw = result.data;
-        else if (result.data.data && Array.isArray(result.data.data)) raw = result.data.data;
-      }
+      const raw: Record<string, unknown>[] = result.data || [];
       setUsers(raw.map((u, idx) => ({
         id: String(u.id || u.pin || idx),
         cloud_id: String(u.cloud_id || ""),
         pin: String(u.pin || ""),
-        name: (u.Name as string) || (u.name as string) || null,
+        name: (u.name as string) || null,
         role: (u.role as string) || "user",
-        created_at: String(u.created_at || u.sTime || ""),
+        created_at: String(u.created_at || ""),
       })));
     } catch {
       setUsers([]);
