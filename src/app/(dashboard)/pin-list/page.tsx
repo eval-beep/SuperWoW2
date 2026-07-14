@@ -25,24 +25,26 @@ export default function PinListPage() {
   const [newForm, setNewForm] = useState({ pin: "", name: "", role: "user" });
   const [editForm, setEditForm] = useState({ name: "", role: "user" });
 
+  const [detailModal, setDetailModal] = useState<{ open: boolean; user: DeviceUser | null }>({ open: false, user: null });
+
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/pin-list");
       const result = await res.json();
-      if (result.success && result.data) {
-        const raw = Array.isArray(result.data) ? result.data : (result.data.data || []);
-        setUsers(raw.map((u: Record<string, unknown>) => ({
-          id: String(u.id || u.pin || Math.random()),
-          cloud_id: String(u.cloud_id || ""),
-          pin: String(u.pin || ""),
-          name: (u.name as string) || null,
-          role: (u.role as string) || "user",
-          created_at: String(u.created_at || ""),
-        })));
-      } else {
-        setUsers([]);
+      let raw: Record<string, unknown>[] = [];
+      if (result.data) {
+        if (Array.isArray(result.data)) raw = result.data;
+        else if (result.data.data && Array.isArray(result.data.data)) raw = result.data.data;
       }
+      setUsers(raw.map((u, idx) => ({
+        id: String(u.id || u.pin || idx),
+        cloud_id: String(u.cloud_id || ""),
+        pin: String(u.pin || ""),
+        name: (u.Name as string) || (u.name as string) || null,
+        role: (u.role as string) || "user",
+        created_at: String(u.created_at || u.sTime || ""),
+      })));
     } catch {
       setUsers([]);
     }
@@ -127,14 +129,14 @@ export default function PinListPage() {
               </thead>
               <tbody>
                 {users.map((user, i) => (
-                  <tr key={user.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                    <tr key={user.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, user })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
                     <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</td>
                     <td className="py-2.5 px-3" style={{ color: "#1a1c1c" }}>{user.name || "-"}</td>
                     <td className="py-2.5 px-3">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{ROLE_LABELS[user.role || "user"]}</span>
                     </td>
                     <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => { setEditModal({ open: true, user }); setEditForm({ name: user.name || "", role: user.role || "user" }); }} className="w-7 h-7 inline-flex items-center justify-center rounded-lg hover:bg-[#dbe1ff]">
                           <span className="material-symbols-outlined text-sm" style={{ color: "#004ccd" }}>edit</span>
                         </button>
@@ -198,6 +200,36 @@ export default function PinListPage() {
             <div className="flex gap-2 mt-3">
               <button onClick={() => setAddModal(false)} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#737687" }}>Batal</button>
               <button onClick={handleAdd} className="flex-1 py-2 text-xs font-medium text-white rounded-lg" style={{ background: "#004ccd" }}>Simpan</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detailModal.open && detailModal.user && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, user: null })}>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail PIN</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>PIN</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{detailModal.user.pin}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Nama</span>
+                <span className="font-medium" style={{ color: "#1a1c1c" }}>{detailModal.user.name || "-"}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Role</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{ROLE_LABELS[detailModal.user.role || "user"]}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Cloud ID</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.cloud_id || "-"}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => { setDetailModal({ open: false, user: null }); setEditModal({ open: true, user: detailModal.user }); setEditForm({ name: detailModal.user!.name || "", role: detailModal.user!.role || "user" }); }} className="flex-1 py-2 text-xs font-medium rounded-lg" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#004ccd" }}>Edit</button>
+              <button onClick={() => setDetailModal({ open: false, user: null })} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>
             </div>
           </div>
         </div>

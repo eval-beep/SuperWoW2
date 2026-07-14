@@ -47,6 +47,10 @@ export default function UserInfoPage() {
     open: false,
     user: null,
   });
+  const [detailModal, setDetailModal] = useState<{ open: boolean; user: Userinfo | null }>({
+    open: false,
+    user: null,
+  });
   const [addModal, setAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
     cloud_id: "C2697842930C1634",
@@ -218,7 +222,7 @@ export default function UserInfoPage() {
 
           {/* Table */}
           <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-            <div className="overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
@@ -273,6 +277,40 @@ export default function UserInfoPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden p-3 space-y-2">
+              {loading ? (
+                <div className="text-center py-8" style={{ color: "#737687" }}>
+                  <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="text-center py-8" style={{ color: "#737687" }}>No data found</div>
+              ) : (
+                filteredUsers.map((user) => {
+                  const priv = getPrivilegeInfo(user.privilege);
+                  return (
+                    <div key={user.id} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(195,198,216,0.15)" }} onClick={() => setDetailModal({ open: true, user })}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ background: "#004ccd" }}>{getInitials(user.name)}</div>
+                          <div>
+                            <span className="font-medium text-xs block" style={{ color: "#1a1c1c" }}>{user.name}</span>
+                            <span className="text-[10px]" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</span>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold" style={{ background: priv.bg, color: priv.color }}>{priv.label}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
+                        <span>{user.cloud_id}</span>
+                        <span>{user.created_at ? formatDate(user.created_at) : "-"}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
             <Pagination
               page={page}
               lastPage={lastPage}
@@ -371,6 +409,49 @@ export default function UserInfoPage() {
               <div className="flex-1" />
               <button onClick={() => setAddModal(false)} className="px-4 py-2.5 rounded-xl text-sm" style={{ color: "#737687" }}>Cancel</button>
               <button onClick={handleAdd} className="px-6 py-2.5 rounded-xl text-sm font-medium text-white" style={{ background: "#004ccd" }}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {detailModal.open && detailModal.user && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, user: null })}>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail User</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>PIN</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{detailModal.user.pin}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Nama</span>
+                <span className="font-medium" style={{ color: "#1a1c1c" }}>{detailModal.user.name}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Privilege</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: getPrivilegeInfo(detailModal.user.privilege).bg, color: getPrivilegeInfo(detailModal.user.privilege).color }}>{getPrivilegeInfo(detailModal.user.privilege).label}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Cloud ID</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.cloud_id}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Password</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.password || "-"}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>RFID</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.rfid || "-"}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs">
+                <span style={{ color: "#737687" }}>Created At</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.created_at ? formatDate(detailModal.user.created_at) : "-"}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => { setDetailModal({ open: false, user: null }); setDeleteModal({ open: true, user: detailModal.user }); }} className="flex-1 py-2 text-xs font-medium rounded-lg" style={{ border: "1px solid rgba(219,14,14,0.2)", color: "#da1e28" }}>Delete</button>
+              <button onClick={() => setDetailModal({ open: false, user: null })} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>
             </div>
           </div>
         </div>

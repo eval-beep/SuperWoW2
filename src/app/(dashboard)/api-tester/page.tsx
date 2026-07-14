@@ -107,7 +107,7 @@ function ApiTesterContent() {
         return { ...base, pin, verification };
 
       case "restart_device":
-        return { ...base, timezone };
+        return base;
 
       default:
         return base;
@@ -163,7 +163,7 @@ function ApiTesterContent() {
     if (responseJson) navigator.clipboard.writeText(responseJson);
   }
 
-  const inputStyle = { border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c", fontSize: "12px", padding: "5px 10px", borderRadius: "8px" };
+  const inputStyle = { border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c", fontSize: "12px", padding: "6px 10px", borderRadius: "8px", width: "100%" as const };
 
   const filteredTz = TIMEZONES.map((g) => ({
     ...g,
@@ -171,18 +171,18 @@ function ApiTesterContent() {
   })).filter((g) => g.items.length > 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Pengujian API</h1>
-        <p className="text-sm mt-1" style={{ color: "#737687" }}>Kirim perintah langsung ke device biometrik sesuai dokumentasi resmi</p>
+        <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Pengujian API</h1>
+        <p className="text-xs sm:text-sm mt-1" style={{ color: "#737687" }}>Kirim perintah langsung ke device biometrik</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Request Panel */}
-        <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl" style={{ color: "#004ccd" }}>send_and_archive</span>
-            <h3 className="font-semibold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Request Builder</h3>
+            <span className="material-symbols-outlined text-lg sm:text-xl" style={{ color: "#004ccd" }}>send_and_archive</span>
+            <h3 className="text-sm font-semibold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Request Builder</h3>
           </div>
 
           {/* Command */}
@@ -329,37 +329,6 @@ function ApiTesterContent() {
             </div>
           )}
 
-          {/* === RESTART DEVICE === */}
-          {command === "restart_device" && (
-            <div data-tz-picker>
-              <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>timezone</label>
-              <div className="relative">
-                <button type="button" onClick={() => { setTzOpen(!tzOpen); setTzSearch(""); }} className="w-full px-3 py-1.5 rounded-lg text-xs text-left flex items-center justify-between" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }}>
-                  <span>{timezone}</span>
-                  <span className="material-symbols-outlined text-[14px]" style={{ color: "#737687" }}>unfold_more</span>
-                </button>
-                {tzOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-lg shadow-lg overflow-hidden" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)", maxHeight: "180px" }}>
-                    <div className="p-1.5" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                      <input autoFocus value={tzSearch} onChange={(e) => setTzSearch(e.target.value)} className="w-full px-2 py-1 rounded text-[11px] outline-none" style={{ background: "#f3f3f3", color: "#1a1c1c" }} placeholder="Cari timezone..." />
-                    </div>
-                    <div className="overflow-y-auto" style={{ maxHeight: "150px" }}>
-                      {filteredTz.map((group) => (
-                        <div key={group.group}>
-                          <div className="px-2.5 py-1 text-[9px] uppercase tracking-wider font-bold" style={{ fontFamily: "JetBrains Mono", color: "#737687", background: "#f9f9f9" }}>{group.group}</div>
-                          {group.items.map((tz) => (
-                            <button key={tz} onClick={() => { setTimezone(tz); setTzOpen(false); setTzSearch(""); }} className="w-full text-left px-2.5 py-1.5 text-[11px] hover:bg-[#dbe1ff] transition-colors" style={{ fontFamily: "JetBrains Mono", color: tz === timezone ? "#004ccd" : "#1a1c1c", background: tz === timezone ? "rgba(0,76,205,0.08)" : "transparent" }}>{tz}</button>
-                          ))}
-                        </div>
-                      ))}
-                      {filteredTz.length === 0 && <div className="px-3 py-2 text-[11px]" style={{ color: "#737687" }}>Tidak ditemukan</div>}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* GET ALL PIN — no extra fields needed */}
           {command === "get_all_pin" && (
             <div className="rounded-lg p-2 text-[10px]" style={{ background: "#f3f3f3", color: "#737687" }}>
@@ -381,23 +350,23 @@ function ApiTesterContent() {
         </div>
 
         {/* Response Panel — Dark */}
-        <div className="rounded-2xl p-5 space-y-0" style={{ background: "#1a1c1c" }}>
-          <div className="mb-4">
+        <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 space-y-0" style={{ background: "#1a1c1c" }}>
+          <div className="mb-3 sm:mb-4">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-white" style={{ fontFamily: "Hanken Grotesk" }}>Device Endpoint</h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", background: "rgba(0,110,43,0.2)", color: "#93f59e" }}>STABLE</span>
+              <h3 className="text-sm font-semibold text-white" style={{ fontFamily: "Hanken Grotesk" }}>Device Endpoint</h3>
+              <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", background: "rgba(0,110,43,0.2)", color: "#93f59e" }}>STABLE</span>
             </div>
-            <div className="px-3 py-2 rounded-lg text-xs" style={{ fontFamily: "JetBrains Mono", background: "rgba(255,255,255,0.05)", color: "#908fa0" }}>{endpointUrl}</div>
+            <div className="px-3 py-2 rounded-lg text-[10px] sm:text-xs break-all" style={{ fontFamily: "JetBrains Mono", background: "rgba(255,255,255,0.05)", color: "#908fa0" }}>{endpointUrl}</div>
           </div>
 
-          <div className="flex items-center gap-1 mb-0">
+          <div className="flex items-center gap-1 mb-0 overflow-x-auto">
             {([
-              { key: "body" as const, icon: "code", label: "Response Body" },
+              { key: "body" as const, icon: "code", label: "Body" },
               { key: "headers" as const, icon: "list_alt", label: "Headers" },
-              { key: "raw" as const, icon: "raw_on", label: "Raw Payload" },
+              { key: "raw" as const, icon: "raw_on", label: "Raw" },
             ]).map((tab) => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-medium transition-colors ${activeTab === tab.key ? "bg-white/5 text-white border-b-2 border-[#004ccd]" : "text-gray-500 hover:text-gray-300"}`} style={{ fontFamily: "Hanken Grotesk" }}>
-                <span className="material-symbols-outlined text-[14px]">{tab.icon}</span>{tab.label}
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-1 px-2 sm:px-3 py-2 rounded-t-lg text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${activeTab === tab.key ? "bg-white/5 text-white border-b-2 border-[#004ccd]" : "text-gray-500 hover:text-gray-300"}`} style={{ fontFamily: "Hanken Grotesk" }}>
+                <span className="material-symbols-outlined text-[13px] sm:text-[14px]">{tab.icon}</span>{tab.label}
               </button>
             ))}
           </div>
@@ -405,41 +374,39 @@ function ApiTesterContent() {
           <div className="rounded-b-xl rounded-tr-xl overflow-hidden" style={{ background: "#1a1c1c" }}>
             {response ? (
               <div className="relative">
-                <button onClick={handleCopyResponse} className="absolute top-3 right-3 z-10 p-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }} title="Copy to clipboard">
-                  <span className="material-symbols-outlined text-[16px] text-gray-400">content_copy</span>
+                <button onClick={handleCopyResponse} className="absolute top-2 right-2 z-10 p-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }} title="Copy">
+                  <span className="material-symbols-outlined text-[14px] sm:text-[16px] text-gray-400">content_copy</span>
                 </button>
-                <div className="px-4 pt-3 pb-2 text-[11px] tracking-widest" style={{ fontFamily: "JetBrains Mono", color: "#555" }}>01020304050607080910111213141516</div>
-                {activeTab === "body" && <pre className="px-4 pb-4 text-xs overflow-auto max-h-[420px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{responseJson}</pre>}
-                {activeTab === "headers" && <pre className="px-4 pb-4 text-xs overflow-auto max-h-[420px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{generateHeaders()}</pre>}
-                {activeTab === "raw" && <pre className="px-4 pb-4 text-xs overflow-auto max-h-[420px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{responseJson}</pre>}
-                <div className="flex items-center gap-3 px-4 py-2 text-[11px]" style={{ fontFamily: "JetBrains Mono", borderTop: "1px solid rgba(255,255,255,0.06)", color: "#908fa0" }}>
+                <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 text-[10px] sm:text-[11px] tracking-widest" style={{ fontFamily: "JetBrains Mono", color: "#555" }}>01020304050607080910111213141516</div>
+                {activeTab === "body" && <pre className="px-3 sm:px-4 pb-3 sm:pb-4 text-[11px] sm:text-xs overflow-auto max-h-[300px] sm:max-h-[420px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{responseJson}</pre>}
+                {activeTab === "headers" && <pre className="px-3 sm:px-4 pb-3 sm:pb-4 text-[11px] sm:text-xs overflow-auto max-h-[300px] sm:max-h-[420px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{generateHeaders()}</pre>}
+                {activeTab === "raw" && <pre className="px-3 sm:px-4 pb-3 sm:pb-4 text-[11px] sm:text-xs overflow-auto max-h-[300px] sm:max-h-[420px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{responseJson}</pre>}
+                <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 text-[10px] sm:text-[11px] flex-wrap" style={{ fontFamily: "JetBrains Mono", borderTop: "1px solid rgba(255,255,255,0.06)", color: "#908fa0" }}>
                   <span>JSON</span><span>•</span><span>UTF-8</span><span>•</span>
                   <span>{new Blob([responseJson]).size > 1024 ? `${(new Blob([responseJson]).size / 1024).toFixed(1)}KB` : `${new Blob([responseJson]).size}B`}</span>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-600">
-                <span className="material-symbols-outlined text-[48px] opacity-30">send</span>
-                <p className="text-sm mt-2" style={{ fontFamily: "Hanken Grotesk" }}>Kirim perintah untuk melihat response</p>
+              <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-gray-600">
+                <span className="material-symbols-outlined text-[36px] sm:text-[48px] opacity-30">send</span>
+                <p className="text-xs sm:text-sm mt-2" style={{ fontFamily: "Hanken Grotesk" }}>Kirim perintah untuk melihat response</p>
               </div>
             )}
           </div>
 
           {response && (
-            <div className="flex items-center justify-between mt-3 px-1">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between mt-3 px-1 flex-wrap gap-2">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <span className={`w-2 h-2 rounded-full ${(response.status_code || response.http_code || 0) >= 200 && (response.status_code || response.http_code || 0) < 300 ? "bg-green-500" : "bg-red-500"}`} />
-                  <span className="text-sm font-bold" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{response.status_code || response.http_code || "-"}</span>
-                  <span className="text-sm" style={{ fontFamily: "Hanken Grotesk", color: "#908fa0" }}>{getStatusLabel(response.status_code || response.http_code || 0)}</span>
+                  <span className="text-xs sm:text-sm font-bold" style={{ fontFamily: "JetBrains Mono", color: "#e4e1ed" }}>{response.status_code || response.http_code || "-"}</span>
+                  <span className="text-xs sm:text-sm hidden sm:inline" style={{ fontFamily: "Hanken Grotesk", color: "#908fa0" }}>{getStatusLabel(response.status_code || response.http_code || 0)}</span>
                 </div>
-                <span className="text-xs" style={{ fontFamily: "JetBrains Mono", color: "#908fa0" }}>{timing}ms</span>
+                <span className="text-[10px] sm:text-xs" style={{ fontFamily: "JetBrains Mono", color: "#908fa0" }}>{timing}ms</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button onClick={handleCopyResponse} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ fontFamily: "Hanken Grotesk", background: "rgba(255,255,255,0.05)", color: "#908fa0" }}>
-                  <span className="material-symbols-outlined text-[14px]">download</span>DOWNLOAD LOG
-                </button>
-              </div>
+              <button onClick={handleCopyResponse} className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium" style={{ fontFamily: "Hanken Grotesk", background: "rgba(255,255,255,0.05)", color: "#908fa0" }}>
+                <span className="material-symbols-outlined text-[12px] sm:text-[14px]">download</span>LOG
+              </button>
             </div>
           )}
         </div>

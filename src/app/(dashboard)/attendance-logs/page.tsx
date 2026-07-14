@@ -188,7 +188,7 @@ export default function AttendanceLogsPage() {
                 </thead>
                 <tbody>
                   {logs.map((log, i) => (
-                    <tr key={log.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                    <tr key={log.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, log })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
                       <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
                       <td className="py-2.5 px-3" style={{ color: "#1a1c1c" }}>{log.name || "-"}</td>
                       <td className="py-2.5 px-3" style={{ color: "#737687", fontFamily: "JetBrains Mono" }}>{log.cloud_id}</td>
