@@ -19,9 +19,6 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function PinListPage() {
   const [users, setUsers] = useState<DeviceUser[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [addModal, setAddModal] = useState(false);
   const [editModal, setEditModal] = useState<{ open: boolean; user: DeviceUser | null }>({ open: false, user: null });
@@ -30,14 +27,27 @@ export default function PinListPage() {
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(page), per_page: "15" });
-    const res = await fetch(`/api/supabase?table=device_users&select=*&${params.toString()}`);
-    const data = await res.json();
-    setUsers(data.data || []);
-    setTotal(data.count || 0);
-    setLastPage(data.lastPage || 1);
+    try {
+      const res = await fetch("/api/pin-list");
+      const result = await res.json();
+      if (result.success && result.data) {
+        const raw = Array.isArray(result.data) ? result.data : (result.data.data || []);
+        setUsers(raw.map((u: Record<string, unknown>) => ({
+          id: String(u.id || u.pin || Math.random()),
+          cloud_id: String(u.cloud_id || ""),
+          pin: String(u.pin || ""),
+          name: (u.name as string) || null,
+          role: (u.role as string) || "user",
+          created_at: String(u.created_at || ""),
+        })));
+      } else {
+        setUsers([]);
+      }
+    } catch {
+      setUsers([]);
+    }
     setLoading(false);
-  }, [page]);
+  }, []);
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
 
@@ -84,7 +94,6 @@ export default function PinListPage() {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Daftar PIN</h1>
@@ -95,7 +104,6 @@ export default function PinListPage() {
         </button>
       </div>
 
-      {/* Content */}
       {loading ? (
         <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
           <span className="material-symbols-outlined animate-spin text-2xl" style={{ color: "#004ccd" }}>progress_activity</span>
@@ -108,7 +116,6 @@ export default function PinListPage() {
         </div>
       ) : (
         <>
-          {/* Desktop Table */}
           <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
             <table className="w-full text-xs">
               <thead>
@@ -128,10 +135,10 @@ export default function PinListPage() {
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => { setEditModal({ open: true, user }); setEditForm({ name: user.name || "", role: user.role || "user" }); }} className="w-7 h-7 inline-flex items-center justify-center rounded-lg hover:bg-[#dbe1ff]" title="Edit">
+                        <button onClick={() => { setEditModal({ open: true, user }); setEditForm({ name: user.name || "", role: user.role || "user" }); }} className="w-7 h-7 inline-flex items-center justify-center rounded-lg hover:bg-[#dbe1ff]">
                           <span className="material-symbols-outlined text-sm" style={{ color: "#004ccd" }}>edit</span>
                         </button>
-                        <button onClick={() => handleDelete(user)} className="w-7 h-7 inline-flex items-center justify-center rounded-lg hover:bg-[#ffeded]" title="Hapus">
+                        <button onClick={() => handleDelete(user)} className="w-7 h-7 inline-flex items-center justify-center rounded-lg hover:bg-[#ffeded]">
                           <span className="material-symbols-outlined text-sm" style={{ color: "#da1e28" }}>delete</span>
                         </button>
                       </div>
@@ -142,7 +149,6 @@ export default function PinListPage() {
             </table>
           </div>
 
-          {/* Mobile Cards */}
           <div className="md:hidden space-y-2">
             {users.map((user) => (
               <div key={user.id} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
@@ -164,24 +170,9 @@ export default function PinListPage() {
               </div>
             ))}
           </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between rounded-xl px-3 py-2" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-            <span className="text-[10px]" style={{ color: "#737687" }}>{Math.min((page - 1) * 15 + 1, total)}-{Math.min(page * 15, total)} dari {total}</span>
-            <div className="flex items-center gap-0.5">
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&laquo;</button>
-              {Array.from({ length: Math.min(5, lastPage) }, (_, i) => {
-                const p = page <= 3 ? i + 1 : page + i - 2;
-                if (p < 1 || p > lastPage) return null;
-                return <button key={p} onClick={() => setPage(p)} className="w-7 h-7 rounded-lg text-[11px] font-medium" style={p === page ? { background: "#004ccd", color: "#fff" } : { color: "#424656" }}>{p}</button>;
-              })}
-              <button onClick={() => setPage(Math.min(lastPage, page + 1))} disabled={page === lastPage} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&raquo;</button>
-            </div>
-          </div>
         </>
       )}
 
-      {/* Add Modal */}
       {addModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setAddModal(false)}>
           <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
@@ -212,7 +203,6 @@ export default function PinListPage() {
         </div>
       )}
 
-      {/* Edit Modal */}
       {editModal.open && editModal.user && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setEditModal({ open: false, user: null })}>
           <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
