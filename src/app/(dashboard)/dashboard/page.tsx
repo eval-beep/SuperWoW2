@@ -64,9 +64,9 @@ export default function DashboardPage() {
     try {
       // 4 parallel queries: counts + commands + recent attlogs + latest payload
       const [usersRes, attlogsRes, webhooksRes, commandsRes, attlogsListRes, latestRes] = await Promise.all([
-        fetch("/api/supabase?table=userinfos&count=true&limit=0"),
-        fetch("/api/supabase?table=attlogs&count=true&limit=0"),
-        fetch("/api/supabase?table=webhook_logs&count=true&limit=0"),
+        fetch("/api/supabase?table=userinfos&count=true&limit=1"),
+        fetch("/api/supabase?table=attlogs&count=true&limit=1"),
+        fetch("/api/supabase?table=webhook_logs&count=true&limit=1"),
         fetch("/api/supabase?table=command_logs&select=command_type&order=created_at.desc&limit=500"),
         fetch("/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6"),
         fetch("/api/supabase?table=command_logs&select=command_type,response_payload,created_at&order=created_at.desc&limit=1"),
