@@ -115,29 +115,30 @@ export default function AttendanceLogsPage() {
   const endEntry = Math.min(page * perPage, total);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Log Absensi</h1>
-          <p className="text-sm mt-1" style={{ color: "#737687" }}>Riwayat kehadiran dan aktivitas karyawan</p>
+          <h1 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Log Absensi</h1>
+          <p className="text-xs sm:text-sm mt-1" style={{ color: "#737687" }}>Riwayat kehadiran dan aktivitas karyawan</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setGetAttlogModal(true)} className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 text-white" style={{ background: "#004ccd" }}>
-            <span className="material-symbols-outlined text-[18px]">download</span>
-            Ambil Log dari Device
+          <button onClick={() => setGetAttlogModal(true)} className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 text-white" style={{ background: "#004ccd" }}>
+            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">download</span>
+            <span className="hidden xs:inline">Ambil Log dari Device</span>
+            <span className="xs:hidden">Ambil Log</span>
           </button>
-          <button onClick={handleExport} className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>
-            <span className="material-symbols-outlined text-[18px]">file_download</span>
+          <button onClick={handleExport} className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>
+            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">file_download</span>
             Export
           </button>
         </div>
       </div>
 
       {/* Filter Row */}
-      <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-[180px]">
+      <div className="rounded-2xl p-3 sm:p-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-end gap-2 sm:gap-3">
+          <div className="flex-1 min-w-0 sm:min-w-[180px]">
             <label className="block text-xs font-medium mb-1.5" style={{ color: "#737687" }}>PIN</label>
             <input
               type="text"
@@ -149,35 +150,37 @@ export default function AttendanceLogsPage() {
               style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}
             />
           </div>
-          <div className="min-w-[160px]">
+          <div className="min-w-0 sm:min-w-[160px]">
             <label className="block text-xs font-medium mb-1.5" style={{ color: "#737687" }}>Tanggal Mulai</label>
             <LgDatepicker id="dpFrom" value={dateFrom} onChange={setDateFrom} placeholder="Tanggal Mulai" />
           </div>
-          <div className="min-w-[160px]">
+          <div className="min-w-0 sm:min-w-[160px]">
             <label className="block text-xs font-medium mb-1.5" style={{ color: "#737687" }}>Tanggal Akhir</label>
             <LgDatepicker id="dpTo" value={dateTo} onChange={setDateTo} placeholder="Tanggal Akhir" />
           </div>
-          <button
-            onClick={handleFilter}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
-            style={{ background: "#004ccd" }}
-          >
-            Filter
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-            style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}
-          >
-            Reset
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleFilter}
+              className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
+              style={{ background: "#004ccd" }}
+            >
+              Filter
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+              style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}
+            >
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Table */}
       <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" style={{ minWidth: "700px" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
                 {["PIN", "User ID", "Device", "Waktu Scan", "Verifikasi", "Status", "Aksi"].map((h) => (
@@ -201,10 +204,10 @@ export default function AttendanceLogsPage() {
               ) : (
                 logs.map((log, i) => (
                   <tr key={log.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
-                    <td className="py-3 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
-                    <td className="py-3 px-3" style={{ color: "#1a1c1c" }}>{log.name || "-"}</td>
-                    <td className="py-3 px-3" style={{ color: "#737687" }}>{log.cloud_id}</td>
-                    <td className="py-3 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatDateTime(log.scan_time)}</td>
+                    <td className="py-3 px-3 font-medium whitespace-nowrap" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
+                    <td className="py-3 px-3 whitespace-nowrap" style={{ color: "#1a1c1c" }}>{log.name || "-"}</td>
+                    <td className="py-3 px-3 whitespace-nowrap" style={{ color: "#737687" }}>{log.cloud_id}</td>
+                    <td className="py-3 px-3 whitespace-nowrap" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatDateTime(log.scan_time)}</td>
                     <td className="py-3 px-3">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>
                         {getVerifyLabel(log.verify)}
@@ -238,9 +241,9 @@ export default function AttendanceLogsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid rgba(195,198,216,0.2)" }}>
-          <span className="text-sm" style={{ color: "#737687" }}>
-            Menampilkan {startEntry}-{endEntry} dari {total.toLocaleString()} data
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 gap-2" style={{ borderTop: "1px solid rgba(195,198,216,0.2)" }}>
+          <span className="text-xs sm:text-sm whitespace-nowrap" style={{ color: "#737687" }}>
+            {startEntry}-{endEntry} dari {total.toLocaleString()}
           </span>
           <div className="flex items-center gap-1">
             <button
@@ -277,8 +280,8 @@ export default function AttendanceLogsPage() {
 
       {/* Detail Modal */}
       {detailModal.open && detailModal.log && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, log: null })}>
-          <div className="w-full max-w-lg rounded-2xl p-6" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, log: null })}>
+          <div className="w-full max-w-lg rounded-2xl p-5 sm:p-6" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail Log</h3>
             <div className="space-y-3">
               {[
@@ -291,9 +294,9 @@ export default function AttendanceLogsPage() {
                 ["Sumber", detailModal.log.source || "-"],
                 ["Trans ID", detailModal.log.trans_id || "-"],
               ].map(([label, value]) => (
-                <div key={label as string} className="flex justify-between items-center py-2" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                  <span className="text-sm" style={{ color: "#737687" }}>{label}</span>
-                  <span className="text-sm font-medium" style={{ color: "#1a1c1c" }}>{value}</span>
+                <div key={label as string} className="flex justify-between items-start gap-4 py-2" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
+                  <span className="text-sm shrink-0" style={{ color: "#737687" }}>{label}</span>
+                  <span className="text-sm font-medium text-right break-all" style={{ color: "#1a1c1c" }}>{value}</span>
                 </div>
               ))}
             </div>
@@ -310,11 +313,11 @@ export default function AttendanceLogsPage() {
 
       {/* Get Attlog Modal */}
       {getAttlogModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setGetAttlogModal(false)}>
-          <div className="w-full max-w-xl rounded-2xl p-6" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setGetAttlogModal(false)}>
+          <div className="w-full max-w-xl rounded-2xl p-5 sm:p-6" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Ambil Log dari Device</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
                 <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
                 <select
                   value={getForm.cloud_id}
@@ -358,10 +361,10 @@ export default function AttendanceLogsPage() {
                 />
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
               <a
                 href={`/api-tester?command=get_attlog&cloud_id=${getForm.cloud_id}`}
-                className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
                 style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}
               >
                 <span className="material-symbols-outlined text-[16px]">open_in_new</span>API Tester
