@@ -61,7 +61,7 @@ export default function WebhookHistoryPage() {
     <div className="space-y-3 sm:space-y-4">
       <div>
         <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Riwayat Webhook</h1>
-        <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Riwayat event webhook dari device</p>
+        <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Histori response dari Fingerspot API</p>
       </div>
 
       <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
