@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
           cloud_id: params.cloud_id || "",
           trans_id: params.trans_id || "1",
           request_payload: params,
-          response_payload: result.data,
+          response_payload: { ...((typeof result.data === "object" && result.data !== null) ? result.data : {}), _command_sent: command, _endpoint: endpoint, _status_code: result.status_code },
           status: result.success ? "success" : "failed",
           endpoint,
         });
