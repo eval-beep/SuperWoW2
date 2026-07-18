@@ -9,25 +9,18 @@ export async function GET(request: NextRequest) {
   const offset = (page - 1) * perPage;
 
   const filters: Record<string, string> = {};
-  if (search) filters.or = `(cloud_id.ilike.*${search}*,webhook_type.ilike.*${search}*)`;
+  if (search) filters.or = `(cloud_id.ilike.*${search}*,command_type.ilike.*${search}*)`;
 
-  // Single query: data + count combined
-  const { data, count } = await supabaseSelect("webhook_logs", {
+  const { data, count } = await supabaseSelect("command_logs", {
     select: "*",
-    order: { column: "received_at", ascending: false },
+    order: { column: "created_at", ascending: false },
     limit: perPage, offset, count: true, filters,
   });
 
-  // Compute type counts from current page data
-  const typeCounts: Record<string, number> = {};
-  for (const row of (data || []) as { webhook_type: string }[]) {
-    typeCounts[row.webhook_type] = (typeCounts[row.webhook_type] || 0) + 1;
-  }
-
-  return NextResponse.json({ data, total: count, lastPage: Math.ceil(count / perPage), page, perPage, stats: { total: count, types: typeCounts } });
+  return NextResponse.json({ data, total: count, lastPage: Math.ceil(count / perPage), page, perPage });
 }
 
 export async function DELETE() {
-  await supabaseDelete("webhook_logs", { id: "not.is.null" });
+  await supabaseDelete("command_logs", { id: "not.is.null" });
   return NextResponse.json({ success: true, message: "Webhook history cleared" });
 }
