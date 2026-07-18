@@ -118,7 +118,7 @@ export default function PinListPage() {
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                  {["PIN", "Nama", "Role", "Aksi"].map((h) => (
+                  {["PIN", "Role", "Aksi"].map((h) => (
                     <th key={h} className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{h}</th>
                   ))}
                 </tr>
@@ -127,7 +127,6 @@ export default function PinListPage() {
                 {users.map((user, i) => (
                     <tr key={user.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, user })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
                     <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</td>
-                    <td className="py-2.5 px-3" style={{ color: "#1a1c1c" }}>{user.name || "-"}</td>
                     <td className="py-2.5 px-3">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{ROLE_LABELS[user.role || "user"]}</span>
                     </td>
@@ -153,7 +152,6 @@ export default function PinListPage() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-xs" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</span>
-                    <span className="text-[11px]" style={{ color: "#1a1c1c" }}>{user.name || "-"}</span>
                   </div>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{ROLE_LABELS[user.role || "user"]}</span>
                 </div>
@@ -209,10 +207,6 @@ export default function PinListPage() {
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
                 <span style={{ color: "#737687" }}>PIN</span>
                 <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{detailModal.user.pin}</span>
-              </div>
-              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
-                <span style={{ color: "#737687" }}>Nama</span>
-                <span className="font-medium" style={{ color: "#1a1c1c" }}>{detailModal.user.name || "-"}</span>
               </div>
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
                 <span style={{ color: "#737687" }}>Role</span>

@@ -35,8 +35,10 @@ export async function sendFingerspotCommand(
 
   const data = await res.json();
 
+  const apiSuccess = res.ok && (data as Record<string, unknown>)?.success !== false;
+
   return {
-    success: res.ok,
+    success: apiSuccess,
     status_code: res.status,
     data,
   };
