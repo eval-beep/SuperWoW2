@@ -186,7 +186,7 @@ export default function WebhookHistoryPage() {
             </div>
             {detailModal.log.response_payload != null && (
               <div className="mt-3">
-                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Response Payload</label>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Response Payload (Fingerspot Format)</label>
                 <pre className="p-3 rounded-lg text-[10px] overflow-x-auto max-h-64 leading-relaxed" style={{ background: "#1a1c1c", fontFamily: "JetBrains Mono", color: "#a6e3a1" }}>{JSON.stringify(detailModal.log.response_payload, null, 2)}</pre>
               </div>
             )}

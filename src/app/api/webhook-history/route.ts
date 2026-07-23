@@ -6,10 +6,13 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const perPage = parseInt(searchParams.get("per_page") || "15");
   const search = searchParams.get("search") || "";
+  const status = searchParams.get("status") || "";
   const offset = (page - 1) * perPage;
 
   const filters: Record<string, string> = {};
+  filters.command_type = "not.eq.restart_device";
   if (search) filters.or = `(cloud_id.ilike.*${search}*,command_type.ilike.*${search}*)`;
+  if (status) filters.status = `eq.${status}`;
 
   const { data, count } = await supabaseSelect("command_logs", {
     select: "*",
