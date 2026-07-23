@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { LgDatepicker } from "@/components/ui/LgComponents";
-import { formatDateTime } from "@/lib/utils";
+import { formatFingerspotDateTime } from "@/lib/utils";
 
 interface Attlog {
   id: string;
@@ -65,6 +65,11 @@ export default function AttendanceLogsPage() {
     loadLogs();
     loadCloudIds();
   }, [loadLogs]);
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setPinSearch(q);
+  }, []);
 
   async function loadCloudIds() {
     const res = await fetch("/api/supabase?table=attlogs&select=cloud_id");
@@ -191,8 +196,8 @@ export default function AttendanceLogsPage() {
                     <tr key={log.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, log })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
                       <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
                       <td className="py-2.5 px-3" style={{ color: "#1a1c1c" }}>{log.name || "-"}</td>
-                      <td className="py-2.5 px-3" style={{ color: "#737687", fontFamily: "JetBrains Mono" }}>{log.cloud_id}</td>
-                      <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatDateTime(log.scan_time)}</td>
+                      <td className="py-2.5 px-3" style={{ color: "#737687", fontFamily: "JetBrains Mono" }}>{log.cloud_id || "-"}</td>
+                      <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatFingerspotDateTime(log.scan_time)}</td>
                       <td className="py-2.5 px-3">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
                       </td>
@@ -222,8 +227,8 @@ export default function AttendanceLogsPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
-                  <span style={{ fontFamily: "JetBrains Mono" }}>{formatDateTime(log.scan_time)}</span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
+                  <span style={{ fontFamily: "JetBrains Mono" }}>{formatFingerspotDateTime(log.scan_time)}</span>
+                   <span className="inline-flex items-center px-2 py-0.5 rounded-full font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
                 </div>
               </div>
             ))}
@@ -254,8 +259,8 @@ export default function AttendanceLogsPage() {
               {[
                 ["PIN", detailModal.log.pin],
                 ["Nama", detailModal.log.name || "-"],
-                ["Cloud ID", detailModal.log.cloud_id],
-                ["Waktu", formatDateTime(detailModal.log.scan_time)],
+                ["Cloud ID", detailModal.log.cloud_id || "-"],
+                ["Waktu", formatFingerspotDateTime(detailModal.log.scan_time)],
                 ["Verifikasi", getVerifyLabel(detailModal.log.verify)],
                 ["Status", detailModal.log.status_scan === 0 ? "MASUK" : "GAGAL"],
                 ["Sumber", detailModal.log.source || "-"],

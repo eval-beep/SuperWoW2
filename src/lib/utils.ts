@@ -4,7 +4,7 @@ export const WIB_OFFSET = 7 * 60;
 
 export function toWIB(date: string | Date): Date {
   const d = new Date(date);
-  return new Date(d.getTime() + WIB_OFFSET * 60 * 1000 - d.getTimezoneOffset() * 60 * 1000);
+  return new Date(d.getTime() + WIB_OFFSET * 60 * 1000);
 }
 
 export function toWIBISOString(date: string | Date): string {
@@ -28,6 +28,33 @@ export function getWIBDate(date: string | Date): { year: number; month: number; 
     minutes: d.getMinutes(),
     seconds: d.getSeconds(),
   };
+}
+
+function parseFingerspotParts(dateStr: string): { y: string; m: string; d: string; h: string; min: string; s: string } {
+  const cleaned = dateStr.replace(/(\+00:00|Z)$/g, "");
+  const match = cleaned.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!match) return { y: "0000", m: "00", d: "00", h: "00", min: "00", s: "00" };
+  return { y: match[1], m: match[2], d: match[3], h: match[4], min: match[5], s: match[6] || "00" };
+}
+
+export function formatFingerspotDateTime(dateStr: string): string {
+  const p = parseFingerspotParts(dateStr);
+  return `${p.d}/${p.m}/${p.y}, ${p.h}:${p.min}`;
+}
+
+export function formatFingerspotDate(dateStr: string): string {
+  const p = parseFingerspotParts(dateStr);
+  return `${p.d}/${p.m}/${p.y}`;
+}
+
+export function formatFingerspotTime(dateStr: string): string {
+  const p = parseFingerspotParts(dateStr);
+  return `${p.h}:${p.min}:${p.s}`;
+}
+
+export function parseFingerspotTimestamp(dateStr: string): Date {
+  const p = parseFingerspotParts(dateStr);
+  return new Date(`${p.y}-${p.m}-${p.d}T${p.h}:${p.min}:${p.s}`);
 }
 
 export function cn(...inputs: ClassValue[]) {

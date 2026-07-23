@@ -61,6 +61,9 @@ export default function UserInfoPage() {
     password: "",
     rfid: "",
   });
+  const [editModal, setEditModal] = useState<{ open: boolean; user: Userinfo | null }>({ open: false, user: null });
+  const [editForm, setEditForm] = useState({ name: "", privilege: 1 });
+  const [editLoading, setEditLoading] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -83,6 +86,11 @@ export default function UserInfoPage() {
     loadUsers();
     loadCloudIds();
   }, [loadUsers]);
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setSearch(q);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside() {
@@ -129,6 +137,28 @@ export default function UserInfoPage() {
       loadUsers();
     } catch (err) {
       console.error("Add error:", err);
+    }
+  }
+
+  async function handleEdit() {
+    if (!editModal.user || !editForm.name.trim()) return alert("Nama harus diisi");
+    setEditLoading(true);
+    try {
+      await fetch("/api/user-info", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editModal.user.id,
+          name: editForm.name,
+          privilege: editForm.privilege,
+        }),
+      });
+      setEditModal({ open: false, user: null });
+      loadUsers();
+    } catch (err) {
+      console.error("Edit error:", err);
+    } finally {
+      setEditLoading(false);
     }
   }
 
@@ -262,7 +292,7 @@ export default function UserInfoPage() {
                             </button>
                             {actionMenu === user.id && (
                               <div className="absolute right-0 top-full mt-1 z-50 rounded-xl py-1 min-w-[160px] shadow-lg" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-                                <button onClick={() => setActionMenu(null)} className="w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-[#f3f3f3]" style={{ color: "#1a1c1c" }}>
+                                <button onClick={() => { setActionMenu(null); setEditModal({ open: true, user }); setEditForm({ name: user.name, privilege: user.privilege }); }} className="w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-[#f3f3f3]" style={{ color: "#1a1c1c" }}>
                                   <span className="material-symbols-outlined text-[16px]">edit</span>Edit
                                 </button>
                                 <button onClick={() => { setActionMenu(null); setDeleteModal({ open: true, user }); }} className="w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-[#f3f3f3]" style={{ color: "#da1e28" }}>
@@ -451,8 +481,48 @@ export default function UserInfoPage() {
               </div>
             </div>
             <div className="flex gap-2 mt-3">
+              <button onClick={() => { setDetailModal({ open: false, user: null }); setEditModal({ open: true, user: detailModal.user }); setEditForm({ name: detailModal.user!.name, privilege: detailModal.user!.privilege }); }} className="flex-1 py-2 text-xs font-medium rounded-lg" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#004ccd" }}>
+                <span className="material-symbols-outlined text-[14px] align-middle mr-1">edit</span>Edit
+              </button>
               <button onClick={() => { setDetailModal({ open: false, user: null }); setDeleteModal({ open: true, user: detailModal.user }); }} className="flex-1 py-2 text-xs font-medium rounded-lg" style={{ border: "1px solid rgba(219,14,14,0.2)", color: "#da1e28" }}>Delete</button>
               <button onClick={() => setDetailModal({ open: false, user: null })} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editModal.open && editModal.user && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setEditModal({ open: false, user: null })}>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Edit User</h3>
+            <div className="space-y-2">
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>PIN</label>
+                <input value={editModal.user.pin} disabled className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#737687", fontFamily: "JetBrains Mono" }} />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Nama</label>
+                <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }} placeholder="Nama user" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Privilege</label>
+                <select value={editForm.privilege} onChange={(e) => setEditForm({ ...editForm, privilege: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}>
+                  <option value={1}>Normal User</option>
+                  <option value={2}>Admin</option>
+                  <option value={3}>Super Admin</option>
+                </select>
+              </div>
+              <div className="rounded-lg p-2.5 text-[10px]" style={{ background: "#f3f3f3", color: "#737687" }}>
+                Cloud ID: <span style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{editModal.user.cloud_id}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => setEditModal({ open: false, user: null })} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#737687" }}>Batal</button>
+              <button onClick={handleEdit} disabled={editLoading} className="flex-1 py-2 text-xs font-medium text-white rounded-lg flex items-center justify-center gap-1.5" style={{ background: "#004ccd", opacity: editLoading ? 0.6 : 1 }}>
+                {editLoading && <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>}
+                {editLoading ? "Menyimpan..." : "Simpan"}
+              </button>
             </div>
           </div>
         </div>

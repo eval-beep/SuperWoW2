@@ -37,12 +37,16 @@ export async function GET(request: NextRequest) {
     filters,
   });
 
-  const verifyMap: Record<number, string> = { 0: "Password", 1: "Fingerprint", 2: "Face", 3: "Card", 4: "Face", 5: "QR" };
+  const verifyMap: Record<number, string> = { 1: "Finger", 2: "Password", 3: "Card", 4: "Face", 6: "Vein", 7: "QR" };
   const csvRows = ["Timestamp,Cloud ID,PIN,Name,Verify Method,Source,Trans ID".split(",").join(",")];
 
   for (const row of (data || []) as Record<string, unknown>[]) {
+    const scanTime = row.scan_time as string;
+    const cleaned = scanTime.replace(/(\+00:00|Z)$/g, "");
+    const d = new Date(cleaned);
+    const formattedTime = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     csvRows.push([
-      `"${row.scan_time}"`, `"${row.cloud_id}"`, `"${row.pin}"`, `"${row.name || ""}"`,
+      `"${formattedTime}"`, `"${row.cloud_id}"`, `"${row.pin}"`, `"${row.name || ""}"`,
       `"${verifyMap[row.verify as number] || "Unknown"}"`, `"${row.source || ""}"`, `"${row.trans_id || ""}"`,
     ].join(","));
   }

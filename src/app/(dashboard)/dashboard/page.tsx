@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatFingerspotDate, formatFingerspotTime, parseFingerspotTimestamp } from "@/lib/utils";
 
 interface Stats {
   totalUsers: number;
@@ -30,6 +30,13 @@ interface LatestPayload {
   createdAt: string;
 }
 
+interface DeviceStatus {
+  status: "online" | "idle" | "offline";
+  lastActivity: string | null;
+  lastCommand: string | null;
+  cloudId: string;
+}
+
 const COMMAND_LABELS: Record<string, string> = {
   get_attlog: "Get Attendance Log",
   get_userinfo: "Get User Info",
@@ -46,6 +53,7 @@ export default function DashboardPage() {
   const [topCommands, setTopCommands] = useState<TopCommand[]>([]);
   const [recentAttlogs, setRecentAttlogs] = useState<RecentAttlog[]>([]);
   const [latestPayload, setLatestPayload] = useState<LatestPayload | null>(null);
+  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ status: "offline", lastActivity: null, lastCommand: null, cloudId: "" });
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(0);
 
@@ -62,23 +70,26 @@ export default function DashboardPage() {
 
   async function loadDashboard() {
     try {
-      // 4 parallel queries: counts + commands + recent attlogs + latest payload
-      const [usersRes, attlogsRes, webhooksRes, commandsRes, attlogsListRes, latestRes] = await Promise.all([
+      const [usersRes, attlogsRes, webhooksRes, commandsRes, attlogsListRes, latestRes, latestAttlogRes, latestCmdRes] = await Promise.all([
         fetch("/api/supabase?table=userinfos&count=true&limit=1"),
         fetch("/api/supabase?table=attlogs&count=true&limit=1"),
         fetch("/api/supabase?table=webhook_logs&count=true&limit=1"),
         fetch("/api/supabase?table=command_logs&select=command_type&order=created_at.desc&limit=500"),
         fetch("/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6"),
         fetch("/api/supabase?table=command_logs&select=command_type,response_payload,created_at&order=created_at.desc&limit=1"),
+        fetch("/api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1"),
+        fetch("/api/supabase?table=command_logs&select=cloud_id,command_type,created_at,status&order=created_at.desc&limit=10"),
       ]);
 
-      const [users, attlogs, webhooks, commandsData, attlogsList, latestData] = await Promise.all([
+      const [users, attlogs, webhooks, commandsData, attlogsList, latestData, latestAttlog, latestCmds] = await Promise.all([
         usersRes.json(),
         attlogsRes.json(),
         webhooksRes.json(),
         commandsRes.json(),
         attlogsListRes.json(),
         latestRes.json(),
+        latestAttlogRes.json(),
+        latestCmdRes.json(),
       ]);
 
       setStats({
@@ -87,7 +98,6 @@ export default function DashboardPage() {
         totalWebhooks: webhooks.count || 0,
       });
 
-      // Compute top commands from fetched data
       const commandCounts: Record<string, number> = {};
       for (const row of commandsData.data || []) {
         commandCounts[row.command_type] = (commandCounts[row.command_type] || 0) + 1;
@@ -104,17 +114,15 @@ export default function DashboardPage() {
         }));
       setTopCommands(sorted);
 
-      // Format recent attlogs
       const attlogsFormatted = (attlogsList.data || []).map((row: Record<string, unknown>) => ({
         pin: row.pin as string,
         name: (row.name as string) || "-",
-        date: formatDate(row.scan_time as string),
-        time: formatTime(row.scan_time as string),
+        date: formatFingerspotDate(row.scan_time as string),
+        time: formatFingerspotTime(row.scan_time as string),
         status: (row.status_scan as number) === 0 ? "MASUK" : "KELUAR",
       }));
       setRecentAttlogs(attlogsFormatted);
 
-      // Latest payload
       if (latestData.data?.[0]) {
         setLatestPayload({
           payload: latestData.data[0].response_payload || {},
@@ -122,6 +130,32 @@ export default function DashboardPage() {
           createdAt: latestData.data[0].created_at,
         });
       }
+
+      // Device status logic
+      const lastAttlog = latestAttlog.data?.[0];
+      const lastSuccessfulCmd = (latestCmds.data || []).find((c: Record<string, unknown>) => c.status === "success");
+      const now = Date.now();
+      const FIVE_MIN = 5 * 60 * 1000;
+      const ONE_HOUR = 60 * 60 * 1000;
+
+      const lastAttlogTime = lastAttlog?.scan_time ? parseFingerspotTimestamp(lastAttlog.scan_time).getTime() : 0;
+      const lastCmdTime = lastSuccessfulCmd?.created_at ? new Date(lastSuccessfulCmd.created_at).getTime() : 0;
+      const lastActivityTime = Math.max(lastAttlogTime, lastCmdTime);
+
+      let status: "online" | "idle" | "offline" = "offline";
+      if (lastActivityTime > 0) {
+        const elapsed = now - lastActivityTime;
+        if (elapsed < FIVE_MIN) status = "online";
+        else if (elapsed < ONE_HOUR) status = "idle";
+        else status = "offline";
+      }
+
+      setDeviceStatus({
+        status,
+        lastActivity: lastActivityTime > 0 ? new Date(lastActivityTime).toISOString() : null,
+        lastCommand: lastSuccessfulCmd?.command_type || null,
+        cloudId: lastAttlog?.cloud_id || lastSuccessfulCmd?.cloud_id || "",
+      });
     } catch (err) {
       console.error("Dashboard load error:", err);
     } finally {
@@ -140,8 +174,50 @@ export default function DashboardPage() {
     );
   }
 
+  const statusConfig = {
+    online: { bg: "#defbe6", color: "#006e2b", dot: "#006e2b", label: "Online", icon: "check_circle" as const },
+    idle: { bg: "#fff8e1", color: "#b28600", dot: "#b28600", label: "Idle", icon: "schedule" as const },
+    offline: { bg: "#fff1f1", color: "#da1e28", dot: "#da1e28", label: "Offline", icon: "cloud_off" as const },
+  };
+  const sc = statusConfig[deviceStatus.status];
+
   return (
     <div className="space-y-6">
+      {/* Device Status Header */}
+      <div className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: sc.bg }}>
+            <span className="material-symbols-outlined text-xl" style={{ color: sc.color }}>{sc.icon}</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Status Mesin</h2>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: sc.bg, color: sc.color }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: sc.dot }} />
+                {sc.label}
+              </span>
+            </div>
+            <p className="text-[10px] mt-0.5" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>
+              {deviceStatus.cloudId ? `Cloud ID: ${deviceStatus.cloudId}` : "Tidak ada device terdeteksi"}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 text-[10px]" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>
+          {deviceStatus.lastActivity && (
+            <span className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">schedule</span>
+              Aktivitas terakhir: {formatTimeAgo(deviceStatus.lastActivity, now)}
+            </span>
+          )}
+          {deviceStatus.lastCommand && (
+            <span className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">terminal</span>
+              {COMMAND_LABELS[deviceStatus.lastCommand] || deviceStatus.lastCommand}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
@@ -183,16 +259,16 @@ export default function DashboardPage() {
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: "#737687", letterSpacing: "0.05em" }}>Status API</p>
+              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: "#737687", letterSpacing: "0.05em" }}>Status Mesin</p>
               <div className="flex items-center gap-2 mt-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#defbe6", color: "#006e2b" }}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#006e2b" }} />
-                  Online
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium" style={{ background: sc.bg, color: sc.color }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: sc.dot }} />
+                  {sc.label}
                 </span>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#dbe1ff" }}>
-              <span className="material-symbols-outlined text-xl" style={{ color: "#004ccd" }}>cloud</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: sc.bg }}>
+              <span className="material-symbols-outlined text-xl" style={{ color: sc.color }}>{sc.icon}</span>
             </div>
           </div>
         </div>

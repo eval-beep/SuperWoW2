@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
       try {
         await supabaseInsert("command_logs", {
           command_type: command,
-          cloud_id: params.cloud_id || "",
+          cloud_id: params.cloud_id || "C2697842930C1634",
           trans_id: params.trans_id || "1",
           request_payload: params,
-          response_payload: { ...((typeof result.data === "object" && result.data !== null) ? result.data : {}), _command_sent: command, _endpoint: endpoint, _status_code: result.status_code },
+          response_payload: result.data || {},
           status: result.success ? "success" : "failed",
           endpoint,
         });

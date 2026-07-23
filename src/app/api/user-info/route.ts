@@ -46,8 +46,19 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const body = await request.json();
-  const { id, name } = body;
-  if (!id || !name) return NextResponse.json({ error: "id dan name harus diisi" }, { status: 400 });
-  const result = await supabaseUpdate("userinfos", { name }, { id: `eq.${id}` });
+  const { id, cloud_id, pin, name, privilege } = body;
+  if (!id && (!cloud_id || !pin)) return NextResponse.json({ error: "id atau (cloud_id + pin) harus diisi" }, { status: 400 });
+
+  const updateData: Record<string, unknown> = {};
+  if (name !== undefined) updateData.name = name;
+  if (privilege !== undefined) updateData.privilege = privilege;
+
+  if (Object.keys(updateData).length === 0) return NextResponse.json({ error: "Minimal satu field harus diupdate" }, { status: 400 });
+
+  const filters: Record<string, string> = id
+    ? { id: `eq.${id}` }
+    : { cloud_id: `eq.${cloud_id}`, pin: `eq.${pin}` };
+
+  const result = await supabaseUpdate("userinfos", updateData, filters);
   return NextResponse.json({ success: true, data: result });
 }

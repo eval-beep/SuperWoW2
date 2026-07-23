@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -22,8 +22,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState("");
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q") || "";
+    setHeaderSearch(q);
+  }, [pathname]);
 
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 1024);
@@ -141,9 +148,32 @@ export default function DashboardLayout({
               <input
                 className="w-full h-10 pl-10 pr-4 rounded-full text-sm border-none focus:ring-2 focus:ring-[#004ccd]/30 transition-all"
                 style={{ background: "#f3f3f3", fontFamily: "Inter" }}
-                placeholder="Cari data absensi..."
+                placeholder="Cari..."
                 type="text"
+                value={headerSearch}
+                onChange={(e) => setHeaderSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const url = new URL(window.location.href);
+                    if (headerSearch) {
+                      url.searchParams.set("q", headerSearch);
+                    } else {
+                      url.searchParams.delete("q");
+                    }
+                    router.push(url.pathname + url.search);
+                  }
+                }}
               />
+              {headerSearch && (
+                <button onClick={() => {
+                  setHeaderSearch("");
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete("q");
+                  router.push(url.pathname + url.search);
+                }} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "#737687" }}>
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              )}
             </div>
           </div>
 

@@ -51,6 +51,11 @@ export default function WebhookHistoryPage() {
 
   useEffect(() => { loadLogs(); }, [loadLogs]);
 
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setCommandFilter(q);
+  }, []);
+
   const handleReset = () => {
     setCommandFilter("");
     setStatusFilter("");
@@ -113,7 +118,7 @@ export default function WebhookHistoryPage() {
                   return (
                     <tr key={log.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }} className="cursor-pointer" onClick={() => setDetailModal({ open: true, log })}>
                       <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.command_type}</td>
-                      <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{log.cloud_id}</td>
+                      <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{log.cloud_id || "-"}</td>
                       <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatDateTime(log.created_at)}</td>
                       <td className="py-2.5 px-3">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: st.bg, color: st.color }}>{STATUS_LABELS[log.status] || log.status}</span>
@@ -135,7 +140,7 @@ export default function WebhookHistoryPage() {
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: st.bg, color: st.color }}>{STATUS_LABELS[log.status] || log.status}</span>
                   </div>
                   <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
-                    <span style={{ fontFamily: "JetBrains Mono" }}>{log.cloud_id}</span>
+                    <span style={{ fontFamily: "JetBrains Mono" }}>{log.cloud_id || "-"}</span>
                     <span style={{ fontFamily: "JetBrains Mono" }}>{formatDateTime(log.created_at)}</span>
                   </div>
                 </div>
@@ -160,25 +165,29 @@ export default function WebhookHistoryPage() {
 
       {detailModal.open && detailModal.log && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, log: null })}>
-          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail Response</h3>
+          <div className="w-full max-w-lg rounded-xl p-4 max-h-[85vh] overflow-y-auto" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail Response</h3>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: STATUS_COLORS[detailModal.log.status]?.bg || "#f3f3f3", color: STATUS_COLORS[detailModal.log.status]?.color || "#737687" }}>{STATUS_LABELS[detailModal.log.status] || detailModal.log.status}</span>
+            </div>
             <div className="space-y-2">
               {[
                 ["Command", detailModal.log.command_type],
-                ["Cloud ID", detailModal.log.cloud_id],
+                ["Cloud ID", detailModal.log.cloud_id || "-"],
+                ["Trans ID", detailModal.log.trans_id || "-"],
                 ["Waktu", formatDateTime(detailModal.log.created_at)],
-                ["Status", STATUS_LABELS[detailModal.log.status] || detailModal.log.status],
+                ["Endpoint", detailModal.log.endpoint || detailModal.log.command_type],
               ].map(([label, value]) => (
                 <div key={label as string} className="flex justify-between items-start gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
                   <span className="shrink-0" style={{ color: "#737687" }}>{label}</span>
-                  <span className="font-medium text-right break-all" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{value}</span>
+                  <span className="font-medium text-right break-all" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{String(value)}</span>
                 </div>
               ))}
             </div>
             {detailModal.log.response_payload != null && (
               <div className="mt-3">
                 <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Response Payload</label>
-                <pre className="p-2 rounded-lg text-[10px] overflow-x-auto max-h-48" style={{ background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{String(JSON.stringify(detailModal.log.response_payload, null, 2))}</pre>
+                <pre className="p-3 rounded-lg text-[10px] overflow-x-auto max-h-64 leading-relaxed" style={{ background: "#1a1c1c", fontFamily: "JetBrains Mono", color: "#a6e3a1" }}>{JSON.stringify(detailModal.log.response_payload, null, 2)}</pre>
               </div>
             )}
             <button onClick={() => setDetailModal({ open: false, log: null })} className="w-full mt-3 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>

@@ -57,7 +57,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
-  await supabaseDelete("command_logs", { id: "not.is.null" });
-  return NextResponse.json({ success: true, message: "API history cleared" });
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const status = searchParams.get("status");
+  const filters: Record<string, string> = status ? { status: `eq.${status}` } : { id: "not.is.null" };
+  await supabaseDelete("command_logs", filters);
+  return NextResponse.json({ success: true, message: "Riwayat berhasil dihapus" });
 }
