@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand } from "@/lib/fingerspot";
-import { supabaseInsert, supabaseSelect } from "@/lib/supabase";
+import { supabaseSelect } from "@/lib/supabase";
 
 export async function GET() {
   try {
     const result = await sendFingerspotCommand("get_all_pin", { trans_id: "1", cloud_id: "C2697842930C1634" });
-    await supabaseInsert("command_logs", {
-      command_type: "get_all_pin", cloud_id: "C2697842930C1634", trans_id: "1",
-      request_payload: { trans_id: "1", cloud_id: "C2697842930C1634" },
-      response_payload: result.data, status: result.success ? "pending" : "failed", endpoint: "get_all_pin",
-    });
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ success: false, data: { error: (error as Error).message } }, { status: 500 });

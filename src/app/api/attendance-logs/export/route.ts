@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     const formattedTime = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     csvRows.push([
       `"${formattedTime}"`, `"${row.cloud_id}"`, `"${row.pin}"`, `"${row.name || ""}"`,
-      `"${verifyMap[row.verify as number] || "Unknown"}"`, `"${row.source || ""}"`, `"${row.trans_id || ""}"`,
+      `"${verifyMap[row.verify_method as number] || "Unknown"}"`, `"${row.source || ""}"`, `"${row.trans_id || ""}"`,
     ].join(","));
   }
 

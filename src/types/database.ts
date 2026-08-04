@@ -36,31 +36,9 @@ export interface Attlog {
   name: string | null;
   scan_time: string;
   status_scan: number;
-  verify: number;
+  verify_method: number;
   source: string;
   trans_id: string;
-  created_at: string;
-}
-
-export interface CommandLog {
-  id: string;
-  command_type: string;
-  cloud_id: string;
-  trans_id: string;
-  request_payload: Record<string, unknown> | string | null;
-  response_payload: Record<string, unknown> | string | null;
-  status: "pending" | "success" | "failed";
-  endpoint: string | null;
-  created_at: string;
-}
-
-export interface WebhookLog {
-  id: string;
-  cloud_id: string;
-  webhook_type: string;
-  raw_payload: Record<string, unknown> | string | null;
-  status: string;
-  processed_at: string | null;
   created_at: string;
 }
 

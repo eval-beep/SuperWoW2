@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand, COMMAND_TYPES } from "@/lib/fingerspot";
-import { supabaseInsert } from "@/lib/supabase";
+import { supabaseInsert, supabaseDelete } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { command, params, logToHistory = true } = body;
+  const { command, params } = body;
 
   if (!command || !COMMAND_TYPES.includes(command)) {
     return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
@@ -13,23 +13,104 @@ export async function POST(request: NextRequest) {
   try {
     const result = await sendFingerspotCommand(command, params);
 
-    if (logToHistory) {
-      const endpoint = command === "register_online" ? "reg_online" : command;
-      try {
-        await supabaseInsert("command_logs", {
-          command_type: command,
-          cloud_id: params.cloud_id || "C2697842930C1634",
-          trans_id: params.trans_id || "1",
-          request_payload: params,
-          response_payload: result.data || {},
-          status: result.success ? "success" : "failed",
-          endpoint,
-        });
-      } catch { /* don't fail */ }
+    if (result.success && result.data) {
+      const cloudId = params.cloud_id || "C2697842930C1634";
+      const transId = params.trans_id || "1";
+
+      if (command === "get_attlog") {
+        await saveAttlogs(cloudId, transId, result.data);
+      } else if (command === "get_userinfo") {
+        await saveUserinfo(cloudId, result.data);
+      } else if (command === "get_all_pin") {
+        await savePins(cloudId, result.data);
+      }
     }
 
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ success: false, status_code: 500, data: { error: (error as Error).message } }, { status: 500 });
+  }
+}
+
+async function saveAttlogs(cloudId: string, transId: string, data: Record<string, unknown>) {
+  const records = Array.isArray(data) ? data : data.data;
+  if (!Array.isArray(records)) return;
+
+  for (const rec of records) {
+    const pin = String(rec.pin || "");
+    const scanTime = rec.scan_time || rec.scan || rec.scan_date || "";
+    if (!pin || !scanTime) continue;
+
+    let scanTimeISO: string;
+    try {
+      const d = new Date(scanTime as string);
+      if (isNaN(d.getTime())) continue;
+      scanTimeISO = d.toISOString();
+    } catch {
+      continue;
+    }
+
+    const verifyMethod = Number(rec.verify_method || rec.verify || 0);
+    const statusScan = Number(rec.status_scan ?? 0);
+
+    try {
+      await supabaseInsert("attlogs", {
+        cloud_id: cloudId,
+        pin,
+        scan_time: scanTimeISO,
+        verify_method: verifyMethod || null,
+        status_scan: statusScan,
+        source: "api_pull",
+        trans_id: transId || null,
+        raw_payload: rec,
+      });
+    } catch { /* skip duplicate */ }
+  }
+}
+
+async function saveUserinfo(cloudId: string, data: Record<string, unknown>) {
+  const userData = data.data && typeof data.data === "object" && !Array.isArray(data.data)
+    ? data.data as Record<string, unknown>
+    : data;
+
+  const pin = String(userData.pin || "");
+  if (!pin) return;
+
+  try {
+    await supabaseInsert("userinfos", {
+      cloud_id: cloudId,
+      pin,
+      name: userData.name || null,
+      privilege: Number(userData.privilege || 0),
+      password: userData.password || null,
+      rfid: userData.rfid || null,
+      template: userData.template || null,
+      raw_payload: userData,
+      synced_at: new Date().toISOString(),
+    });
+  } catch { /* skip */ }
+}
+
+async function savePins(cloudId: string, data: Record<string, unknown>) {
+  let pinArr: string[] = [];
+  const inner = data.data && typeof data.data === "object" ? data.data : data;
+
+  if (Array.isArray(inner)) {
+    pinArr = inner.map((r: Record<string, unknown>) => String(r.pin || "")).filter(Boolean);
+  } else if (Array.isArray((inner as Record<string, unknown>).pin_arr)) {
+    pinArr = ((inner as Record<string, unknown>).pin_arr as unknown[]).map(String).filter(Boolean);
+  }
+
+  if (pinArr.length === 0) return;
+
+  await supabaseDelete("pins", { cloud_id: `eq.${cloudId}` });
+
+  for (const pin of pinArr) {
+    try {
+      await supabaseInsert("pins", {
+        cloud_id: cloudId,
+        pin,
+      });
+    } catch { /* skip duplicate */ }
   }
 }

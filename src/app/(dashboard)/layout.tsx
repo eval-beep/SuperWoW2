@@ -11,8 +11,6 @@ const NAV_ITEMS = [
   { href: "/user-info", icon: "person", label: "User Info" },
   { href: "/pin-list", icon: "password", label: "PIN List" },
   { href: "/api-tester", icon: "terminal", label: "API Tester" },
-  { href: "/api-history", icon: "receipt_long", label: "API History" },
-  { href: "/webhook-history", icon: "webhook", label: "Webhook History" },
   { href: "/settings", icon: "settings", label: "Pengaturan" },
 ];
 

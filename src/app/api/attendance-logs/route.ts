@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const filters: Record<string, string | string[]> = {};
   if (search) filters.or = `(pin.ilike.*${search}*,name.ilike.*${search}*,cloud_id.ilike.*${search}*)`;
   if (status) filters.status_scan = `eq.${status}`;
-  if (verifyMethod) filters.verify = `eq.${verifyMethod}`;
+  if (verifyMethod) filters.verify_method = `eq.${verifyMethod}`;
   if (cloudId) filters.cloud_id = `eq.${cloudId}`;
   if (from && to) {
     const toDate = new Date(to + "T00:00:00");

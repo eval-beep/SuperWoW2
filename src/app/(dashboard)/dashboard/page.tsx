@@ -9,13 +9,6 @@ interface Stats {
   totalWebhooks: number;
 }
 
-interface TopCommand {
-  type: string;
-  label: string;
-  count: number;
-  maxCount: number;
-}
-
 interface RecentAttlog {
   pin: string;
   name: string;
@@ -24,36 +17,16 @@ interface RecentAttlog {
   status: string;
 }
 
-interface LatestPayload {
-  payload: Record<string, unknown>;
-  command: string;
-  createdAt: string;
-}
-
 interface DeviceStatus {
   status: "online" | "idle" | "offline";
   lastActivity: string | null;
-  lastCommand: string | null;
   cloudId: string;
 }
 
-const COMMAND_LABELS: Record<string, string> = {
-  get_attlog: "Get Attendance Log",
-  get_userinfo: "Get User Info",
-  get_all_pin: "Get All PIN",
-  set_userinfo: "Set User Info",
-  delete_userinfo: "Delete User Info",
-  set_time: "Set Time",
-  register_online: "Register Online",
-  restart_device: "Restart Device",
-};
-
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalAttlogs: 0, totalWebhooks: 0 });
-  const [topCommands, setTopCommands] = useState<TopCommand[]>([]);
   const [recentAttlogs, setRecentAttlogs] = useState<RecentAttlog[]>([]);
-  const [latestPayload, setLatestPayload] = useState<LatestPayload | null>(null);
-  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ status: "offline", lastActivity: null, lastCommand: null, cloudId: "" });
+  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ status: "offline", lastActivity: null, cloudId: "" });
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(0);
 
@@ -70,26 +43,20 @@ export default function DashboardPage() {
 
   async function loadDashboard() {
     try {
-      const [usersRes, attlogsRes, webhooksRes, commandsRes, attlogsListRes, latestRes, latestAttlogRes, latestCmdRes] = await Promise.all([
+      const [usersRes, attlogsRes, webhooksRes, attlogsListRes, latestAttlogRes] = await Promise.all([
         fetch("/api/supabase?table=userinfos&count=true&limit=1"),
         fetch("/api/supabase?table=attlogs&count=true&limit=1"),
         fetch("/api/supabase?table=webhook_logs&count=true&limit=1"),
-        fetch("/api/supabase?table=command_logs&select=command_type&order=created_at.desc&limit=500"),
         fetch("/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6"),
-        fetch("/api/supabase?table=command_logs&select=command_type,response_payload,created_at&order=created_at.desc&limit=1"),
         fetch("/api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1"),
-        fetch("/api/supabase?table=command_logs&select=cloud_id,command_type,created_at,status&order=created_at.desc&limit=10"),
       ]);
 
-      const [users, attlogs, webhooks, commandsData, attlogsList, latestData, latestAttlog, latestCmds] = await Promise.all([
+      const [users, attlogs, webhooks, attlogsList, latestAttlog] = await Promise.all([
         usersRes.json(),
         attlogsRes.json(),
         webhooksRes.json(),
-        commandsRes.json(),
         attlogsListRes.json(),
-        latestRes.json(),
         latestAttlogRes.json(),
-        latestCmdRes.json(),
       ]);
 
       setStats({
@@ -97,22 +64,6 @@ export default function DashboardPage() {
         totalAttlogs: attlogs.count || 0,
         totalWebhooks: webhooks.count || 0,
       });
-
-      const commandCounts: Record<string, number> = {};
-      for (const row of commandsData.data || []) {
-        commandCounts[row.command_type] = (commandCounts[row.command_type] || 0) + 1;
-      }
-      const maxCount = Math.max(...Object.values(commandCounts), 1);
-      const sorted = Object.entries(commandCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([type, count]) => ({
-          type,
-          count,
-          label: COMMAND_LABELS[type] || type,
-          maxCount,
-        }));
-      setTopCommands(sorted);
 
       const attlogsFormatted = (attlogsList.data || []).map((row: Record<string, unknown>) => ({
         pin: row.pin as string,
@@ -123,38 +74,21 @@ export default function DashboardPage() {
       }));
       setRecentAttlogs(attlogsFormatted);
 
-      if (latestData.data?.[0]) {
-        setLatestPayload({
-          payload: latestData.data[0].response_payload || {},
-          command: latestData.data[0].command_type,
-          createdAt: latestData.data[0].created_at,
-        });
-      }
-
-      // Device status logic
       const lastAttlog = latestAttlog.data?.[0];
-      const lastSuccessfulCmd = (latestCmds.data || []).find((c: Record<string, unknown>) => c.status === "success");
-      const now = Date.now();
-      const FIVE_MIN = 5 * 60 * 1000;
-      const ONE_HOUR = 60 * 60 * 1000;
-
-      const lastAttlogTime = lastAttlog?.scan_time ? parseFingerspotTimestamp(lastAttlog.scan_time).getTime() : 0;
-      const lastCmdTime = lastSuccessfulCmd?.created_at ? new Date(lastSuccessfulCmd.created_at).getTime() : 0;
-      const lastActivityTime = Math.max(lastAttlogTime, lastCmdTime);
+      const lastActivityTime = lastAttlog?.scan_time ? parseFingerspotTimestamp(lastAttlog.scan_time).getTime() : 0;
 
       let status: "online" | "idle" | "offline" = "offline";
       if (lastActivityTime > 0) {
-        const elapsed = now - lastActivityTime;
-        if (elapsed < FIVE_MIN) status = "online";
-        else if (elapsed < ONE_HOUR) status = "idle";
+        const elapsed = Date.now() - lastActivityTime;
+        if (elapsed < 5 * 60 * 1000) status = "online";
+        else if (elapsed < 60 * 60 * 1000) status = "idle";
         else status = "offline";
       }
 
       setDeviceStatus({
         status,
         lastActivity: lastActivityTime > 0 ? new Date(lastActivityTime).toISOString() : null,
-        lastCommand: lastSuccessfulCmd?.command_type || null,
-        cloudId: lastAttlog?.cloud_id || lastSuccessfulCmd?.cloud_id || "",
+        cloudId: lastAttlog?.cloud_id || "",
       });
     } catch (err) {
       console.error("Dashboard load error:", err);
@@ -209,17 +143,11 @@ export default function DashboardPage() {
               Aktivitas terakhir: {formatTimeAgo(deviceStatus.lastActivity, now)}
             </span>
           )}
-          {deviceStatus.lastCommand && (
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">terminal</span>
-              {COMMAND_LABELS[deviceStatus.lastCommand] || deviceStatus.lastCommand}
-            </span>
-          )}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
           <div className="flex items-start justify-between">
             <div>
@@ -252,75 +180,6 @@ export default function DashboardPage() {
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#fff1f1" }}>
               <span className="material-symbols-outlined text-xl" style={{ color: "#da1e28" }}>webhook</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: "#737687", letterSpacing: "0.05em" }}>Status Mesin</p>
-              <div className="flex items-center gap-2 mt-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium" style={{ background: sc.bg, color: sc.color }}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: sc.dot }} />
-                  {sc.label}
-                </span>
-              </div>
-            </div>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: sc.bg }}>
-              <span className="material-symbols-outlined text-xl" style={{ color: sc.color }}>{sc.icon}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top Commands - Bar Chart */}
-        <div className="lg:col-span-2 rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <h3 className="text-base font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Permintaan API Teratas</h3>
-          {topCommands.length > 0 ? (
-            <div className="space-y-3">
-              {topCommands.map((cmd, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="text-xs w-36 truncate" style={{ fontFamily: "Inter", color: "#737687" }}>{cmd.label}</span>
-                  <div className="flex-1 h-6 rounded-full overflow-hidden" style={{ background: "#f3f3f3" }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${(cmd.count / cmd.maxCount) * 100}%`,
-                        background: "#004ccd",
-                        minWidth: "24px",
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs w-8 text-right" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{cmd.count}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm" style={{ color: "#737687" }}>Belum ada data</p>
-          )}
-        </div>
-
-        {/* System Health */}
-        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <h3 className="text-base font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Kesehatan Sistem</h3>
-          <div className="space-y-4">
-            <div className="rounded-xl p-4" style={{ background: "#f3f3f3" }}>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="material-symbols-outlined text-lg" style={{ color: "#004ccd" }}>speed</span>
-                <span className="text-xs font-medium" style={{ color: "#424656" }}>Tingkat Respons</span>
-              </div>
-              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>240</p>
-              <p className="text-[10px] mt-1" style={{ color: "#737687" }}>ms average</p>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: "#f3f3f3" }}>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="material-symbols-outlined text-lg" style={{ color: "#006e2b" }}>timer</span>
-                <span className="text-xs font-medium" style={{ color: "#424656" }}>Latensi</span>
-              </div>
-              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>0.338</p>
-              <p className="text-[10px] mt-1" style={{ color: "#737687" }}>seconds / 400</p>
             </div>
           </div>
         </div>
@@ -373,30 +232,27 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Console Payload */}
+        {/* System Health */}
         <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Payload Terbaru</h3>
-            {latestPayload && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#defbe6", color: "#006e2b" }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#006e2b" }} />
-                API Online
-              </span>
-            )}
-          </div>
-          {latestPayload ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{latestPayload.command}</span>
-                <span className="text-xs" style={{ color: "#737687" }}>{formatTimeAgo(latestPayload.createdAt, now)}</span>
+          <h3 className="text-base font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Kesehatan Sistem</h3>
+          <div className="space-y-4">
+            <div className="rounded-xl p-4" style={{ background: "#f3f3f3" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-outlined text-lg" style={{ color: "#004ccd" }}>speed</span>
+                <span className="text-xs font-medium" style={{ color: "#424656" }}>Tingkat Respons</span>
               </div>
-              <div className="rounded-xl p-4 overflow-auto max-h-48" style={{ background: "#1a1c1c", fontFamily: "JetBrains Mono" }}>
-                <pre className="text-xs text-[#a6e3a1] whitespace-pre-wrap">{JSON.stringify(latestPayload.payload, null, 2)}</pre>
-              </div>
+              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>240</p>
+              <p className="text-[10px] mt-1" style={{ color: "#737687" }}>ms average</p>
             </div>
-          ) : (
-            <p className="text-sm" style={{ color: "#737687" }}>Belum ada data</p>
-          )}
+            <div className="rounded-xl p-4" style={{ background: "#f3f3f3" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-outlined text-lg" style={{ color: "#006e2b" }}>timer</span>
+                <span className="text-xs font-medium" style={{ color: "#424656" }}>Latensi</span>
+              </div>
+              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>0.338</p>
+              <p className="text-[10px] mt-1" style={{ color: "#737687" }}>seconds / 400</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

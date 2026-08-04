@@ -11,7 +11,7 @@ interface Attlog {
   name: string | null;
   scan_time: string;
   status_scan: number;
-  verify: number;
+  verify_method: number;
   source: string;
   trans_id: string;
   created_at: string;
@@ -199,7 +199,7 @@ export default function AttendanceLogsPage() {
                       <td className="py-2.5 px-3" style={{ color: "#737687", fontFamily: "JetBrains Mono" }}>{log.cloud_id || "-"}</td>
                       <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatFingerspotDateTime(log.scan_time)}</td>
                       <td className="py-2.5 px-3">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify_method)}</span>
                       </td>
                       <td className="py-2.5 px-3">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: log.status_scan === 0 ? "#defbe6" : "#fff1f1", color: log.status_scan === 0 ? "#006e2b" : "#da1e28" }}>
@@ -228,7 +228,7 @@ export default function AttendanceLogsPage() {
                 </div>
                 <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
                   <span style={{ fontFamily: "JetBrains Mono" }}>{formatFingerspotDateTime(log.scan_time)}</span>
-                   <span className="inline-flex items-center px-2 py-0.5 rounded-full font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify)}</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{getVerifyLabel(log.verify_method)}</span>
                 </div>
               </div>
             ))}
@@ -261,7 +261,7 @@ export default function AttendanceLogsPage() {
                 ["Nama", detailModal.log.name || "-"],
                 ["Cloud ID", detailModal.log.cloud_id || "-"],
                 ["Waktu", formatFingerspotDateTime(detailModal.log.scan_time)],
-                ["Verifikasi", getVerifyLabel(detailModal.log.verify)],
+                ["Verifikasi", getVerifyLabel(detailModal.log.verify_method)],
                 ["Status", detailModal.log.status_scan === 0 ? "MASUK" : "GAGAL"],
                 ["Sumber", detailModal.log.source || "-"],
                 ["Trans ID", detailModal.log.trans_id || "-"],

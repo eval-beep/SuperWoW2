@@ -8,14 +8,8 @@ export async function POST(request: NextRequest) {
 
   if (mode === "device") {
     const { sendFingerspotCommand } = await import("@/lib/fingerspot");
-    const { supabaseInsert } = await import("@/lib/supabase");
     try {
-      const result = await sendFingerspotCommand("delete_userinfo", { trans_id: "1", cloud_id, pin });
-      await supabaseInsert("command_logs", {
-        command_type: "delete_userinfo", cloud_id, trans_id: "1",
-        request_payload: { trans_id: "1", cloud_id, pin }, response_payload: result.data,
-        status: result.success ? "success" : "failed", endpoint: "delete_userinfo",
-      });
+      await sendFingerspotCommand("delete_userinfo", { trans_id: "1", cloud_id, pin });
     } catch { /* continue */ }
   }
 
