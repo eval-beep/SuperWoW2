@@ -67,11 +67,13 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  console.log("Received payload:", JSON.stringify(payload).substring(0, 500));
+  console.log("=== SMART-TASK WEBHOOK ===");
+  console.log("Full payload:", JSON.stringify(payload));
 
   const { type, cloud_id, machine_id, trans_id, data } = payload;
 
   if (!type || !VALID_TYPES.includes(type)) {
+    console.error("Invalid type:", type);
     return new Response(JSON.stringify({ error: `Invalid type: ${type}` }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -79,6 +81,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!cloud_id) {
+    console.error("Missing cloud_id");
     return new Response(JSON.stringify({ error: "cloud_id is required" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -88,15 +91,6 @@ Deno.serve(async (req: Request) => {
   const supabase = createSupabaseAdmin();
 
   try {
-    const { error: logError } = await supabase.from("webhook_logs").insert({
-      webhook_type: type === "attlog" ? "realtime_attlog" : type === "get_userid_list" ? "get_all_pin" : type,
-      cloud_id,
-      trans_id: trans_id || null,
-      raw_payload: payload,
-      status: "success",
-    });
-    if (logError) console.error("webhook_logs error:", logError);
-
     switch (type) {
       case "realtime_attlog":
       case "attlog":
@@ -109,6 +103,8 @@ Deno.serve(async (req: Request) => {
       case "get_userid_list":
         await processGetAllPin(supabase, cloud_id, data);
         break;
+      default:
+        console.log(`Type ${type} received but no handler needed`);
     }
 
     return new Response(JSON.stringify({ success: true }), {
@@ -131,10 +127,13 @@ async function processAttlog(
   data?: Record<string, unknown> | Record<string, unknown>[],
   transId?: string
 ) {
-  if (!data) return;
+  if (!data) {
+    console.log("No data in attlog payload, skipping");
+    return;
+  }
   const records = Array.isArray(data) ? data : [data];
 
-  console.log(`Processing ${records.length} attlog records`);
+  console.log(`Processing ${records.length} attlog records for ${cloudId}`);
 
   for (const record of records) {
     const pin = String(record.pin || record.PIN || "");
@@ -143,7 +142,7 @@ async function processAttlog(
     const statusScan = Number(record.status_scan || record.statusScan || record.Status || record.status || 0);
 
     if (!pin || !scanTime) {
-      console.error("Skipping attlog: missing pin or scan_time", record);
+      console.error("Skipping attlog: missing pin or scan_time", JSON.stringify(record));
       continue;
     }
 
@@ -183,7 +182,7 @@ async function processAttlog(
       raw_payload: record,
     };
 
-    console.log("Inserting attlog:", JSON.stringify(insertData).substring(0, 300));
+    console.log("Inserting attlog:", JSON.stringify(insertData).substring(0, 500));
 
     const { data: inserted, error } = await supabase.from("attlogs").insert(insertData).select();
 
@@ -200,10 +199,13 @@ async function processUserinfo(
   cloudId: string,
   data?: Record<string, unknown> | Record<string, unknown>[]
 ) {
-  if (!data) return;
+  if (!data) {
+    console.log("No data in userinfo payload, skipping");
+    return;
+  }
   const records = Array.isArray(data) ? data : [data];
 
-  console.log(`Processing ${records.length} userinfo records`);
+  console.log(`Processing ${records.length} userinfo records for ${cloudId}`);
 
   for (const record of records) {
     const pin = String(record.pin || record.PIN || "");
@@ -224,7 +226,7 @@ async function processUserinfo(
       synced_at: new Date().toISOString(),
     };
 
-    console.log("Upserting userinfo:", JSON.stringify(upsertData).substring(0, 300));
+    console.log("Upserting userinfo:", JSON.stringify(upsertData).substring(0, 500));
 
     const { error } = await supabase.from("userinfos").upsert(upsertData, {
       onConflict: "cloud_id,pin",
@@ -253,7 +255,10 @@ async function processGetAllPin(
   cloudId: string,
   data?: Record<string, unknown> | Record<string, unknown>[]
 ) {
-  if (!data) return;
+  if (!data) {
+    console.log("No data in get_all_pin payload, skipping");
+    return;
+  }
 
   let pinArr: string[] = [];
 

@@ -41,14 +41,11 @@ async function saveAttlogs(cloudId: string, transId: string, data: Record<string
     const scanTime = rec.scan_time || rec.scan || rec.scan_date || "";
     if (!pin || !scanTime) continue;
 
-    let scanTimeISO: string;
-    try {
-      const d = new Date(scanTime as string);
-      if (isNaN(d.getTime())) continue;
-      scanTimeISO = d.toISOString();
-    } catch {
-      continue;
-    }
+    const scanTimeStr = String(scanTime);
+    const cleaned = scanTimeStr.replace(/(\+00:00|Z)$/g, "");
+    const match = cleaned.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (!match) continue;
+    const scanTimeISO = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6] || "00"}`;
 
     const verifyMethod = Number(rec.verify_method || rec.verify || 0);
     const statusScan = Number(rec.status_scan ?? 0);

@@ -45,7 +45,10 @@ export default function AttendanceLogsPage() {
   const [detailModal, setDetailModal] = useState<{ open: boolean; log: Attlog | null }>({ open: false, log: null });
   const [getAttlogModal, setGetAttlogModal] = useState(false);
   const [allCloudIds, setAllCloudIds] = useState<string[]>([]);
-  const [getForm, setGetForm] = useState({ cloud_id: "C2697842930C1634", pin: "", start_date: "", end_date: "" });
+  const [getForm, setGetForm] = useState({ cloud_id: "", pin: "", start_date: "", end_date: "" });
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [cloudIdFromSettings, setCloudIdFromSettings] = useState("");
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
@@ -64,7 +67,19 @@ export default function AttendanceLogsPage() {
   useEffect(() => {
     loadLogs();
     loadCloudIds();
+    loadSettings();
   }, [loadLogs]);
+
+  async function loadSettings() {
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      if (data?.cloud_id) {
+        setCloudIdFromSettings(data.cloud_id);
+        setGetForm((prev) => ({ ...prev, cloud_id: prev.cloud_id || data.cloud_id }));
+      }
+    } catch { /* ignore */ }
+  }
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("q");
@@ -105,6 +120,35 @@ export default function AttendanceLogsPage() {
     }
   }
 
+  async function handleSyncAttlog() {
+    const cid = cloudIdFromSettings || "C2697842930C1634";
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/fingerspot/command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          command: "get_attlog",
+          params: { trans_id: "1", cloud_id: cid },
+        }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        const count = Array.isArray(result.data?.data) ? result.data.data.length : (result.data ? 1 : 0);
+        setSyncResult({ success: true, message: `Berhasil sync ${count} log dari device` });
+        loadLogs();
+      } else {
+        setSyncResult({ success: false, message: result.data?.error || "Gagal sync data" });
+      }
+    } catch {
+      setSyncResult({ success: false, message: "Gagal menghubungkan ke device" });
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setSyncResult(null), 4000);
+    }
+  }
+
   function handleFilter() {
     setPage(1);
   }
@@ -128,6 +172,9 @@ export default function AttendanceLogsPage() {
           <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Riwayat kehadiran karyawan</p>
         </div>
         <div className="flex gap-2">
+          <button onClick={handleSyncAttlog} disabled={syncing} className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 text-white disabled:opacity-50" style={{ background: "#006e2b" }}>
+            <span className={`material-symbols-outlined text-sm ${syncing ? "animate-spin" : ""}`}>{syncing ? "progress_activity" : "sync"}</span>{syncing ? "Sync..." : "Sync"}
+          </button>
           <button onClick={() => setGetAttlogModal(true)} className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 text-white" style={{ background: "#004ccd" }}>
             <span className="material-symbols-outlined text-sm">download</span>Ambil Log
           </button>
@@ -286,6 +333,7 @@ export default function AttendanceLogsPage() {
               <div>
                 <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
                 <select value={getForm.cloud_id} onChange={(e) => setGetForm({ ...getForm, cloud_id: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}>
+                  {!allCloudIds.includes(getForm.cloud_id) && getForm.cloud_id && <option value={getForm.cloud_id}>{getForm.cloud_id}</option>}
                   {allCloudIds.map((id) => <option key={id} value={id}>{id}</option>)}
                 </select>
               </div>
@@ -309,6 +357,17 @@ export default function AttendanceLogsPage() {
               <button onClick={handleGetAttlog} className="flex-1 py-2 text-xs font-medium text-white rounded-lg" style={{ background: "#004ccd" }}>Kirim</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Sync Result Toast */}
+      {syncResult && (
+        <div
+          className="fixed bottom-4 right-4 z-[300] flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-medium shadow-lg"
+          style={{ background: syncResult.success ? "#defbe6" : "#fff1f1", color: syncResult.success ? "#006e2b" : "#da1e28" }}
+        >
+          <span className="material-symbols-outlined text-[18px]">{syncResult.success ? "check_circle" : "error"}</span>
+          {syncResult.message}
         </div>
       )}
     </div>

@@ -53,6 +53,7 @@ export const COMMAND_TYPES = [
   "set_time",
   "register_online",
   "restart_device",
+  "get_device",
 ] as const;
 
 export type CommandType = (typeof COMMAND_TYPES)[number];
@@ -66,4 +67,5 @@ export const COMMAND_META: Record<string, { icon: string; label: string; color: 
   set_time: { icon: "schedule", label: "Set Time", color: "tertiary" },
   register_online: { icon: "wifi", label: "Register Online", color: "secondary" },
   restart_device: { icon: "restart_alt", label: "Restart Device", color: "tertiary" },
+  get_device: { icon: "devices", label: "Get Device Info", color: "secondary" },
 };
