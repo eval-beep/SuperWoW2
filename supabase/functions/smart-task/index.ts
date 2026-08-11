@@ -100,6 +100,19 @@ Deno.serve(async (req: Request) => {
       status: "received",
     });
 
+    // Update command_logs response_payload with full webhook data
+    if (trans_id) {
+      const transIdNum = parseInt(String(trans_id), 10);
+      if (!isNaN(transIdNum)) {
+        await supabase
+          .from("command_logs")
+          .update({ response_payload: payload, status: "success" })
+          .eq("trans_id", transIdNum)
+          .eq("cloud_id", cloud_id)
+          .eq("status", "pending");
+      }
+    }
+
     switch (type) {
       case "realtime_attlog":
       case "attlog":
