@@ -112,7 +112,7 @@ export default function AttendanceLogsPage() {
     const startDate = getForm.start_date || fmt(yesterday);
     const endDate = getForm.end_date || fmt(today);
     try {
-      const params: Record<string, string> = { trans_id: "1", cloud_id: getForm.cloud_id, start_date: startDate, end_date: endDate };
+      const params: Record<string, string> = { cloud_id: getForm.cloud_id, start_date: startDate, end_date: endDate };
       if (getForm.pin) params.pin = getForm.pin;
       await fetch("/api/fingerspot/command", {
         method: "POST",
@@ -139,7 +139,7 @@ export default function AttendanceLogsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           command: "get_attlog",
-          params: { trans_id: "1", cloud_id: cid, start_date: fmt(yesterday), end_date: fmt(today) },
+          params: { cloud_id: cid, start_date: fmt(yesterday), end_date: fmt(today) },
         }),
       });
       const result = await res.json();

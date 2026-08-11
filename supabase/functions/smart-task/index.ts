@@ -95,6 +95,23 @@ Deno.serve(async (req: Request) => {
   // Map webhook_type to values allowed by DB CHECK constraint
   const dbType = type === "get_userid_list" ? "get_all_pin" : type === "attlog" ? "realtime_attlog" : type;
 
+  // Validate trans_id + command_type against command_logs
+  let commandTypeMatch = false;
+  if (trans_id) {
+    const { data: cmdLog } = await supabase
+      .from("command_logs")
+      .select("command_type")
+      .eq("trans_id", trans_id)
+      .eq("cloud_id", cloud_id)
+      .maybeSingle();
+    if (cmdLog) {
+      commandTypeMatch = cmdLog.command_type === dbType;
+      console.log(`Validation: trans_id=${trans_id} cmd_type=${cmdLog.command_type} vs webhook=${dbType} match=${commandTypeMatch}`);
+    } else {
+      console.log(`Validation: trans_id=${trans_id} not found in command_logs`);
+    }
+  }
+
   // Log every incoming webhook to webhook_logs
   const { error: whLogError } = await supabase.from("webhook_logs").insert({
     webhook_type: dbType,
@@ -102,30 +119,13 @@ Deno.serve(async (req: Request) => {
     trans_id: trans_id ?? null,
     raw_payload: payload,
     status: "success",
+    command_type_match: commandTypeMatch,
   });
   if (whLogError) {
     console.error("webhook_logs insert error:", whLogError.message, whLogError.details, whLogError.hint);
     errors.push(`webhook_logs: ${whLogError.message}`);
   } else {
-    console.log("webhook_logs inserted OK");
-  }
-
-  // Update command_logs response_payload with full webhook data
-  if (trans_id) {
-    const transIdStr = String(trans_id);
-    const transIdNum = parseInt(transIdStr, 10);
-    const { error: cmdLogError } = await supabase
-      .from("command_logs")
-      .update({ response_payload: payload, status: "success", updated_at: new Date().toISOString() })
-      .eq("cloud_id", cloud_id)
-      .in("trans_id", isNaN(transIdNum) ? [transIdStr] : [transIdStr, String(transIdNum)])
-      .in("command_type", ["get_userinfo", "get_all_pin", "get_userid_list", "set_userinfo", "delete_userinfo", "set_time", "register_online"]);
-    if (cmdLogError) {
-      console.error("command_logs update error:", cmdLogError.message, cmdLogError.details, cmdLogError.hint);
-      errors.push(`command_logs: ${cmdLogError.message}`);
-    } else {
-      console.log("command_logs updated OK for trans_id:", trans_id);
-    }
+    console.log("webhook_logs inserted OK, command_type_match:", commandTypeMatch);
   }
 
   try {

@@ -93,7 +93,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           command: "get_device",
-          params: { trans_id: "1", cloud_id: settings.cloud_id || "C2697842930C1634" },
+          params: { cloud_id: settings.cloud_id || "C2697842930C1634" },
         }),
       });
       const result = await res.json();

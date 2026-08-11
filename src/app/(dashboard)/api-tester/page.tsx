@@ -79,7 +79,7 @@ function ApiTesterContent() {
   }
 
   function buildParams(): Record<string, unknown> {
-    const base = { trans_id: "1", cloud_id: cloudId };
+    const base = { cloud_id: cloudId };
 
     switch (command) {
       case "get_attlog":

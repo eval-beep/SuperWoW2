@@ -86,7 +86,7 @@ export default function PinListPage() {
     await fetch("/api/fingerspot/command", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: "delete_userinfo", params: { trans_id: "1", cloud_id: user.cloud_id, pin: user.pin }, logToHistory: true }),
+      body: JSON.stringify({ command: "delete_userinfo", params: { cloud_id: user.cloud_id, pin: user.pin }, logToHistory: true }),
     });
     loadUsers();
   }

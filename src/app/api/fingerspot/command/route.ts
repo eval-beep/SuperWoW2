@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand, COMMAND_TYPES } from "@/lib/fingerspot";
-import { supabaseInsert, supabaseDelete } from "@/lib/supabase";
+import { supabaseInsert, supabaseDelete, supabaseSelect } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -11,7 +11,15 @@ export async function POST(request: NextRequest) {
   }
 
   const cloudId = params.cloud_id || "C2697842930C1634";
-  const transId = params.trans_id || "1";
+
+  // Auto-increment trans_id
+  const { data: maxRow } = await supabaseSelect("command_logs", {
+    select: "trans_id",
+    order: { column: "trans_id", ascending: false },
+    limit: 1,
+    filters: { cloud_id: `eq.${cloudId}` },
+  });
+  const transId = ((maxRow?.[0] as { trans_id?: number } | undefined)?.trans_id || 0) + 1;
 
   try {
     const result = await sendFingerspotCommand(command, params);
@@ -40,7 +48,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, trans_id: transId });
   } catch (error) {
     // Log failed request
     try {
@@ -60,7 +68,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function saveAttlogs(cloudId: string, transId: string, data: Record<string, unknown>) {
+async function saveAttlogs(cloudId: string, transId: number, data: Record<string, unknown>) {
   const records = Array.isArray(data) ? data : data.data;
   if (!Array.isArray(records)) return;
 

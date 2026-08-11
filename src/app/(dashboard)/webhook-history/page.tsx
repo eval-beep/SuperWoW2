@@ -9,6 +9,7 @@ interface WebhookLog {
   trans_id: string | null;
   raw_payload: Record<string, unknown>;
   status: string;
+  command_type_match: boolean;
   related_command_id: string | null;
   received_at: string;
 }
@@ -176,7 +177,7 @@ export default function WebhookHistoryPage() {
               <table className="w-full text-xs">
                 <thead>
                   <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                    {["Waktu", "Type", "Cloud ID", "Trans ID", "Status", "Payload"].map((h) => (
+                    {["Waktu", "Type", "Cloud ID", "Trans ID", "Valid", "Status", "Payload"].map((h) => (
                       <th key={h} className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{h}</th>
                     ))}
                   </tr>
@@ -196,6 +197,12 @@ export default function WebhookHistoryPage() {
                         </td>
                         <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.cloud_id}</td>
                         <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{log.trans_id || "-"}</td>
+                        <td className="py-2.5 px-3">
+                          <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: log.command_type_match ? "#006e2b" : "#b28600" }}>
+                            <span className="material-symbols-outlined text-[12px]">{log.command_type_match ? "check_circle" : "help"}</span>
+                            {log.command_type_match ? "Match" : "Unmatched"}
+                          </span>
+                        </td>
                         <td className="py-2.5 px-3">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
                             style={{ background: hasData ? "#defbe6" : "#fff8e1", color: hasData ? "#006e2b" : "#b28600" }}>
@@ -232,7 +239,7 @@ export default function WebhookHistoryPage() {
                   </div>
                   <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
                     <span style={{ fontFamily: "JetBrains Mono" }}>{log.cloud_id}</span>
-                    <span>{formatTime(log.received_at)}</span>
+                    <span style={{ color: log.command_type_match ? "#006e2b" : "#b28600" }}>{log.command_type_match ? "✓ Match" : "✗ Unmatched"}</span>
                   </div>
                 </div>
               );
@@ -273,6 +280,12 @@ export default function WebhookHistoryPage() {
                   <span className="block text-[10px]" style={{ color: "#737687" }}>Status</span>
                   <span className="font-medium" style={{ color: detailModal.log.raw_payload?.data ? "#006e2b" : "#b28600" }}>
                     {detailModal.log.raw_payload?.data ? "Berhasil" : "Diterima (tanpa data)"}
+                  </span>
+                </div>
+                <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
+                  <span className="block text-[10px]" style={{ color: "#737687" }}>Validasi Command</span>
+                  <span className="font-medium" style={{ color: detailModal.log.command_type_match ? "#006e2b" : "#b28600" }}>
+                    {detailModal.log.command_type_match ? "✓ Match" : "✗ Unmatched"}
                   </span>
                 </div>
                 <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>

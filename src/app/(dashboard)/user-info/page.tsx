@@ -208,7 +208,7 @@ export default function UserInfoPage() {
   const userCount = users.filter((u) => u.privilege <= 1).length;
 
   const jsonPreview = JSON.stringify(
-    { trans_id: "1", cloud_id: addForm.cloud_id, pin: addForm.pin, name: addForm.name, privilege: addForm.privilege, password: addForm.password, rfid: addForm.rfid },
+    { cloud_id: addForm.cloud_id, pin: addForm.pin, name: addForm.name, privilege: addForm.privilege, password: addForm.password, rfid: addForm.rfid },
     null, 2
   );
 
