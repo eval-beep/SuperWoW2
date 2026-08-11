@@ -13,18 +13,6 @@ interface WebhookLog {
   received_at: string;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  realtime_attlog: "#006e2b",
-  attlog: "#006e2b",
-  get_userinfo: "#004ccd",
-  get_userid_list: "#004ccd",
-  get_all_pin: "#004ccd",
-  set_userinfo: "#b28600",
-  delete_userinfo: "#da1e28",
-  set_time: "#737687",
-  register_online: "#006e2b",
-};
-
 export default function WebhookHistoryPage() {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -33,12 +21,15 @@ export default function WebhookHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [cloudIdFromSettings, setCloudIdFromSettings] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [formatJson, setFormatJson] = useState(true);
+  const [wordWrap, setWordWrap] = useState(true);
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(page), per_page: "20" });
+    const params = new URLSearchParams({ page: String(page), per_page: "50" });
     if (search) params.set("search", search);
     if (typeFilter) params.set("webhook_type", typeFilter);
     if (cloudIdFromSettings) params.set("cloud_id", cloudIdFromSettings);
@@ -47,6 +38,9 @@ export default function WebhookHistoryPage() {
     setLogs(data.data || []);
     setTotal(data.total || 0);
     setLastPage(data.lastPage || 1);
+    if (data.data?.length > 0 && !selectedId) {
+      setSelectedId(data.data[0].id);
+    }
     setLoading(false);
   }, [page, search, typeFilter, cloudIdFromSettings]);
 
@@ -67,11 +61,83 @@ export default function WebhookHistoryPage() {
   function formatTime(dateStr: string) {
     const d = new Date(dateStr);
     const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getHours()) >= 12 ? "PM" : "AM"}`;
   }
 
-  const startEntry = total === 0 ? 0 : (page - 1) * 20 + 1;
-  const endEntry = Math.min(page * 20, total);
+  function formatShortTime(dateStr: string) {
+    const d = new Date(dateStr);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${months[d.getMonth()]} ${d.getDate()}\n${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getHours()) >= 12 ? "PM" : "AM"}`;
+  }
+
+  function getShortId(id: string) {
+    return id.substring(0, 8);
+  }
+
+  function getPayloadPreview(payload: Record<string, unknown>): string {
+    const t = payload?.type || payload?.webhook_type || "";
+    const cid = payload?.cloud_id || "";
+    return `${t} ${cid}`.trim();
+  }
+
+  const selectedLog = logs.find((l) => l.id === selectedId);
+
+  function handleCopy() {
+    if (!selectedLog) return;
+    navigator.clipboard.writeText(JSON.stringify(selectedLog.raw_payload, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  function renderJson(payload: unknown, indent: number = 0): React.ReactNode {
+    if (payload === null) return <span style={{ color: "#9cdcfe" }}>null</span>;
+    if (payload === undefined) return <span style={{ color: "#9cdcfe" }}>undefined</span>;
+    if (typeof payload === "boolean") return <span style={{ color: "#569cd6" }}>{String(payload)}</span>;
+    if (typeof payload === "number") return <span style={{ color: "#b5cea8" }}>{payload}</span>;
+    if (typeof payload === "string") return <span style={{ color: "#ce9178" }}>&quot;{payload}&quot;</span>;
+
+    if (Array.isArray(payload)) {
+      if (payload.length === 0) return <span>[</span>;
+      const items = payload.map((item, i) => (
+        <div key={i} style={{ paddingLeft: (indent + 1) * 16 }}>
+          {renderJson(item, indent + 1)}{i < payload.length - 1 ? "," : ""}
+        </div>
+      ));
+      return (
+        <>
+          <span>[</span>
+          {items}
+          <div style={{ paddingLeft: indent * 16 }}>]</div>
+        </>
+      );
+    }
+
+    if (typeof payload === "object") {
+      const entries = Object.entries(payload as Record<string, unknown>);
+      if (entries.length === 0) return <span>{"{}"}</span>;
+      const items = entries.map(([key, val], i) => (
+        <div key={key} style={{ paddingLeft: (indent + 1) * 16 }}>
+          <span style={{ color: "#9cdcfe" }}>&quot;{key}&quot;</span>
+          <span>: </span>
+          {renderJson(val, indent + 1)}{i < entries.length - 1 ? "," : ""}
+        </div>
+      ));
+      return (
+        <>
+          <span>{"{"}</span>
+          {items}
+          <div style={{ paddingLeft: indent * 16 }}>{"}"}</div>
+        </>
+      );
+    }
+
+    return <span>{String(payload)}</span>;
+  }
+
+  const startEntry = total === 0 ? 0 : (page - 1) * 50 + 1;
+  const endEntry = Math.min(page * 50, total);
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -81,123 +147,117 @@ export default function WebhookHistoryPage() {
         <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Data webhook yang diterima dari device Fingerspot</p>
       </div>
 
-      {/* Filter */}
-      <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
-          <div className="flex-1 min-w-0">
-            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Cari</label>
-            <input type="text" placeholder="Cloud ID, Trans ID, PIN..." value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleFilter()}
-              className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }} />
+      {/* Main Content - Webhook.site style */}
+      <div className="rounded-xl overflow-hidden flex flex-col lg:flex-row" style={{ background: "#1e1e1e", border: "1px solid rgba(195,198,216,0.2)", minHeight: "500px" }}>
+        {/* Left Sidebar - Inbox */}
+        <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col" style={{ borderRight: "1px solid #333" }}>
+          {/* Sidebar Header */}
+          <div className="px-3 py-2 flex items-center justify-between" style={{ background: "#252526", borderBottom: "1px solid #333" }}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold" style={{ color: "#ccc" }}>INBOX</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "#333", color: "#aaa" }}>({total})</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-30" style={{ color: "#aaa" }}>&laquo;</button>
+              <span className="text-[10px]" style={{ color: "#777" }}>{page}/{lastPage}</span>
+              <button onClick={() => setPage(Math.min(lastPage, page + 1))} disabled={page === lastPage} className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-30" style={{ color: "#aaa" }}>&raquo;</button>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Webhook Type</label>
-            <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-              className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}>
-              <option value="">Semua</option>
-              <option value="realtime_attlog">Realtime Attlog</option>
-              <option value="attlog">Attlog</option>
-              <option value="get_userinfo">Get Userinfo</option>
-              <option value="get_userid_list">Get User ID List</option>
-              <option value="get_all_pin">Get All PIN</option>
-              <option value="set_userinfo">Set Userinfo</option>
-              <option value="delete_userinfo">Delete Userinfo</option>
-              <option value="set_time">Set Time</option>
-              <option value="register_online">Register Online</option>
-            </select>
+
+          {/* Filter */}
+          <div className="px-3 py-2" style={{ background: "#252526", borderBottom: "1px solid #333" }}>
+            <input type="text" placeholder="Search Query" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleFilter()}
+              className="w-full px-2 py-1 rounded text-[11px]" style={{ background: "#333", border: "1px solid #444", color: "#ccc", fontFamily: "JetBrains Mono" }} />
           </div>
-          <div className="flex gap-2">
-            <button onClick={handleFilter} className="px-4 py-2 rounded-lg text-xs font-medium text-white" style={{ background: "#004ccd" }}>Filter</button>
-            <button onClick={handleReset} className="px-4 py-2 rounded-lg text-xs font-medium" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>Reset</button>
+
+          {/* Inbox List */}
+          <div className="flex-1 overflow-y-auto" style={{ maxHeight: "420px" }}>
+            {loading ? (
+              <div className="p-4 text-center">
+                <span className="material-symbols-outlined animate-spin text-lg" style={{ color: "#004ccd" }}>progress_activity</span>
+              </div>
+            ) : logs.length === 0 ? (
+              <div className="p-4 text-center text-xs" style={{ color: "#666" }}>Tidak ada data</div>
+            ) : (
+              logs.map((log) => {
+                const isSelected = selectedId === log.id;
+                const d = new Date(log.received_at);
+                const pad = (n: number) => String(n).padStart(2, "0");
+                const dateStr = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+                const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                return (
+                  <div key={log.id} onClick={() => setSelectedId(log.id)}
+                    className="px-3 py-2 cursor-pointer transition-colors flex items-start gap-2"
+                    style={{
+                      background: isSelected ? "#094771" : "transparent",
+                      borderBottom: "1px solid #333",
+                    }}>
+                    <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold flex-shrink-0 mt-0.5" style={{ background: "#0e639c", color: "#fff" }}>POST</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[11px] font-medium" style={{ color: isSelected ? "#fff" : "#ccc", fontFamily: "JetBrains Mono" }}>#{getShortId(log.id)}</span>
+                        <span className="text-[10px]" style={{ color: "#666" }}>{log.cloud_id}</span>
+                      </div>
+                      <div className="text-[10px]" style={{ color: "#888" }}>{dateStr} {timeStr}</div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Right Panel - Request Content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Panel Header */}
+          <div className="px-4 py-2 flex items-center justify-between" style={{ background: "#252526", borderBottom: "1px solid #333" }}>
+            <span className="text-xs font-bold" style={{ color: "#ccc" }}>Request Content</span>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1 text-[10px] cursor-pointer" style={{ color: "#aaa" }}>
+                <input type="checkbox" checked={formatJson} onChange={(e) => setFormatJson(e.target.checked)} className="w-3 h-3" />
+                Format JSON
+              </label>
+              <label className="flex items-center gap-1 text-[10px] cursor-pointer" style={{ color: "#aaa" }}>
+                <input type="checkbox" checked={wordWrap} onChange={(e) => setWordWrap(e.target.checked)} className="w-3 h-3" />
+                Word Wrap
+              </label>
+              <button onClick={handleCopy} className="text-[10px] px-2 py-0.5 rounded flex items-center gap-1" style={{ background: "#0e639c", color: "#fff" }}>
+                <span className="material-symbols-outlined text-[12px]">{copied ? "check" : "content_copy"}</span>
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+          </div>
+
+          {/* JSON Content */}
+          <div className="flex-1 overflow-auto p-4" style={{ background: "#1e1e1e" }}>
+            {selectedLog ? (
+              <div>
+                {/* Meta info */}
+                <div className="mb-3 pb-3" style={{ borderBottom: "1px solid #333" }}>
+                  <div className="flex items-center gap-4 text-[10px]" style={{ color: "#888", fontFamily: "JetBrains Mono" }}>
+                    <span>Type: <span style={{ color: "#569cd6" }}>{selectedLog.webhook_type}</span></span>
+                    <span>Cloud ID: <span style={{ color: "#ce9178" }}>{selectedLog.cloud_id}</span></span>
+                    {selectedLog.trans_id && <span>Trans ID: <span style={{ color: "#b5cea8" }}>{selectedLog.trans_id}</span></span>}
+                    <span>Received: <span style={{ color: "#9cdcfe" }}>{formatTime(selectedLog.received_at)}</span></span>
+                  </div>
+                </div>
+                {/* Raw Content */}
+                <div className="text-[11px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", whiteSpace: wordWrap ? "pre-wrap" : "pre", wordBreak: wordWrap ? "break-all" : "normal" }}>
+                  {formatJson ? (
+                    renderJson(selectedLog.raw_payload, 0)
+                  ) : (
+                    <span style={{ color: "#ce9178" }}>{JSON.stringify(selectedLog.raw_payload)}</span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-xs" style={{ color: "#666" }}>Pilih webhook dari inbox</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <span className="material-symbols-outlined animate-spin text-2xl" style={{ color: "#004ccd" }}>progress_activity</span>
-          <p className="text-xs mt-2" style={{ color: "#737687" }}>Memuat data...</p>
-        </div>
-      ) : logs.length === 0 ? (
-        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <span className="material-symbols-outlined text-3xl" style={{ color: "#c3c6d8" }}>inbox</span>
-          <p className="text-xs mt-2" style={{ color: "#737687" }}>Tidak ada data</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {logs.map((log) => {
-            const isExpanded = expandedId === log.id;
-            const typeColor = TYPE_COLORS[log.webhook_type] || "#737687";
-            const payload = log.raw_payload || {};
-            const dataObj = payload.data && typeof payload.data === "object" ? payload.data as Record<string, unknown> : null;
-            const pin = dataObj?.pin || dataObj?.PIN || "-";
-            const scanTime = dataObj?.scan || dataObj?.scan_date || dataObj?.scan_time || null;
-
-            return (
-              <div key={log.id} className="rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-                {/* Summary Row */}
-                <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-black/[0.02] transition-colors" onClick={() => setExpandedId(isExpanded ? null : log.id)}>
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: typeColor }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{log.webhook_type}</span>
-                      {log.trans_id && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "#dbe1ff", color: "#004ccd", fontFamily: "JetBrains Mono" }}>trans_id: {log.trans_id}</span>}
-                    </div>
-                    <div className="flex items-center gap-3 mt-0.5 text-[10px]" style={{ color: "#737687", fontFamily: "JetBrains Mono" }}>
-                      <span>{log.cloud_id}</span>
-                      {scanTime && <span>{String(scanTime)}</span>}
-                      {dataObj?.pin && <span>PIN: {String(dataObj.pin)}</span>}
-                      {dataObj?.verify && <span>verify: {String(dataObj.verify)}</span>}
-                    </div>
-                  </div>
-                  <span className="text-[10px] flex-shrink-0" style={{ color: "#737687" }}>{formatTime(log.received_at)}</span>
-                  <span className="material-symbols-outlined text-[16px] transition-transform" style={{ color: "#737687", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>expand_more</span>
-                </div>
-
-                {/* Expanded Full Payload */}
-                {isExpanded && (
-                  <div style={{ borderTop: "1px solid rgba(195,198,216,0.2)" }}>
-                    <div className="px-4 py-2 flex items-center justify-between" style={{ background: "#f3f3f3" }}>
-                      <span className="text-[10px] font-medium" style={{ color: "#737687" }}>RAW PAYLOAD</span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(JSON.stringify(log.raw_payload, null, 2));
-                          const el = document.getElementById(`copy-${log.id}`);
-                          if (el) { el.textContent = "Copied!"; setTimeout(() => el.textContent = "Copy", 1500); }
-                        }}
-                        className="text-[10px] px-2 py-0.5 rounded flex items-center gap-1"
-                        style={{ background: "#dbe1ff", color: "#004ccd" }}
-                      >
-                        <span className="material-symbols-outlined text-[12px]">content_copy</span>
-                        <span id={`copy-${log.id}`}>Copy</span>
-                      </button>
-                    </div>
-                    <pre className="px-4 py-3 text-[11px] overflow-x-auto" style={{ background: "#1a1c1c", color: "#93f59e", fontFamily: "JetBrains Mono", maxHeight: "400px", margin: 0 }}>
-                      {JSON.stringify(log.raw_payload, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {logs.length > 0 && (
-        <div className="flex items-center justify-between rounded-xl px-3 py-2" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <span className="text-[10px]" style={{ color: "#737687" }}>{startEntry}-{endEntry} dari {total}</span>
-          <div className="flex items-center gap-0.5">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&laquo;</button>
-            {Array.from({ length: Math.min(5, lastPage) }, (_, i) => {
-              const p = page <= 3 ? i + 1 : page + i - 2;
-              if (p < 1 || p > lastPage) return null;
-              return <button key={p} onClick={() => setPage(p)} className="w-7 h-7 rounded-lg text-[11px] font-medium" style={p === page ? { background: "#004ccd", color: "#fff" } : { color: "#424656" }}>{p}</button>;
-            })}
-            <button onClick={() => setPage(Math.min(lastPage, page + 1))} disabled={page === lastPage} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&raquo;</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
