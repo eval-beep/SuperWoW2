@@ -13,6 +13,18 @@ interface WebhookLog {
   received_at: string;
 }
 
+const TYPE_ICONS: Record<string, string> = {
+  realtime_attlog: "fingerprint",
+  attlog: "history",
+  get_userinfo: "person_search",
+  get_userid_list: "pin",
+  get_all_pin: "pin",
+  set_userinfo: "person_add",
+  delete_userinfo: "person_remove",
+  set_time: "schedule",
+  register_online: "wifi",
+};
+
 export default function WebhookHistoryPage() {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -21,15 +33,12 @@ export default function WebhookHistoryPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [cloudIdFromSettings, setCloudIdFromSettings] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [formatJson, setFormatJson] = useState(true);
-  const [wordWrap, setWordWrap] = useState(true);
+  const [detailModal, setDetailModal] = useState<{ open: boolean; log: WebhookLog | null }>({ open: false, log: null });
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(page), per_page: "50" });
+    const params = new URLSearchParams({ page: String(page), per_page: "20" });
     if (search) params.set("search", search);
     if (typeFilter) params.set("webhook_type", typeFilter);
     if (cloudIdFromSettings) params.set("cloud_id", cloudIdFromSettings);
@@ -38,9 +47,6 @@ export default function WebhookHistoryPage() {
     setLogs(data.data || []);
     setTotal(data.total || 0);
     setLastPage(data.lastPage || 1);
-    if (data.data?.length > 0 && !selectedId) {
-      setSelectedId(data.data[0].id);
-    }
     setLoading(false);
   }, [page, search, typeFilter, cloudIdFromSettings]);
 
@@ -61,34 +67,7 @@ export default function WebhookHistoryPage() {
   function formatTime(dateStr: string) {
     const d = new Date(dateStr);
     const pad = (n: number) => String(n).padStart(2, "0");
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getHours() >= 12 ? "PM" : "AM"}`;
-  }
-
-  function formatShortTime(dateStr: string) {
-    const d = new Date(dateStr);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[d.getMonth()]} ${d.getDate()}\n${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getHours() >= 12 ? "PM" : "AM"}`;
-  }
-
-  function getShortId(id: string) {
-    return id.substring(0, 8);
-  }
-
-  function getPayloadPreview(payload: Record<string, unknown>): string {
-    const t = payload?.type || payload?.webhook_type || "";
-    const cid = payload?.cloud_id || "";
-    return `${t} ${cid}`.trim();
-  }
-
-  const selectedLog = logs.find((l) => l.id === selectedId);
-
-  function handleCopy() {
-    if (!selectedLog) return;
-    navigator.clipboard.writeText(JSON.stringify(selectedLog.raw_payload, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   }
 
   function renderJson(payload: unknown, indent: number = 0): React.ReactNode {
@@ -136,8 +115,8 @@ export default function WebhookHistoryPage() {
     return <span>{String(payload)}</span>;
   }
 
-  const startEntry = total === 0 ? 0 : (page - 1) * 50 + 1;
-  const endEntry = Math.min(page * 50, total);
+  const startEntry = total === 0 ? 0 : (page - 1) * 20 + 1;
+  const endEntry = Math.min(page * 20, total);
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -147,117 +126,179 @@ export default function WebhookHistoryPage() {
         <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Data webhook yang diterima dari device Fingerspot</p>
       </div>
 
-      {/* Main Content - Webhook.site style */}
-      <div className="rounded-xl overflow-hidden flex flex-col lg:flex-row" style={{ background: "#1e1e1e", border: "1px solid rgba(195,198,216,0.2)", minHeight: "500px" }}>
-        {/* Left Sidebar - Inbox */}
-        <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col" style={{ borderRight: "1px solid #333" }}>
-          {/* Sidebar Header */}
-          <div className="px-3 py-2 flex items-center justify-between" style={{ background: "#252526", borderBottom: "1px solid #333" }}>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold" style={{ color: "#ccc" }}>INBOX</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "#333", color: "#aaa" }}>({total})</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-30" style={{ color: "#aaa" }}>&laquo;</button>
-              <span className="text-[10px]" style={{ color: "#777" }}>{page}/{lastPage}</span>
-              <button onClick={() => setPage(Math.min(lastPage, page + 1))} disabled={page === lastPage} className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-30" style={{ color: "#aaa" }}>&raquo;</button>
-            </div>
+      {/* Filter */}
+      <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Cari</label>
+            <input type="text" placeholder="Type, Cloud ID, Trans ID..." value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleFilter()}
+              className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }} />
           </div>
-
-          {/* Filter */}
-          <div className="px-3 py-2" style={{ background: "#252526", borderBottom: "1px solid #333" }}>
-            <input type="text" placeholder="Search Query" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleFilter()}
-              className="w-full px-2 py-1 rounded text-[11px]" style={{ background: "#333", border: "1px solid #444", color: "#ccc", fontFamily: "JetBrains Mono" }} />
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Type</label>
+            <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+              className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}>
+              <option value="">Semua</option>
+              <option value="realtime_attlog">Realtime Attlog</option>
+              <option value="attlog">Attlog</option>
+              <option value="get_userinfo">Get Userinfo</option>
+              <option value="get_all_pin">Get All PIN</option>
+              <option value="set_userinfo">Set Userinfo</option>
+              <option value="delete_userinfo">Delete Userinfo</option>
+              <option value="set_time">Set Time</option>
+              <option value="register_online">Register Online</option>
+            </select>
           </div>
-
-          {/* Inbox List */}
-          <div className="flex-1 overflow-y-auto" style={{ maxHeight: "420px" }}>
-            {loading ? (
-              <div className="p-4 text-center">
-                <span className="material-symbols-outlined animate-spin text-lg" style={{ color: "#004ccd" }}>progress_activity</span>
-              </div>
-            ) : logs.length === 0 ? (
-              <div className="p-4 text-center text-xs" style={{ color: "#666" }}>Tidak ada data</div>
-            ) : (
-              logs.map((log) => {
-                const isSelected = selectedId === log.id;
-                const d = new Date(log.received_at);
-                const pad = (n: number) => String(n).padStart(2, "0");
-                const dateStr = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-                const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-                return (
-                  <div key={log.id} onClick={() => setSelectedId(log.id)}
-                    className="px-3 py-2 cursor-pointer transition-colors flex items-start gap-2"
-                    style={{
-                      background: isSelected ? "#094771" : "transparent",
-                      borderBottom: "1px solid #333",
-                    }}>
-                    <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold flex-shrink-0 mt-0.5" style={{ background: "#0e639c", color: "#fff" }}>POST</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <span className="text-[11px] font-medium" style={{ color: isSelected ? "#fff" : "#ccc", fontFamily: "JetBrains Mono" }}>#{getShortId(log.id)}</span>
-                        <span className="text-[10px]" style={{ color: "#666" }}>{log.cloud_id}</span>
-                      </div>
-                      <div className="text-[10px]" style={{ color: "#888" }}>{dateStr} {timeStr}</div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Right Panel - Request Content */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Panel Header */}
-          <div className="px-4 py-2 flex items-center justify-between" style={{ background: "#252526", borderBottom: "1px solid #333" }}>
-            <span className="text-xs font-bold" style={{ color: "#ccc" }}>Request Content</span>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1 text-[10px] cursor-pointer" style={{ color: "#aaa" }}>
-                <input type="checkbox" checked={formatJson} onChange={(e) => setFormatJson(e.target.checked)} className="w-3 h-3" />
-                Format JSON
-              </label>
-              <label className="flex items-center gap-1 text-[10px] cursor-pointer" style={{ color: "#aaa" }}>
-                <input type="checkbox" checked={wordWrap} onChange={(e) => setWordWrap(e.target.checked)} className="w-3 h-3" />
-                Word Wrap
-              </label>
-              <button onClick={handleCopy} className="text-[10px] px-2 py-0.5 rounded flex items-center gap-1" style={{ background: "#0e639c", color: "#fff" }}>
-                <span className="material-symbols-outlined text-[12px]">{copied ? "check" : "content_copy"}</span>
-                {copied ? "Copied!" : "Copy"}
-              </button>
-            </div>
-          </div>
-
-          {/* JSON Content */}
-          <div className="flex-1 overflow-auto p-4" style={{ background: "#1e1e1e" }}>
-            {selectedLog ? (
-              <div>
-                {/* Meta info */}
-                <div className="mb-3 pb-3" style={{ borderBottom: "1px solid #333" }}>
-                  <div className="flex items-center gap-4 text-[10px]" style={{ color: "#888", fontFamily: "JetBrains Mono" }}>
-                    <span>Type: <span style={{ color: "#569cd6" }}>{selectedLog.webhook_type}</span></span>
-                    <span>Cloud ID: <span style={{ color: "#ce9178" }}>{selectedLog.cloud_id}</span></span>
-                    {selectedLog.trans_id && <span>Trans ID: <span style={{ color: "#b5cea8" }}>{selectedLog.trans_id}</span></span>}
-                    <span>Received: <span style={{ color: "#9cdcfe" }}>{formatTime(selectedLog.received_at)}</span></span>
-                  </div>
-                </div>
-                {/* Raw Content */}
-                <div className="text-[11px] leading-relaxed" style={{ fontFamily: "JetBrains Mono", whiteSpace: wordWrap ? "pre-wrap" : "pre", wordBreak: wordWrap ? "break-all" : "normal" }}>
-                  {formatJson ? (
-                    renderJson(selectedLog.raw_payload, 0)
-                  ) : (
-                    <span style={{ color: "#ce9178" }}>{JSON.stringify(selectedLog.raw_payload)}</span>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-xs" style={{ color: "#666" }}>Pilih webhook dari inbox</p>
-              </div>
-            )}
+          <div className="flex gap-2">
+            <button onClick={handleFilter} className="px-4 py-2 rounded-lg text-xs font-medium text-white" style={{ background: "#004ccd" }}>Filter</button>
+            <button onClick={handleReset} className="px-4 py-2 rounded-lg text-xs font-medium" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}>Reset</button>
           </div>
         </div>
       </div>
+
+      {/* Content */}
+      {loading ? (
+        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          <span className="material-symbols-outlined animate-spin text-2xl" style={{ color: "#004ccd" }}>progress_activity</span>
+          <p className="text-xs mt-2" style={{ color: "#737687" }}>Memuat data...</p>
+        </div>
+      ) : logs.length === 0 ? (
+        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          <span className="material-symbols-outlined text-3xl" style={{ color: "#c3c6d8" }}>inbox</span>
+          <p className="text-xs mt-2" style={{ color: "#737687" }}>Tidak ada data webhook</p>
+          <p className="text-[10px] mt-1" style={{ color: "#c3c6d8" }}>Pastikan device sudah dikonfigurasi webhook URL di Fingerspot Customer Portal</p>
+        </div>
+      ) : (
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
+                    {["Waktu", "Type", "Cloud ID", "Trans ID", "Status", "Payload"].map((h) => (
+                      <th key={h} className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log, i) => {
+                    const hasData = log.raw_payload?.data;
+                    return (
+                      <tr key={log.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, log })}
+                        style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                        <td className="py-2.5 px-3 whitespace-nowrap" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{formatTime(log.received_at)}</td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[14px]" style={{ color: "#004ccd" }}>{TYPE_ICONS[log.webhook_type] || "webhook"}</span>
+                            <span className="font-medium" style={{ color: "#1a1c1c" }}>{log.webhook_type}</span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.cloud_id}</td>
+                        <td className="py-2.5 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{log.trans_id || "-"}</td>
+                        <td className="py-2.5 px-3">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                            style={{ background: hasData ? "#defbe6" : "#fff8e1", color: hasData ? "#006e2b" : "#b28600" }}>
+                            {hasData ? "Berhasil" : "Diterima"}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 max-w-[200px] truncate" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>
+                          {hasData ? "✓ data" : JSON.stringify(log.raw_payload || {}).substring(0, 40)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-2">
+            {logs.map((log) => {
+              const hasData = log.raw_payload?.data;
+              return (
+                <div key={log.id} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}
+                  onClick={() => setDetailModal({ open: true, log })}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[14px]" style={{ color: "#004ccd" }}>{TYPE_ICONS[log.webhook_type] || "webhook"}</span>
+                      <span className="font-medium text-xs" style={{ color: "#1a1c1c" }}>{log.webhook_type}</span>
+                    </div>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                      style={{ background: hasData ? "#defbe6" : "#fff8e1", color: hasData ? "#006e2b" : "#b28600" }}>
+                      {hasData ? "Berhasil" : "Diterima"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]" style={{ color: "#737687" }}>
+                    <span style={{ fontFamily: "JetBrains Mono" }}>{log.cloud_id}</span>
+                    <span>{formatTime(log.received_at)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between rounded-xl px-3 py-2" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <span className="text-[10px]" style={{ color: "#737687" }}>{startEntry}-{endEntry} dari {total}</span>
+            <div className="flex items-center gap-0.5">
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&laquo;</button>
+              {Array.from({ length: Math.min(5, lastPage) }, (_, i) => {
+                const p = page <= 3 ? i + 1 : page + i - 2;
+                if (p < 1 || p > lastPage) return null;
+                return <button key={p} onClick={() => setPage(p)} className="w-7 h-7 rounded-lg text-[11px] font-medium" style={p === page ? { background: "#004ccd", color: "#fff" } : { color: "#424656" }}>{p}</button>;
+              })}
+              <button onClick={() => setPage(Math.min(lastPage, page + 1))} disabled={page === lastPage} className="w-7 h-7 rounded-lg text-xs disabled:opacity-40">&raquo;</button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Detail Modal */}
+      {detailModal.open && detailModal.log && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, log: null })}>
+          <div className="w-full max-w-lg rounded-xl p-4 max-h-[80vh] overflow-y-auto" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail Webhook</h3>
+              <span className="material-symbols-outlined text-[14px] cursor-pointer" style={{ color: "#737687" }} onClick={() => setDetailModal({ open: false, log: null })}>close</span>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
+                  <span className="block text-[10px]" style={{ color: "#737687" }}>Type</span>
+                  <span className="font-medium" style={{ color: "#1a1c1c", fontFamily: "JetBrains Mono" }}>{detailModal.log.webhook_type}</span>
+                </div>
+                <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
+                  <span className="block text-[10px]" style={{ color: "#737687" }}>Status</span>
+                  <span className="font-medium" style={{ color: detailModal.log.raw_payload?.data ? "#006e2b" : "#b28600" }}>
+                    {detailModal.log.raw_payload?.data ? "Berhasil" : "Diterima (tanpa data)"}
+                  </span>
+                </div>
+                <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
+                  <span className="block text-[10px]" style={{ color: "#737687" }}>Cloud ID</span>
+                  <span className="font-medium" style={{ color: "#004ccd", fontFamily: "JetBrains Mono" }}>{detailModal.log.cloud_id}</span>
+                </div>
+                <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
+                  <span className="block text-[10px]" style={{ color: "#737687" }}>Trans ID</span>
+                  <span className="font-medium" style={{ color: "#1a1c1c", fontFamily: "JetBrains Mono" }}>{detailModal.log.trans_id || "-"}</span>
+                </div>
+                <div className="rounded-lg p-2 col-span-2" style={{ background: "#f3f3f3" }}>
+                  <span className="block text-[10px]" style={{ color: "#737687" }}>Waktu Diterima</span>
+                  <span className="font-medium" style={{ color: "#1a1c1c" }}>{formatTime(detailModal.log.received_at)}</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Raw Payload</label>
+                <pre className="rounded-lg p-3 text-[10px] overflow-x-auto" style={{ background: "#1a1c1c", color: "#93f59e", fontFamily: "JetBrains Mono", maxHeight: "300px" }}>
+                  {renderJson(detailModal.log.raw_payload, 0)}
+                </pre>
+              </div>
+            </div>
+            <button onClick={() => setDetailModal({ open: false, log: null })} className="w-full mt-3 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

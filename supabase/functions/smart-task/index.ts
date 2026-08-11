@@ -90,29 +90,40 @@ Deno.serve(async (req: Request) => {
 
   const supabase = createSupabaseAdmin();
 
-  try {
-    // Log every incoming webhook to webhook_logs
-    await supabase.from("webhook_logs").insert({
-      webhook_type: type,
-      cloud_id: cloud_id,
-      trans_id: trans_id ?? null,
-      raw_payload: payload,
-      status: "received",
-    });
+  const errors: string[] = [];
 
-    // Update command_logs response_payload with full webhook data
-    if (trans_id) {
-      const transIdNum = parseInt(String(trans_id), 10);
-      if (!isNaN(transIdNum)) {
-        await supabase
-          .from("command_logs")
-          .update({ response_payload: payload, status: "success" })
-          .eq("trans_id", transIdNum)
-          .eq("cloud_id", cloud_id)
-          .eq("status", "pending");
-      }
+  // Log every incoming webhook to webhook_logs
+  const { error: whLogError } = await supabase.from("webhook_logs").insert({
+    webhook_type: type,
+    cloud_id: cloud_id,
+    trans_id: trans_id ?? null,
+    raw_payload: payload,
+    status: "success",
+  });
+  if (whLogError) {
+    console.error("webhook_logs insert error:", whLogError.message, whLogError.details, whLogError.hint);
+    errors.push(`webhook_logs: ${whLogError.message}`);
+  } else {
+    console.log("webhook_logs inserted OK");
+  }
+
+  // Update command_logs response_payload with full webhook data
+  if (trans_id) {
+    const { error: cmdLogError } = await supabase
+      .from("command_logs")
+      .update({ response_payload: payload, status: "success", updated_at: new Date().toISOString() })
+      .eq("trans_id", String(trans_id))
+      .eq("cloud_id", cloud_id)
+      .in("command_type", ["get_userinfo", "get_all_pin", "get_userid_list", "set_userinfo", "delete_userinfo", "set_time", "register_online"]);
+    if (cmdLogError) {
+      console.error("command_logs update error:", cmdLogError.message, cmdLogError.details, cmdLogError.hint);
+      errors.push(`command_logs: ${cmdLogError.message}`);
+    } else {
+      console.log("command_logs updated OK for trans_id:", trans_id);
     }
+  }
 
+  try {
     switch (type) {
       case "realtime_attlog":
       case "attlog":
@@ -128,18 +139,22 @@ Deno.serve(async (req: Request) => {
       default:
         console.log(`Type ${type} received but no handler needed`);
     }
+  } catch (procErr) {
+    console.error("Processing error:", procErr);
+    errors.push(`processing: ${(procErr as Error).message}`);
+  }
 
-    return new Response(JSON.stringify({ success: true }), {
+  if (errors.length > 0) {
+    return new Response(JSON.stringify({ success: true, warnings: errors }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("Error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   }
+
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 });
 
 async function processAttlog(
@@ -170,12 +185,18 @@ async function processAttlog(
 
     let scanTimeISO: string;
     try {
-      const d = new Date(scanTime as string);
-      if (isNaN(d.getTime())) {
-        console.error("Invalid scan_time:", scanTime);
-        continue;
+      const cleaned = String(scanTime).replace(/(\+00:00|Z)$/g, "");
+      const match = cleaned.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+      if (match) {
+        scanTimeISO = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6] || "00"}`;
+      } else {
+        const d = new Date(String(scanTime));
+        if (isNaN(d.getTime())) {
+          console.error("Invalid scan_time:", scanTime);
+          continue;
+        }
+        scanTimeISO = d.toISOString().replace(/\.\d{3}Z$/, "");
       }
-      scanTimeISO = d.toISOString();
     } catch {
       console.error("Failed to parse scan_time:", scanTime);
       continue;
@@ -204,14 +225,12 @@ async function processAttlog(
       raw_payload: record,
     };
 
-    console.log("Inserting attlog:", JSON.stringify(insertData).substring(0, 500));
-
-    const { data: inserted, error } = await supabase.from("attlogs").insert(insertData).select();
+    const { error } = await supabase.from("attlogs").insert(insertData);
 
     if (error) {
       console.error("attlogs insert error:", error.message, error.details, error.hint);
     } else {
-      console.log("attlogs inserted:", inserted?.length);
+      console.log("attlogs inserted:", pin, scanTimeISO);
     }
   }
 }
@@ -312,14 +331,13 @@ async function processGetAllPin(
     retrieved_at: now,
   }));
 
-  const { data: inserted, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from("pins")
-    .insert(insertRows)
-    .select();
+    .insert(insertRows);
 
   if (insertError) {
     console.error("pins insert error:", insertError.message, insertError.details);
   } else {
-    console.log(`pins inserted: ${inserted?.length || 0} records for ${cloudId}`);
+    console.log(`pins inserted: ${pinArr.length} records for ${cloudId}`);
   }
 }
