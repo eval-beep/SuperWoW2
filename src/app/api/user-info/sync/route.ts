@@ -11,7 +11,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await sendFingerspotCommand("get_userinfo", { cloud_id, pin });
+    const { data: maxRow } = await supabaseSelect("command_logs", {
+      select: "trans_id",
+      order: { column: "trans_id", ascending: false },
+      limit: 1,
+      filters: { cloud_id: `eq.${cloud_id}` },
+    });
+    const transId = ((maxRow?.[0] as { trans_id?: number } | undefined)?.trans_id || 0) + 1;
+
+    const result = await sendFingerspotCommand("get_userinfo", { cloud_id, pin, trans_id: String(transId) });
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.data?.error || "Command gagal" }, { status: 500 });

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const transId = ((maxRow?.[0] as { trans_id?: number } | undefined)?.trans_id || 0) + 1;
 
   try {
-    const result = await sendFingerspotCommand(command, params);
+    const result = await sendFingerspotCommand(command, { ...params, trans_id: String(transId) });
 
     // Log to command_logs
     try {
