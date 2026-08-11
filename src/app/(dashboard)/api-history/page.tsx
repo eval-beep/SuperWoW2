@@ -10,6 +10,7 @@ interface CommandLog {
   endpoint: string;
   request_payload: Record<string, unknown>;
   response_payload: Record<string, unknown>;
+  webhook_payload?: Record<string, unknown>;
   status: string;
   http_status_code: number | null;
   error_message: string | null;
@@ -20,6 +21,7 @@ const STATUS_MAP: Record<string, { bg: string; color: string; label: string }> =
   success: { bg: "#defbe6", color: "#006e2b", label: "Berhasil" },
   failed: { bg: "#fff1f1", color: "#da1e28", label: "Gagal" },
   pending: { bg: "#fff8e1", color: "#b28600", label: "Pending" },
+  updated: { bg: "#defbe6", color: "#006e2b", label: "Updated" },
 };
 
 const COMMAND_ICONS: Record<string, string> = {
@@ -171,7 +173,7 @@ export default function ApiHistoryPage() {
                 </thead>
                 <tbody>
                   {logs.map((log, i) => {
-                    const st = STATUS_MAP[log.status] || STATUS_MAP.pending;
+                    const st = log.webhook_payload ? STATUS_MAP.updated : STATUS_MAP[log.status] || STATUS_MAP.pending;
                     return (
                       <tr key={log.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, log })}
                         style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
@@ -188,7 +190,7 @@ export default function ApiHistoryPage() {
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
                         </td>
                         <td className="py-2.5 px-3 max-w-[200px] truncate" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>
-                          {log.response_payload?.success ? "✓ success" : log.response_payload?.error ? "✗ error" : JSON.stringify(log.response_payload || {}).substring(0, 40)}
+                          {log.webhook_payload ? "✓ updated via webhook" : log.response_payload?.success ? "✓ success" : log.response_payload?.error ? "✗ error" : JSON.stringify(log.response_payload || {}).substring(0, 40)}
                         </td>
                       </tr>
                     );
@@ -201,7 +203,7 @@ export default function ApiHistoryPage() {
           {/* Mobile Cards */}
           <div className="md:hidden space-y-2">
             {logs.map((log) => {
-              const st = STATUS_MAP[log.status] || STATUS_MAP.pending;
+              const st = log.webhook_payload ? STATUS_MAP.updated : STATUS_MAP[log.status] || STATUS_MAP.pending;
               return (
                 <div key={log.id} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}
                   onClick={() => setDetailModal({ open: true, log })}>
@@ -253,7 +255,7 @@ export default function ApiHistoryPage() {
                 </div>
                 <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
                   <span className="block text-[10px]" style={{ color: "#737687" }}>Status</span>
-                  <span className="font-medium" style={{ color: STATUS_MAP[detailModal.log.status]?.color || "#737687" }}>{STATUS_MAP[detailModal.log.status]?.label || detailModal.log.status}</span>
+                  <span className="font-medium" style={{ color: (detailModal.log.webhook_payload ? STATUS_MAP.updated : STATUS_MAP[detailModal.log.status])?.color || "#737687" }}>{(detailModal.log.webhook_payload ? STATUS_MAP.updated : STATUS_MAP[detailModal.log.status])?.label || detailModal.log.status}</span>
                 </div>
                 <div className="rounded-lg p-2" style={{ background: "#f3f3f3" }}>
                   <span className="block text-[10px]" style={{ color: "#737687" }}>Cloud ID</span>
@@ -284,6 +286,14 @@ export default function ApiHistoryPage() {
                   {JSON.stringify(detailModal.log.response_payload, null, 2)}
                 </pre>
               </div>
+              {detailModal.log.webhook_payload && (
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Webhook Response (dari Device)</label>
+                  <pre className="rounded-lg p-3 text-[10px] overflow-x-auto" style={{ background: "#1a1c1c", color: "#93f59e", fontFamily: "JetBrains Mono", maxHeight: "200px" }}>
+                    {JSON.stringify(detailModal.log.webhook_payload, null, 2)}
+                  </pre>
+                </div>
+              )}
               {detailModal.log.error_message && (
                 <div className="rounded-lg p-2 text-xs" style={{ background: "#fff1f1", color: "#da1e28" }}>
                   Error: {detailModal.log.error_message}

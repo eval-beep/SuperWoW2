@@ -62,14 +62,14 @@ export default function WebhookHistoryPage() {
     const d = new Date(dateStr);
     const pad = (n: number) => String(n).padStart(2, "0");
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getHours()) >= 12 ? "PM" : "AM"}`;
+    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getHours() >= 12 ? "PM" : "AM"}`;
   }
 
   function formatShortTime(dateStr: string) {
     const d = new Date(dateStr);
     const pad = (n: number) => String(n).padStart(2, "0");
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[d.getMonth()]} ${d.getDate()}\n${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getHours()) >= 12 ? "PM" : "AM"}`;
+    return `${months[d.getMonth()]} ${d.getDate()}\n${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getHours() >= 12 ? "PM" : "AM"}`;
   }
 
   function getShortId(id: string) {
