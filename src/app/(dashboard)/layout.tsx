@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: "/attendance-logs", icon: "history", label: "Attendance Logs" },
   { href: "/user-info", icon: "person", label: "User Info" },
   { href: "/pin-list", icon: "password", label: "PIN List" },
+  { href: "/api-history", icon: "cloud_upload", label: "API History" },
+  { href: "/webhook-history", icon: "cloud_download", label: "Webhook History" },
   { href: "/api-tester", icon: "terminal", label: "API Tester" },
   { href: "/settings", icon: "settings", label: "Pengaturan" },
 ];

@@ -10,13 +10,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
   }
 
+  const cloudId = params.cloud_id || "C2697842930C1634";
+  const transId = params.trans_id || "1";
+
   try {
     const result = await sendFingerspotCommand(command, params);
 
-    if (result.success && result.data) {
-      const cloudId = params.cloud_id || "C2697842930C1634";
-      const transId = params.trans_id || "1";
+    // Log to command_logs
+    try {
+      await supabaseInsert("command_logs", {
+        command_type: command,
+        cloud_id: cloudId,
+        trans_id: transId,
+        endpoint: command,
+        request_payload: params,
+        response_payload: result.data || result,
+        status: result.success ? "success" : "failed",
+        error_message: result.data?.error || result.data?.message || null,
+      });
+    } catch { /* ignore log errors */ }
 
+    if (result.success && result.data) {
       if (command === "get_attlog") {
         await saveAttlogs(cloudId, transId, result.data);
       } else if (command === "get_userinfo") {
@@ -28,6 +42,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    // Log failed request
+    try {
+      await supabaseInsert("command_logs", {
+        command_type: command,
+        cloud_id: cloudId,
+        trans_id: transId,
+        endpoint: command,
+        request_payload: params,
+        response_payload: { error: (error as Error).message },
+        status: "failed",
+        error_message: (error as Error).message,
+      });
+    } catch { /* ignore */ }
+
     return NextResponse.json({ success: false, status_code: 500, data: { error: (error as Error).message } }, { status: 500 });
   }
 }
