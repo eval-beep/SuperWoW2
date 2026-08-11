@@ -104,11 +104,15 @@ export default function AttendanceLogsPage() {
 
   async function handleGetAttlog() {
     if (!getForm.cloud_id) return alert("Cloud ID harus diisi");
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const startDate = getForm.start_date || fmt(yesterday);
+    const endDate = getForm.end_date || fmt(today);
     try {
-      const params: Record<string, string> = { trans_id: "1", cloud_id: getForm.cloud_id };
+      const params: Record<string, string> = { trans_id: "1", cloud_id: getForm.cloud_id, start_date: startDate, end_date: endDate };
       if (getForm.pin) params.pin = getForm.pin;
-      if (getForm.start_date) params.start_date = getForm.start_date;
-      if (getForm.end_date) params.end_date = getForm.end_date;
       await fetch("/api/fingerspot/command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,6 +126,10 @@ export default function AttendanceLogsPage() {
 
   async function handleSyncAttlog() {
     const cid = cloudIdFromSettings || "C2697842930C1634";
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     setSyncing(true);
     setSyncResult(null);
     try {
@@ -130,7 +138,7 @@ export default function AttendanceLogsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           command: "get_attlog",
-          params: { trans_id: "1", cloud_id: cid },
+          params: { trans_id: "1", cloud_id: cid, start_date: fmt(yesterday), end_date: fmt(today) },
         }),
       });
       const result = await res.json();
@@ -139,7 +147,7 @@ export default function AttendanceLogsPage() {
         setSyncResult({ success: true, message: `Berhasil sync ${count} log dari device` });
         loadLogs();
       } else {
-        setSyncResult({ success: false, message: result.data?.error || "Gagal sync data" });
+        setSyncResult({ success: false, message: result.data?.error || result.data?.message || "Gagal sync data" });
       }
     } catch {
       setSyncResult({ success: false, message: "Gagal menghubungkan ke device" });
