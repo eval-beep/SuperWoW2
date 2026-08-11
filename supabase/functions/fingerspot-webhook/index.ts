@@ -92,9 +92,12 @@ Deno.serve(async (req: Request) => {
 
   const errors: string[] = [];
 
+  // Map webhook_type to values allowed by DB CHECK constraint
+  const dbType = type === "get_userid_list" ? "get_all_pin" : type === "attlog" ? "realtime_attlog" : type;
+
   // Log every incoming webhook to webhook_logs
   const { error: whLogError } = await supabase.from("webhook_logs").insert({
-    webhook_type: type,
+    webhook_type: dbType,
     cloud_id: cloud_id,
     trans_id: trans_id ?? null,
     raw_payload: payload,
@@ -109,11 +112,13 @@ Deno.serve(async (req: Request) => {
 
   // Update command_logs response_payload with full webhook data
   if (trans_id) {
+    const transIdStr = String(trans_id);
+    const transIdNum = parseInt(transIdStr, 10);
     const { error: cmdLogError } = await supabase
       .from("command_logs")
       .update({ response_payload: payload, status: "success", updated_at: new Date().toISOString() })
-      .eq("trans_id", String(trans_id))
       .eq("cloud_id", cloud_id)
+      .in("trans_id", isNaN(transIdNum) ? [transIdStr] : [transIdStr, String(transIdNum)])
       .in("command_type", ["get_userinfo", "get_all_pin", "get_userid_list", "set_userinfo", "delete_userinfo", "set_time", "register_online"]);
     if (cmdLogError) {
       console.error("command_logs update error:", cmdLogError.message, cmdLogError.details, cmdLogError.hint);
