@@ -91,6 +91,15 @@ Deno.serve(async (req: Request) => {
   const supabase = createSupabaseAdmin();
 
   try {
+    // Log every incoming webhook to webhook_logs
+    await supabase.from("webhook_logs").insert({
+      webhook_type: type,
+      cloud_id: cloud_id,
+      trans_id: trans_id ?? null,
+      raw_payload: payload,
+      status: "received",
+    });
+
     switch (type) {
       case "realtime_attlog":
       case "attlog":
