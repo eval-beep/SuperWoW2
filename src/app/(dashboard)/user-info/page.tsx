@@ -64,6 +64,10 @@ export default function UserInfoPage() {
   const [editModal, setEditModal] = useState<{ open: boolean; user: Userinfo | null }>({ open: false, user: null });
   const [editForm, setEditForm] = useState({ name: "", privilege: 1 });
   const [editLoading, setEditLoading] = useState(false);
+  const [syncPin, setSyncPin] = useState("");
+  const [syncCloudId, setSyncCloudId] = useState("C2697842930C1634");
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -85,6 +89,7 @@ export default function UserInfoPage() {
   useEffect(() => {
     loadUsers();
     loadCloudIds();
+    loadSettingsCloudId();
   }, [loadUsers]);
 
   useEffect(() => {
@@ -106,6 +111,14 @@ export default function UserInfoPage() {
     const raw: { cloud_id: string }[] = data.data || [];
     const ids = [...new Set(raw.map((r) => r.cloud_id))];
     setAllCloudIds(ids.filter(Boolean) as string[]);
+  }
+
+  async function loadSettingsCloudId() {
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      if (data?.cloud_id) setSyncCloudId(data.cloud_id);
+    } catch { /* ignore */ }
   }
 
   async function handleDelete(mode: "web" | "device") {
@@ -159,6 +172,30 @@ export default function UserInfoPage() {
       console.error("Edit error:", err);
     } finally {
       setEditLoading(false);
+    }
+  }
+
+  async function handleSyncFromDevice() {
+    if (!syncPin.trim()) return alert("PIN harus diisi");
+    setSyncLoading(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/user-info/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cloud_id: syncCloudId, pin: syncPin.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncResult({ ok: true, msg: data.message || "Berhasil" });
+        loadUsers();
+      } else {
+        setSyncResult({ ok: false, msg: data.error || "Gagal" });
+      }
+    } catch (err) {
+      setSyncResult({ ok: false, msg: (err as Error).message });
+    } finally {
+      setSyncLoading(false);
     }
   }
 
@@ -382,21 +419,40 @@ export default function UserInfoPage() {
           </div>
 
           <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-            <h3 className="text-sm font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Device Sync Efficiency</h3>
-            <div className="space-y-4">
-              {[
-                { label: "Avg Sync Speed", value: "2.4s", pct: 85, color: "#006e2b" },
-                { label: "Avg Size", value: "128 KB", pct: 62, color: "#004ccd" },
-                { label: "Network Load", value: "34%", pct: 34, color: "#da1e28" },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p className="text-xs" style={{ color: "#737687" }}>{item.label}</p>
-                  <p className="text-lg font-bold mt-1" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{item.value}</p>
-                  <div className="w-full h-1.5 rounded-full mt-2" style={{ background: "#f3f3f3" }}>
-                    <div className="h-full rounded-full" style={{ width: `${item.pct}%`, background: item.color }} />
-                  </div>
+            <h3 className="text-sm font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>
+              <span className="material-symbols-outlined text-[16px] align-middle mr-1" style={{ color: "#004ccd" }}>cloud_download</span>
+              Ambil dari Device
+            </h3>
+            <p className="text-xs mb-3" style={{ color: "#737687" }}>Kirim perintah get_userinfo ke device Fingerspot</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
+                <select value={syncCloudId} onChange={(e) => setSyncCloudId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c", fontFamily: "JetBrains Mono" }}>
+                  <option value="C2697842930C1634">C2697842930C1634</option>
+                  <option value="FZ0595556">FZ0595556</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>PIN</label>
+                <input value={syncPin} onChange={(e) => setSyncPin(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSyncFromDevice()}
+                  className="w-full px-3 py-2 rounded-xl text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#004ccd" }} placeholder="100030" />
+              </div>
+              <button onClick={handleSyncFromDevice} disabled={syncLoading || !syncPin.trim()}
+                className="w-full py-2.5 rounded-xl text-xs font-medium text-white flex items-center justify-center gap-1.5"
+                style={{ background: syncLoading || !syncPin.trim() ? "#b0b8c8" : "#004ccd" }}>
+                {syncLoading ? (
+                  <><span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>Mengambil...</>
+                ) : (
+                  <><span className="material-symbols-outlined text-[14px]">cloud_download</span>Ambil Data</>
+                )}
+              </button>
+              {syncResult && (
+                <div className="rounded-xl p-2.5 text-[11px]" style={{ background: syncResult.ok ? "#defbe6" : "#fff1f1", color: syncResult.ok ? "#006e2b" : "#da1e28" }}>
+                  {syncResult.msg}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
