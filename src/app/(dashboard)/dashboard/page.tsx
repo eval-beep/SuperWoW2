@@ -29,9 +29,10 @@ export default function DashboardPage() {
   const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ status: "offline", lastActivity: null, cloudId: "" });
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(0);
+  const [cloudIdFilter, setCloudIdFilter] = useState("");
 
   useEffect(() => {
-    loadDashboard();
+    loadSettings().then(() => loadDashboard());
     const interval = setInterval(loadDashboard, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -41,14 +42,24 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
+  async function loadSettings() {
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      if (data?.cloud_id) setCloudIdFilter(data.cloud_id);
+    } catch { /* ignore */ }
+  }
+
   async function loadDashboard() {
     try {
+      const cid = cloudIdFilter;
+      const cidParam = cid ? `&cloud_id=eq.${cid}` : "";
       const [usersRes, attlogsRes, webhooksRes, attlogsListRes, latestAttlogRes] = await Promise.all([
-        fetch("/api/supabase?table=userinfos&count=true&limit=1"),
-        fetch("/api/supabase?table=attlogs&count=true&limit=1"),
+        fetch(`/api/supabase?table=userinfos&count=true&limit=1${cid ? `&cloud_id=${cid}` : ""}`),
+        fetch(`/api/supabase?table=attlogs&count=true&limit=1${cid ? `&cloud_id=${cid}` : ""}`),
         fetch("/api/supabase?table=webhook_logs&count=true&limit=1"),
-        fetch("/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6"),
-        fetch("/api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1"),
+        fetch(`/api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6${cid ? `&cloud_id=${cid}` : ""}`),
+        fetch(`/api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1${cid ? `&cloud_id=${cid}` : ""}`),
       ]);
 
       const [users, attlogs, webhooks, attlogsList, latestAttlog] = await Promise.all([

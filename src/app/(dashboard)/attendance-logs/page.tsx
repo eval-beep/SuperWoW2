@@ -56,13 +56,14 @@ export default function AttendanceLogsPage() {
     if (pinSearch) params.set("search", pinSearch);
     if (dateFrom) params.set("from", dateFrom);
     if (dateTo) params.set("to", dateTo);
+    if (cloudIdFromSettings) params.set("cloud_id", cloudIdFromSettings);
     const res = await fetch(`/api/attendance-logs?${params.toString()}`);
     const data = await res.json();
     setLogs(data.data || []);
     setTotal(data.count || 0);
     setLastPage(data.lastPage || 1);
     setLoading(false);
-  }, [page, perPage, pinSearch, dateFrom, dateTo]);
+  }, [page, perPage, pinSearch, dateFrom, dateTo, cloudIdFromSettings]);
 
   useEffect(() => {
     loadLogs();
