@@ -315,19 +315,19 @@ export default function UserInfoPage() {
                     filteredUsers.map((user, i) => {
                       const priv = getPrivilegeInfo(user.privilege);
                       return (
-                        <tr key={user.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, user })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
-                          <td className="py-3 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</td>
-                          <td className="py-3 px-3">
+                        <tr key={user.id} className="cursor-pointer" style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                          <td className="py-3 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }} onClick={() => setDetailModal({ open: true, user })}>{user.pin}</td>
+                          <td className="py-3 px-3" onClick={() => setDetailModal({ open: true, user })}>
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: "#004ccd" }}>{getInitials(user.name)}</div>
                               <span style={{ color: "#1a1c1c" }}>{user.name}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-3">
+                          <td className="py-3 px-3" onClick={() => setDetailModal({ open: true, user })}>
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide" style={{ background: priv.bg, color: priv.color }}>{priv.label}</span>
                           </td>
-                          <td className="py-3 px-3" style={{ color: "#737687" }}>{user.cloud_id}</td>
-                          <td className="py-3 px-3 text-xs" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{user.created_at ? formatDate(user.created_at) : "-"}</td>
+                          <td className="py-3 px-3" onClick={() => setDetailModal({ open: true, user })} style={{ color: "#737687" }}>{user.cloud_id}</td>
+                          <td className="py-3 px-3 text-xs" onClick={() => setDetailModal({ open: true, user })} style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{user.created_at ? formatDate(user.created_at) : "-"}</td>
                           <td className="py-3 px-3 relative">
                             <button onClick={(e) => { e.stopPropagation(); setActionMenu(actionMenu === user.id ? null : user.id); }} className="w-8 h-8 flex items-center justify-center rounded-lg" style={{ color: "#737687" }}>
                               <span className="material-symbols-outlined text-[20px]">more_vert</span>
