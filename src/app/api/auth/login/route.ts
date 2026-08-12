@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { ensureUserSettings } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   let body: Record<string, string>;
@@ -35,6 +36,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email belum diverifikasi. Silakan cek inbox Anda." }, { status: 401 });
     }
     return NextResponse.json({ error: error.message }, { status: 401 });
+  }
+
+  try {
+    await ensureUserSettings(data.user.id);
+  } catch (e) {
+    console.error("[Login] Gagal memastikan settings:", e);
   }
 
   const response = NextResponse.json({

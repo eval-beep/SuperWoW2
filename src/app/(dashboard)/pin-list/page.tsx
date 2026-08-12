@@ -24,14 +24,14 @@ export default function PinListPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [addModal, setAddModal] = useState(false);
-  const [newForm, setNewForm] = useState({ cloud_id: "C2697842930C1634", pin: "", name: "", privilege: 1 });
+  const [newForm, setNewForm] = useState({ pin: "", name: "", privilege: 1 });
 
   const [detailModal, setDetailModal] = useState<{ open: boolean; user: DeviceUser | null }>({ open: false, user: null });
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/supabase?table=userinfos&select=*&order=created_at.desc&count=true");
+      const res = await fetch("/api/pin-list");
       const result = await res.json();
       const raw: Record<string, unknown>[] = result.data || [];
       setUsers(raw.map((u, idx) => ({
@@ -69,14 +69,13 @@ export default function PinListPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cloud_id: newForm.cloud_id,
           pin: newForm.pin,
           name: newForm.name,
           privilege: newForm.privilege,
         }),
       });
       setAddModal(false);
-      setNewForm({ cloud_id: "C2697842930C1634", pin: "", name: "", privilege: 1 });
+      setNewForm({ pin: "", name: "", privilege: 1 });
       loadUsers();
     } catch (err) {
       console.error("Add error:", err);
@@ -193,10 +192,6 @@ export default function PinListPage() {
           <div className="w-full max-w-md rounded-xl p-4" style={{ background: theme === "dark" ? "#292932" : "#ffffff", border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}` }} onClick={(e) => e.stopPropagation()}>
             <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("addPin")}</h3>
             <div className="space-y-2">
-              <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Cloud ID</label>
-                <input value={newForm.cloud_id} onChange={(e) => setNewForm({ ...newForm, cloud_id: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", fontFamily: "JetBrains Mono", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} placeholder="C2697842930C1634" />
-              </div>
               <div>
                 <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>PIN</label>
                 <input value={newForm.pin} onChange={(e) => setNewForm({ ...newForm, pin: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} />

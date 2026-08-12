@@ -91,11 +91,11 @@ export default function AttendanceLogsPage() {
   }, []);
 
   async function loadCloudIds() {
-    const res = await fetch("/api/supabase?table=attlogs&select=cloud_id");
-    const data = await res.json();
-    const raw: { cloud_id: string }[] = data.data || [];
-    const ids = [...new Set(raw.map((r) => r.cloud_id))];
-    setAllCloudIds(ids.filter(Boolean) as string[]);
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      if (data?.cloud_id) setAllCloudIds([data.cloud_id]);
+    } catch { /* ignore */ }
   }
 
   async function handleExport() {

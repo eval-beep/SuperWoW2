@@ -47,7 +47,6 @@ export default function UserInfoPage() {
   const [lastPage, setLastPage] = useState(1);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [cloudIdFilter, setCloudIdFilter] = useState("");
   const [allCloudIds, setAllCloudIds] = useState<string[]>([]);
   const [privilegeFilter, setPrivilegeFilter] = useState("");
   const [actionMenu, setActionMenu] = useState<string | null>(null);
@@ -61,7 +60,6 @@ export default function UserInfoPage() {
   });
   const [addModal, setAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
-    cloud_id: "C2697842930C1634",
     pin: "",
     name: "",
     privilege: 1,
@@ -72,7 +70,6 @@ export default function UserInfoPage() {
   const [editForm, setEditForm] = useState({ name: "", privilege: 1 });
   const [editLoading, setEditLoading] = useState(false);
   const [syncPin, setSyncPin] = useState("");
-  const [syncCloudId, setSyncCloudId] = useState("C2697842930C1634");
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncResult, setSyncResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
@@ -83,20 +80,18 @@ export default function UserInfoPage() {
       per_page: String(perPage),
     });
     if (search) params.set("search", search);
-    if (cloudIdFilter) params.set("cloud_id", cloudIdFilter);
 
-    const res = await fetch(`/api/supabase?table=userinfos&count=true&order=created_at.desc&${params.toString()}`);
+    const res = await fetch(`/api/user-info?${params.toString()}`);
     const data = await res.json();
     setUsers(data.data || []);
-    setTotal(data.count || 0);
+    setTotal(data.total || 0);
     setLastPage(data.lastPage || 1);
     setLoading(false);
-  }, [page, perPage, search, cloudIdFilter]);
+  }, [page, perPage, search]);
 
   useEffect(() => {
     loadUsers();
     loadCloudIds();
-    loadSettingsCloudId();
   }, [loadUsers]);
 
   useEffect(() => {
@@ -113,29 +108,21 @@ export default function UserInfoPage() {
   }, [actionMenu]);
 
   async function loadCloudIds() {
-    const res = await fetch("/api/supabase?table=userinfos&select=cloud_id");
-    const data = await res.json();
-    const raw: { cloud_id: string }[] = data.data || [];
-    const ids = [...new Set(raw.map((r) => r.cloud_id))];
-    setAllCloudIds(ids.filter(Boolean) as string[]);
-  }
-
-  async function loadSettingsCloudId() {
     try {
       const res = await fetch("/api/settings");
       const data = await res.json();
-      if (data?.cloud_id) setSyncCloudId(data.cloud_id);
+      if (data?.cloud_id) setAllCloudIds([data.cloud_id]);
     } catch { /* ignore */ }
   }
 
   async function handleDelete(mode: "web" | "device") {
     if (!deleteModal.user) return;
-    const { cloud_id, pin } = deleteModal.user;
+    const { pin } = deleteModal.user;
     try {
       await fetch("/api/user-info/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cloud_id, pin, mode }),
+        body: JSON.stringify({ pin, mode }),
       });
       setDeleteModal({ open: false, user: null });
       loadUsers();
@@ -150,10 +137,10 @@ export default function UserInfoPage() {
       await fetch("/api/user-info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(addForm),
+        body: JSON.stringify({ pin: addForm.pin, name: addForm.name, privilege: addForm.privilege, password: addForm.password, rfid: addForm.rfid }),
       });
       setAddModal(false);
-      setAddForm({ cloud_id: "C2697842930C1634", pin: "", name: "", privilege: 1, password: "", rfid: "" });
+      setAddForm({ pin: "", name: "", privilege: 1, password: "", rfid: "" });
       loadUsers();
     } catch (err) {
       console.error("Add error:", err);
@@ -190,7 +177,7 @@ export default function UserInfoPage() {
       const res = await fetch("/api/user-info/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cloud_id: syncCloudId, pin: syncPin.trim() }),
+        body: JSON.stringify({ pin: syncPin.trim() }),
       });
       const data = await res.json();
       if (data.success) {
@@ -215,7 +202,7 @@ export default function UserInfoPage() {
   const userCount = users.filter((u) => u.privilege <= 1).length;
 
   const jsonPreview = JSON.stringify(
-    { cloud_id: addForm.cloud_id, pin: addForm.pin, name: addForm.name, privilege: addForm.privilege, password: addForm.password, rfid: addForm.rfid },
+    { pin: addForm.pin, name: addForm.name, privilege: addForm.privilege, password: addForm.password, rfid: addForm.rfid },
     null, 2
   );
 
@@ -275,14 +262,6 @@ export default function UserInfoPage() {
               onChange={(v) => { setPrivilegeFilter(v); setPage(1); }}
               placeholder={t("allPrivileges")}
               icon="filter_list"
-            />
-            <LgSelect
-              id="cloudIdFilter"
-              options={allCloudIds.map((id) => ({ value: id, label: id, icon: "cloud" }))}
-              value={cloudIdFilter}
-              onChange={(v) => { setCloudIdFilter(v); setPage(1); }}
-              placeholder={t("allDevices")}
-              icon="dns"
             />
             <div className="flex-1" />
             <input
@@ -433,14 +412,6 @@ export default function UserInfoPage() {
             <p className="text-xs mb-3" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("syncDesc")}</p>
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("cloudId")}</label>
-                <select value={syncCloudId} onChange={(e) => setSyncCloudId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c", fontFamily: "JetBrains Mono" }}>
-                  <option value="C2697842930C1634">C2697842930C1634</option>
-                  <option value="FZ0595556">FZ0595556</option>
-                </select>
-              </div>
-              <div>
                 <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("pin")}</label>
                 <input value={syncPin} onChange={(e) => setSyncPin(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSyncFromDevice()}
@@ -472,10 +443,6 @@ export default function UserInfoPage() {
             <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("addNewUser")}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("cloudId")}</label>
-                <input value={addForm.cloud_id} onChange={(e) => setAddForm({ ...addForm, cloud_id: e.target.value })} className="w-full px-3 py-2 rounded-xl text-sm" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} />
-              </div>
-              <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("pin")}</label>
                 <input value={addForm.pin} onChange={(e) => setAddForm({ ...addForm, pin: e.target.value })} className="w-full px-3 py-2 rounded-xl text-sm" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", fontFamily: "JetBrains Mono", color: "#004ccd" }} placeholder="123" />
               </div>
@@ -497,7 +464,7 @@ export default function UserInfoPage() {
               <pre className="rounded-xl p-3 text-xs overflow-auto max-h-32" style={{ background: "#1a1c1c", fontFamily: "JetBrains Mono", color: "#a6e3a1" }}>{jsonPreview}</pre>
             </div>
             <div className="flex gap-2 mt-4">
-              <a href={`/api-tester?command=set_userinfo&cloud_id=${addForm.cloud_id}&pin=${addForm.pin}`} className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, color: theme === "dark" ? "#c7c4d7" : "#424656" }}>
+              <a href={`/api-tester?command=set_userinfo&pin=${addForm.pin}`} className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, color: theme === "dark" ? "#c7c4d7" : "#424656" }}>
                 <span className="material-symbols-outlined text-[16px]">open_in_new</span>{t("apiTester")}
               </a>
               <div className="flex-1" />

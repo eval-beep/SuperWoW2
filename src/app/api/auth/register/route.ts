@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { ensureUserSettings } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   let body: Record<string, string>;
@@ -44,6 +45,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Format email tidak valid" }, { status: 400 });
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (data.user) {
+    try {
+      await ensureUserSettings(data.user.id);
+    } catch (e) {
+      console.error("[Register] Gagal membuat default settings:", e);
+    }
   }
 
   if (data.user && !data.session) {

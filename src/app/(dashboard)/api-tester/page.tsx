@@ -39,7 +39,7 @@ function ApiTesterContent() {
   const searchParams = useSearchParams();
   const { theme, t } = useThemeLanguage();
   const [command, setCommand] = useState(searchParams.get("command") || "get_all_pin");
-  const [cloudId, setCloudId] = useState(searchParams.get("cloud_id") || "C2697842930C1634");
+  const [cloudId, setCloudId] = useState(searchParams.get("cloud_id") || "");
   const [pin, setPin] = useState("");
   const [name, setName] = useState("");
   const [privilege, setPrivilege] = useState("1");
@@ -61,6 +61,11 @@ function ApiTesterContent() {
   useEffect(() => {
     const history = localStorage.getItem("cloud_id_history");
     if (history) setCloudIdHistory(JSON.parse(history));
+    if (!searchParams.get("cloud_id")) {
+      fetch("/api/settings").then(r => r.json()).then(d => {
+        if (d?.cloud_id && !cloudId) setCloudId(d.cloud_id);
+      }).catch(() => {});
+    }
   }, []);
 
   useEffect(() => {

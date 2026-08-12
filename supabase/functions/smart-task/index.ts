@@ -69,11 +69,10 @@ Deno.serve(async (req: Request) => {
 
   console.log("=== SMART-TASK WEBHOOK ===");
   console.log("Full payload:", JSON.stringify(payload));
-  console.log("Payload keys:", Object.keys(payload));
 
   const { type, cloud_id, machine_id, trans_id, data } = payload;
 
-  console.log("type:", type, "cloud_id:", cloud_id, "trans_id:", trans_id, "data type:", typeof data, "data:", JSON.stringify(data)?.substring(0, 1000));
+  console.log("type:", type, "cloud_id:", cloud_id, "trans_id:", trans_id);
 
   if (!type || !VALID_TYPES.includes(type)) {
     console.error("Invalid type:", type);
@@ -98,20 +97,23 @@ Deno.serve(async (req: Request) => {
   // Map webhook_type to values allowed by DB CHECK constraint
   const dbType = type === "get_userid_list" ? "get_all_pin" : type === "attlog" ? "realtime_attlog" : type;
 
-  // Validate trans_id + command_type against command_logs, and fetch original request data
+  // Look up user_id from command_logs via trans_id
+  let userId: string | null = null;
   let commandTypeMatch = false;
   let originalRequest: Record<string, unknown> | null = null;
+
   if (trans_id) {
     const { data: cmdLog } = await supabase
       .from("command_logs")
-      .select("command_type, request_payload")
+      .select("command_type, request_payload, user_id")
       .eq("trans_id", trans_id)
       .eq("cloud_id", cloud_id)
       .maybeSingle();
     if (cmdLog) {
       commandTypeMatch = cmdLog.command_type === dbType;
       originalRequest = cmdLog.request_payload as Record<string, unknown> | null;
-      console.log(`Validation: trans_id=${trans_id} cmd_type=${cmdLog.command_type} vs webhook=${dbType} match=${commandTypeMatch}`);
+      userId = cmdLog.user_id as string | null;
+      console.log(`Validation: trans_id=${trans_id} user_id=${userId} cmd_type=${cmdLog.command_type} vs webhook=${dbType} match=${commandTypeMatch}`);
     } else {
       console.log(`Validation: trans_id=${trans_id} not found in command_logs`);
     }
@@ -131,45 +133,41 @@ Deno.serve(async (req: Request) => {
         ...payload,
         data: { ...reqData, ...webhookData },
       };
-      console.log("Enriched payload with original request data");
     }
   }
 
-  // Log every incoming webhook to webhook_logs
+  // Log webhook to webhook_logs with user_id
   const { data: whInserted, error: whLogError } = await supabase.from("webhook_logs").insert({
     webhook_type: dbType,
     cloud_id: cloud_id,
+    user_id: userId,
     trans_id: trans_id ?? null,
     raw_payload: enrichedPayload,
     status: "success",
   }).select("id").maybeSingle();
   if (whLogError) {
-    console.error("webhook_logs insert error:", whLogError.message, whLogError.details, whLogError.hint);
+    console.error("webhook_logs insert error:", whLogError.message);
     errors.push(`webhook_logs: ${whLogError.message}`);
-  } else {
-    console.log("webhook_logs inserted OK, id:", whInserted?.id);
-    // Try to update command_type_match if column exists
-    if (whInserted?.id && trans_id) {
-      const { error: updateErr } = await supabase
-        .from("webhook_logs")
-        .update({ command_type_match: commandTypeMatch })
-        .eq("id", whInserted.id);
-      if (updateErr) console.log("command_type_match update skipped:", updateErr.message);
-    }
+  } else if (whInserted?.id && trans_id) {
+    const { error: updateErr } = await supabase
+      .from("webhook_logs")
+      .update({ command_type_match: commandTypeMatch })
+      .eq("id", whInserted.id);
+    if (updateErr) console.log("command_type_match update skipped:", updateErr.message);
   }
 
   try {
     switch (type) {
       case "realtime_attlog":
       case "attlog":
-        await processAttlog(supabase, cloud_id, machine_id, data, trans_id);
+        await processAttlog(supabase, cloud_id, userId, machine_id, data, trans_id);
         break;
       case "get_userinfo":
-        await processUserinfo(supabase, cloud_id, data);
+        await processUserinfo(supabase, cloud_id, userId, data);
         break;
       case "get_all_pin":
       case "get_userid_list":
-        await processGetAllPin(supabase, cloud_id, data);
+        await processGetAllPin(supabase, cloud_id, userId, data);
         break;
       default:
         console.log(`Type ${type} received but no handler needed`);
@@ -195,6 +193,7 @@ Deno.serve(async (req: Request) => {
 async function processAttlog(
   supabase: ReturnType<typeof createSupabaseAdmin>,
   cloudId: string,
+  userId: string | null,
   machineId: string | undefined,
   data?: Record<string, unknown> | Record<string, unknown>[],
   transId?: string
@@ -205,7 +204,7 @@ async function processAttlog(
   }
   const records = Array.isArray(data) ? data : [data];
 
-  console.log(`Processing ${records.length} attlog records for ${cloudId}`);
+  console.log(`Processing ${records.length} attlog records for ${cloudId} user_id=${userId}`);
 
   for (const record of records) {
     const pin = String(record.pin || record.PIN || "");
@@ -214,7 +213,7 @@ async function processAttlog(
     const statusScan = Number(record.status_scan || record.statusScan || record.Status || record.status || 0);
 
     if (!pin || !scanTime) {
-      console.error("Skipping attlog: missing pin or scan_time", JSON.stringify(record));
+      console.error("Skipping attlog: missing pin or scan_time");
       continue;
     }
 
@@ -243,13 +242,15 @@ async function processAttlog(
       .select("name")
       .eq("cloud_id", cloudId)
       .eq("pin", pin)
-      .single();
+      .eq("user_id", userId || "")
+      .maybeSingle();
     if (userInfo?.name) {
       userName = userInfo.name;
     }
 
-    const insertData = {
+    const insertData: Record<string, unknown> = {
       cloud_id: cloudId,
+      user_id: userId,
       pin,
       name: userName,
       scan_time: scanTimeISO,
@@ -263,9 +264,9 @@ async function processAttlog(
     const { error } = await supabase.from("attlogs").insert(insertData);
 
     if (error) {
-      console.error("attlogs insert error:", error.message, error.details, error.hint);
+      console.error("attlogs insert error:", error.message);
     } else {
-      console.log("attlogs inserted:", pin, scanTimeISO);
+      console.log("attlogs inserted:", pin, scanTimeISO, "user_id:", userId);
     }
   }
 }
@@ -273,17 +274,14 @@ async function processAttlog(
 async function processUserinfo(
   supabase: ReturnType<typeof createSupabaseAdmin>,
   cloudId: string,
+  userId: string | null,
   data?: Record<string, unknown> | Record<string, unknown>[]
 ) {
-  console.log("processUserinfo called, data type:", typeof data, "isArray:", Array.isArray(data));
-  console.log("processUserinfo raw data:", JSON.stringify(data));
-
   if (!data) {
     console.log("No data in userinfo payload, skipping");
     return;
   }
 
-  // Handle nested data: device may send {data: {pin, name, ...}} or {data: [{pin, name, ...}]}
   let records: Record<string, unknown>[];
   if (Array.isArray(data)) {
     records = data;
@@ -293,14 +291,11 @@ async function processUserinfo(
     records = [data];
   }
 
-  console.log(`Processing ${records.length} userinfo records for ${cloudId}`);
+  console.log(`Processing ${records.length} userinfo records for ${cloudId} user_id=${userId}`);
 
   for (const record of records) {
     const pin = String(record.pin || record.PIN || record.PIN_NO || record.pin_no || "");
-    if (!pin) {
-      console.error("Skipping userinfo: no pin found in record:", JSON.stringify(record));
-      continue;
-    }
+    if (!pin) continue;
 
     const name = record.name || record.Name || record.USER_NAME || record.user_name || null;
     const privilege = Number(record.privilege || record.Privilege || record.PRIVILEGE || 0);
@@ -313,6 +308,7 @@ async function processUserinfo(
 
     const upsertData: Record<string, unknown> = {
       cloud_id: cloudId,
+      user_id: userId,
       pin,
       name,
       password,
@@ -326,9 +322,6 @@ async function processUserinfo(
       synced_at: new Date().toISOString(),
     };
 
-    console.log("Upserting userinfo:", JSON.stringify(upsertData).substring(0, 500));
-
-    // Try insert first, if duplicate (409) then update
     const { error: insertErr } = await supabase.from("userinfos").insert(upsertData);
     if (insertErr && insertErr.message?.includes("duplicate")) {
       const { error: updateErr } = await supabase
@@ -346,16 +339,17 @@ async function processUserinfo(
           synced_at: new Date().toISOString(),
         })
         .eq("cloud_id", cloudId)
-        .eq("pin", pin);
+        .eq("pin", pin)
+        .eq("user_id", userId || "");
       if (updateErr) {
-        console.error("userinfos update error:", updateErr.message, updateErr.details, updateErr.hint);
+        console.error("userinfos update error:", updateErr.message);
       } else {
-        console.log("userinfo updated:", pin);
+        console.log("userinfo updated:", pin, "user_id:", userId);
       }
     } else if (insertErr) {
-      console.error("userinfos insert error:", insertErr.message, insertErr.details, insertErr.hint);
+      console.error("userinfos insert error:", insertErr.message);
     } else {
-      console.log("userinfo inserted:", pin);
+      console.log("userinfo inserted:", pin, "user_id:", userId);
     }
 
     if (name) {
@@ -363,9 +357,9 @@ async function processUserinfo(
         .from("pins")
         .update({ name })
         .eq("cloud_id", cloudId)
-        .eq("pin", pin);
+        .eq("pin", pin)
+        .eq("user_id", userId || "");
       if (pinError) console.error("pins name update error:", pinError.message);
-      else console.log("pins name updated:", pin, "->", name);
     }
   }
 }
@@ -373,14 +367,13 @@ async function processUserinfo(
 async function processGetAllPin(
   supabase: ReturnType<typeof createSupabaseAdmin>,
   cloudId: string,
+  userId: string | null,
   data?: Record<string, unknown> | Record<string, unknown>[]
 ) {
   if (!data) {
     console.log("No data in get_all_pin payload, skipping");
     return;
   }
-
-  console.log("processGetAllPin raw data:", JSON.stringify(data));
 
   let pinArr: string[] = [];
 
@@ -392,26 +385,26 @@ async function processGetAllPin(
     if (Array.isArray(rawPinArr)) {
       pinArr = rawPinArr.map((p) => String(p)).filter(Boolean);
     } else if (typeof rawPinArr === "string") {
-      // Handle space-separated string: "1 10 11 13 2 5555"
       pinArr = rawPinArr.split(/\s+/).filter(Boolean);
     } else if (rawPinArr) {
       pinArr = [String(rawPinArr)];
     }
   }
 
-  console.log(`Processing ${pinArr.length} pins for ${cloudId}:`, pinArr.join(", "));
+  console.log(`Processing ${pinArr.length} pins for ${cloudId} user_id=${userId}`);
 
   const { error: deleteError } = await supabase
     .from("pins")
     .delete()
-    .eq("cloud_id", cloudId);
+    .eq("cloud_id", cloudId)
+    .eq("user_id", userId || "");
   if (deleteError) console.error("pins delete error:", deleteError.message);
-  else console.log(`Old pins deleted for ${cloudId}`);
 
   const now = new Date().toISOString();
 
   const insertRows = pinArr.map((pin) => ({
     cloud_id: cloudId,
+    user_id: userId,
     pin,
     retrieved_at: now,
   }));
@@ -421,8 +414,8 @@ async function processGetAllPin(
     .insert(insertRows);
 
   if (insertError) {
-    console.error("pins insert error:", insertError.message, insertError.details);
+    console.error("pins insert error:", insertError.message);
   } else {
-    console.log(`pins inserted: ${pinArr.length} records for ${cloudId}`);
+    console.log(`pins inserted: ${pinArr.length} records for ${cloudId} user_id=${userId}`);
   }
 }

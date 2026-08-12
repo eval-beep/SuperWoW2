@@ -1,34 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand, COMMAND_TYPES } from "@/lib/fingerspot";
 import { supabaseInsert, supabaseDelete, supabaseSelect } from "@/lib/supabase";
+import { requireAuth } from "@/lib/auth-server";
+import { getUserCloudId } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { command, params } = body;
-
-  if (!command || !COMMAND_TYPES.includes(command)) {
-    return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
-  }
-
-  const cloudId = params.cloud_id || "C2697842930C1634";
-
-  // Auto-increment trans_id
-  const { data: maxRow } = await supabaseSelect("command_logs", {
-    select: "trans_id",
-    order: { column: "trans_id", ascending: false },
-    limit: 1,
-    filters: { cloud_id: `eq.${cloudId}` },
-  });
-  const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
-
   try {
-    const result = await sendFingerspotCommand(command, { ...params, trans_id: String(transId) });
+    const user = await requireAuth(request);
+    const userCloudId = await getUserCloudId(user.id);
 
-    // Log to command_logs
+    const body = await request.json();
+    const { command, params } = body;
+
+    if (!command || !COMMAND_TYPES.includes(command)) {
+      return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
+    }
+
+    const { data: maxRow } = await supabaseSelect("command_logs", {
+      select: "trans_id",
+      order: { column: "trans_id", ascending: false },
+      limit: 1,
+      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+    });
+    const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
+
+    const result = await sendFingerspotCommand(command, { ...params, cloud_id: userCloudId, trans_id: String(transId) });
+
     try {
       await supabaseInsert("command_logs", {
         command_type: command,
-        cloud_id: cloudId,
+        cloud_id: userCloudId,
+        user_id: user.id,
         trans_id: transId,
         endpoint: command,
         request_payload: params,
@@ -40,35 +42,52 @@ export async function POST(request: NextRequest) {
 
     if (result.success && result.data) {
       if (command === "get_attlog") {
-        await saveAttlogs(cloudId, transId, result.data);
+        await saveAttlogs(userCloudId, user.id, transId, result.data);
       } else if (command === "get_userinfo") {
-        await saveUserinfo(cloudId, result.data);
+        await saveUserinfo(userCloudId, user.id, result.data);
       } else if (command === "get_all_pin") {
-        await savePins(cloudId, result.data);
+        await savePins(userCloudId, user.id, result.data);
       }
     }
 
     return NextResponse.json({ ...result, trans_id: transId });
-  } catch (error) {
-    // Log failed request
+  } catch (e) {
+    if ((e as Error).message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
+      const user = await requireAuth(request);
+      const userCloudId = await getUserCloudId(user.id);
+      const body = await request.json();
+      const { command, params } = body;
+
+      const { data: maxRow } = await supabaseSelect("command_logs", {
+        select: "trans_id",
+        order: { column: "trans_id", ascending: false },
+        limit: 1,
+        filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      });
+      const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
+
       await supabaseInsert("command_logs", {
         command_type: command,
-        cloud_id: cloudId,
+        cloud_id: userCloudId,
+        user_id: user.id,
         trans_id: transId,
         endpoint: command,
         request_payload: params,
-        response_payload: { error: (error as Error).message },
+        response_payload: { error: (e as Error).message },
         status: "failed",
-        error_message: (error as Error).message,
+        error_message: (e as Error).message,
       });
     } catch { /* ignore */ }
 
-    return NextResponse.json({ success: false, status_code: 500, data: { error: (error as Error).message } }, { status: 500 });
+    return NextResponse.json({ success: false, status_code: 500, data: { error: (e as Error).message } }, { status: 500 });
   }
 }
 
-async function saveAttlogs(cloudId: string, transId: number, data: Record<string, unknown>) {
+async function saveAttlogs(cloudId: string, userId: string, transId: number, data: Record<string, unknown>) {
   const records = Array.isArray(data) ? data : data.data;
   if (!Array.isArray(records)) return;
 
@@ -89,6 +108,7 @@ async function saveAttlogs(cloudId: string, transId: number, data: Record<string
     try {
       await supabaseInsert("attlogs", {
         cloud_id: cloudId,
+        user_id: userId,
         pin,
         scan_time: scanTimeISO,
         verify_method: verifyMethod || null,
@@ -101,7 +121,7 @@ async function saveAttlogs(cloudId: string, transId: number, data: Record<string
   }
 }
 
-async function saveUserinfo(cloudId: string, data: Record<string, unknown>) {
+async function saveUserinfo(cloudId: string, userId: string, data: Record<string, unknown>) {
   const userData = data.data && typeof data.data === "object" && !Array.isArray(data.data)
     ? data.data as Record<string, unknown>
     : data;
@@ -112,6 +132,7 @@ async function saveUserinfo(cloudId: string, data: Record<string, unknown>) {
   try {
     await supabaseInsert("userinfos", {
       cloud_id: cloudId,
+      user_id: userId,
       pin,
       name: userData.name || null,
       privilege: Number(userData.privilege || 0),
@@ -124,7 +145,7 @@ async function saveUserinfo(cloudId: string, data: Record<string, unknown>) {
   } catch { /* skip */ }
 }
 
-async function savePins(cloudId: string, data: Record<string, unknown>) {
+async function savePins(cloudId: string, userId: string, data: Record<string, unknown>) {
   let pinArr: string[] = [];
   const inner = data.data && typeof data.data === "object" ? data.data : data;
 
@@ -136,12 +157,13 @@ async function savePins(cloudId: string, data: Record<string, unknown>) {
 
   if (pinArr.length === 0) return;
 
-  await supabaseDelete("pins", { cloud_id: `eq.${cloudId}` });
+  await supabaseDelete("pins", { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` });
 
   for (const pin of pinArr) {
     try {
       await supabaseInsert("pins", {
         cloud_id: cloudId,
+        user_id: userId,
         pin,
       });
     } catch { /* skip duplicate */ }
