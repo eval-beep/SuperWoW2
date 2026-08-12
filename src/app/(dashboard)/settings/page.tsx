@@ -12,6 +12,8 @@ interface Settings {
 
 export default function SettingsPage() {
   const { theme, lang, setTheme, setLang, t } = useThemeLanguage();
+  const [previewTheme, setPreviewTheme] = useState<"light" | "dark">(theme);
+  const [previewLang, setPreviewLang] = useState<"id" | "en">(lang);
   const [settings, setSettings] = useState<Settings>({
     supabase_url: "",
     supabase_anon_key: "",
@@ -40,6 +42,8 @@ export default function SettingsPage() {
           cloud_id: data.cloud_id || "",
           fingerspot_api_url: data.fingerspot_api_url || "",
         });
+        if (data.theme) setPreviewTheme(data.theme);
+        if (data.language) setPreviewLang(data.language);
       }
     } catch (err) {
       console.error("Load settings error:", err);
@@ -63,16 +67,19 @@ export default function SettingsPage() {
   async function handleSave() {
     setSaving(true);
     try {
+      setTheme(previewTheme);
+      setLang(previewLang);
       await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...settings, theme, language: lang }),
+        body: JSON.stringify({ ...settings, theme: previewTheme, language: previewLang }),
       });
       const toast = document.getElementById("settings-toast");
       if (toast) {
         toast.classList.add("show");
         setTimeout(() => toast.classList.remove("show"), 2500);
       }
+      setTimeout(() => window.location.reload(), 300);
     } catch (err) {
       console.error("Save error:", err);
     } finally {
@@ -147,15 +154,15 @@ export default function SettingsPage() {
   const endpointUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://pktrdpqbowptkatbinhf.supabase.co"}/functions/v1/smart-task`;
   const webhookUrl = deviceResult?.data?.webhook_url || endpointUrl;
 
-  const cardStyle = { background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` };
-  const primaryText = theme === "dark" ? "#e4e1ed" : "#1a1c1c";
-  const secondaryText = theme === "dark" ? "#908fa0" : "#737687";
-  const tertiaryText = theme === "dark" ? "#c7c4d7" : "#424656";
-  const inputBg = theme === "dark" ? "#292932" : "#f3f3f3";
+  const cardStyle = { background: previewTheme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${previewTheme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` };
+  const primaryText = previewTheme === "dark" ? "#e4e1ed" : "#1a1c1c";
+  const secondaryText = previewTheme === "dark" ? "#908fa0" : "#737687";
+  const tertiaryText = previewTheme === "dark" ? "#c7c4d7" : "#424656";
+  const inputBg = previewTheme === "dark" ? "#292932" : "#f3f3f3";
   const inputBorder = `1px solid rgba(195,198,216,0.3)`;
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-2xl" style={{ background: previewTheme === "dark" ? "#13131b" : "#f9f9f9", margin: "-2rem", padding: "2rem", borderRadius: "0", minHeight: "100vh" }}>
       <div>
         <h1 className="text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>{t("settings")}</h1>
         <p className="text-sm mt-1" style={{ color: secondaryText }}>Konfigurasi aplikasi dan device</p>
@@ -338,9 +345,9 @@ export default function SettingsPage() {
             {(["light", "dark"] as const).map((th) => (
               <button
                 key={th}
-                onClick={() => setTheme(th)}
+                onClick={() => setPreviewTheme(th)}
                 className="py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ border: theme === th ? "2px solid #004ccd" : inputBorder, background: theme === th ? "rgba(0,76,205,0.05)" : "transparent", color: theme === th ? "#004ccd" : tertiaryText }}
+                style={{ border: previewTheme === th ? "2px solid #004ccd" : inputBorder, background: previewTheme === th ? "rgba(0,76,205,0.05)" : "transparent", color: previewTheme === th ? "#004ccd" : tertiaryText }}
               >
                 {th === "light" ? "Terang" : "Gelap"}
               </button>
@@ -353,9 +360,9 @@ export default function SettingsPage() {
             {(["id", "en"] as const).map((l) => (
               <button
                 key={l}
-                onClick={() => setLang(l)}
+                onClick={() => setPreviewLang(l)}
                 className="py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ border: lang === l ? "2px solid #004ccd" : inputBorder, background: lang === l ? "rgba(0,76,205,0.05)" : "transparent", color: lang === l ? "#004ccd" : tertiaryText }}
+                style={{ border: previewLang === l ? "2px solid #004ccd" : inputBorder, background: previewLang === l ? "rgba(0,76,205,0.05)" : "transparent", color: previewLang === l ? "#004ccd" : tertiaryText }}
               >
                 {l === "id" ? "Indonesia" : "English"}
               </button>
