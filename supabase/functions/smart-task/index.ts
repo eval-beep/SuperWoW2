@@ -113,19 +113,26 @@ Deno.serve(async (req: Request) => {
   }
 
   // Log every incoming webhook to webhook_logs
-  const { error: whLogError } = await supabase.from("webhook_logs").insert({
+  const { data: whInserted, error: whLogError } = await supabase.from("webhook_logs").insert({
     webhook_type: dbType,
     cloud_id: cloud_id,
     trans_id: trans_id ?? null,
     raw_payload: payload,
     status: "success",
-    command_type_match: commandTypeMatch,
-  });
+  }).select("id").maybeSingle();
   if (whLogError) {
     console.error("webhook_logs insert error:", whLogError.message, whLogError.details, whLogError.hint);
     errors.push(`webhook_logs: ${whLogError.message}`);
   } else {
-    console.log("webhook_logs inserted OK, command_type_match:", commandTypeMatch);
+    console.log("webhook_logs inserted OK, id:", whInserted?.id);
+    // Try to update command_type_match if column exists
+    if (whInserted?.id && trans_id) {
+      const { error: updateErr } = await supabase
+        .from("webhook_logs")
+        .update({ command_type_match: commandTypeMatch })
+        .eq("id", whInserted.id);
+      if (updateErr) console.log("command_type_match update skipped:", updateErr.message);
+    }
   }
 
   try {
