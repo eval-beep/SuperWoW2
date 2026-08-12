@@ -441,10 +441,6 @@ export function ThemeLanguageProvider({ children }: { children: ReactNode }) {
     [lang]
   );
 
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   return (
     <ThemeLanguageContext.Provider value={{ theme, lang, setTheme, setLang, t }}>
       {children}
