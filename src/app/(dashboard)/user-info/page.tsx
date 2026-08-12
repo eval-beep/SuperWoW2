@@ -12,6 +12,11 @@ interface Userinfo {
   privilege: number;
   password: string;
   rfid: string;
+  finger_count: number;
+  face_count: number;
+  vein_count: number;
+  template: string;
+  raw_payload: Record<string, unknown> | null;
   synced_at: string;
   created_at: string;
 }
@@ -310,7 +315,7 @@ export default function UserInfoPage() {
                     filteredUsers.map((user, i) => {
                       const priv = getPrivilegeInfo(user.privilege);
                       return (
-                        <tr key={user.id} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                        <tr key={user.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, user })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
                           <td className="py-3 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</td>
                           <td className="py-3 px-3">
                             <div className="flex items-center gap-3">
@@ -504,8 +509,11 @@ export default function UserInfoPage() {
       {/* Detail Modal */}
       {detailModal.open && detailModal.user && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, user: null })}>
-          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail User</h3>
+          <div className="w-full max-w-md rounded-xl p-4 max-h-[80vh] overflow-y-auto" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail User</h3>
+              <span className="material-symbols-outlined text-[14px] cursor-pointer" style={{ color: "#737687" }} onClick={() => setDetailModal({ open: false, user: null })}>close</span>
+            </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
                 <span style={{ color: "#737687" }}>PIN</span>
@@ -513,7 +521,7 @@ export default function UserInfoPage() {
               </div>
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
                 <span style={{ color: "#737687" }}>Nama</span>
-                <span className="font-medium" style={{ color: "#1a1c1c" }}>{detailModal.user.name}</span>
+                <span className="font-medium" style={{ color: "#1a1c1c" }}>{detailModal.user.name || "-"}</span>
               </div>
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
                 <span style={{ color: "#737687" }}>Privilege</span>
@@ -528,14 +536,36 @@ export default function UserInfoPage() {
                 <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.password || "-"}</span>
               </div>
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
-                <span style={{ color: "#737687" }}>RFID</span>
-                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.rfid || "-"}</span>
+                <span style={{ color: "#737687" }}>Finger</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.finger_count || 0}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Face</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.face_count || 0}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Vein</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.vein_count || 0}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Template</span>
+                <span className="font-medium text-right max-w-[200px] truncate" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.template || "-"}</span>
+              </div>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
+                <span style={{ color: "#737687" }}>Synced At</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.synced_at ? formatDate(detailModal.user.synced_at) : "-"}</span>
               </div>
               <div className="flex justify-between items-center gap-3 py-1.5 text-xs">
                 <span style={{ color: "#737687" }}>Created At</span>
                 <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.created_at ? formatDate(detailModal.user.created_at) : "-"}</span>
               </div>
             </div>
+            {detailModal.user.raw_payload && (
+              <div className="mt-3">
+                <p className="text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Raw Payload dari Device</p>
+                <pre className="rounded-lg p-2 text-[10px] overflow-auto max-h-40" style={{ background: "#1a1c1c", fontFamily: "JetBrains Mono", color: "#a6e3a1" }}>{JSON.stringify(detailModal.user.raw_payload, null, 2)}</pre>
+              </div>
+            )}
             <div className="flex gap-2 mt-3">
               <button onClick={() => { setDetailModal({ open: false, user: null }); setEditModal({ open: true, user: detailModal.user }); setEditForm({ name: detailModal.user!.name, privilege: detailModal.user!.privilege }); }} className="flex-1 py-2 text-xs font-medium rounded-lg" style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#004ccd" }}>
                 <span className="material-symbols-outlined text-[14px] align-middle mr-1">edit</span>Edit
