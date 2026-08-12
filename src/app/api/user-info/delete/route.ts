@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseDelete } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, columnExists } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const userCloudId = await getUserCloudId(user.id);
+    const hasUserCol = await columnExists("pins", "user_id");
 
     const body = await request.json();
     const { pin, mode } = body;
@@ -19,9 +20,16 @@ export async function POST(request: NextRequest) {
       } catch { /* continue */ }
     }
 
+    const pinsFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}` };
+    const userinfosFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}` };
+    if (hasUserCol) {
+      pinsFilter.user_id = `eq.${user.id}`;
+      userinfosFilter.user_id = `eq.${user.id}`;
+    }
+
     await Promise.all([
-      supabaseDelete("pins", { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}`, user_id: `eq.${user.id}` }),
-      supabaseDelete("userinfos", { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}`, user_id: `eq.${user.id}` }),
+      supabaseDelete("pins", pinsFilter),
+      supabaseDelete("userinfos", userinfosFilter),
     ]);
     return NextResponse.json({ success: true, message: "Berhasil dihapus" });
   } catch (e) {

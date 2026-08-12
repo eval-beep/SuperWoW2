@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand, COMMAND_TYPES } from "@/lib/fingerspot";
 import { supabaseInsert, supabaseDelete, supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, columnExists } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const userCloudId = await getUserCloudId(user.id);
+    const hasUserCol = await columnExists("command_logs", "user_id");
 
     const body = await request.json();
     const { command, params } = body;
@@ -16,28 +17,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
     }
 
+    const transFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}` };
+    if (hasUserCol) transFilter.user_id = `eq.${user.id}`;
+
     const { data: maxRow } = await supabaseSelect("command_logs", {
       select: "trans_id",
       order: { column: "trans_id", ascending: false },
       limit: 1,
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: transFilter,
     });
     const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
     const result = await sendFingerspotCommand(command, { ...params, cloud_id: userCloudId, trans_id: String(transId) });
 
     try {
-      await supabaseInsert("command_logs", {
+      const logData: Record<string, unknown> = {
         command_type: command,
         cloud_id: userCloudId,
-        user_id: user.id,
         trans_id: transId,
         endpoint: command,
         request_payload: params,
         response_payload: result.data || result,
         status: result.success ? "success" : "failed",
         error_message: result.data?.error || result.data?.message || null,
-      });
+      };
+      if (hasUserCol) logData.user_id = user.id;
+      await supabaseInsert("command_logs", logData);
     } catch { /* ignore log errors */ }
 
     if (result.success && result.data) {
@@ -59,28 +64,33 @@ export async function POST(request: NextRequest) {
     try {
       const user = await requireAuth(request);
       const userCloudId = await getUserCloudId(user.id);
+      const hasUserCol = await columnExists("command_logs", "user_id");
       const body = await request.json();
       const { command, params } = body;
+
+      const transFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}` };
+      if (hasUserCol) transFilter.user_id = `eq.${user.id}`;
 
       const { data: maxRow } = await supabaseSelect("command_logs", {
         select: "trans_id",
         order: { column: "trans_id", ascending: false },
         limit: 1,
-        filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+        filters: transFilter,
       });
       const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
-      await supabaseInsert("command_logs", {
+      const logData: Record<string, unknown> = {
         command_type: command,
         cloud_id: userCloudId,
-        user_id: user.id,
         trans_id: transId,
         endpoint: command,
         request_payload: params,
         response_payload: { error: (e as Error).message },
         status: "failed",
         error_message: (e as Error).message,
-      });
+      };
+      if (hasUserCol) logData.user_id = user.id;
+      await supabaseInsert("command_logs", logData);
     } catch { /* ignore */ }
 
     return NextResponse.json({ success: false, status_code: 500, data: { error: (e as Error).message } }, { status: 500 });
@@ -90,6 +100,8 @@ export async function POST(request: NextRequest) {
 async function saveAttlogs(cloudId: string, userId: string, transId: number, data: Record<string, unknown>) {
   const records = Array.isArray(data) ? data : data.data;
   if (!Array.isArray(records)) return;
+
+  const hasUserCol = await columnExists("attlogs", "user_id");
 
   for (const rec of records) {
     const pin = String(rec.pin || "");
@@ -106,9 +118,8 @@ async function saveAttlogs(cloudId: string, userId: string, transId: number, dat
     const statusScan = Number(rec.status_scan ?? 0);
 
     try {
-      await supabaseInsert("attlogs", {
+      const insertData: Record<string, unknown> = {
         cloud_id: cloudId,
-        user_id: userId,
         pin,
         scan_time: scanTimeISO,
         verify_method: verifyMethod || null,
@@ -116,7 +127,9 @@ async function saveAttlogs(cloudId: string, userId: string, transId: number, dat
         source: "api_pull",
         trans_id: transId || null,
         raw_payload: rec,
-      });
+      };
+      if (hasUserCol) insertData.user_id = userId;
+      await supabaseInsert("attlogs", insertData);
     } catch { /* skip duplicate */ }
   }
 }
@@ -129,10 +142,11 @@ async function saveUserinfo(cloudId: string, userId: string, data: Record<string
   const pin = String(userData.pin || "");
   if (!pin) return;
 
+  const hasUserCol = await columnExists("userinfos", "user_id");
+
   try {
-    await supabaseInsert("userinfos", {
+    const insertData: Record<string, unknown> = {
       cloud_id: cloudId,
-      user_id: userId,
       pin,
       name: userData.name || null,
       privilege: Number(userData.privilege || 0),
@@ -141,7 +155,9 @@ async function saveUserinfo(cloudId: string, userId: string, data: Record<string
       template: userData.template || null,
       raw_payload: userData,
       synced_at: new Date().toISOString(),
-    });
+    };
+    if (hasUserCol) insertData.user_id = userId;
+    await supabaseInsert("userinfos", insertData);
   } catch { /* skip */ }
 }
 
@@ -157,15 +173,20 @@ async function savePins(cloudId: string, userId: string, data: Record<string, un
 
   if (pinArr.length === 0) return;
 
-  await supabaseDelete("pins", { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` });
+  const hasUserCol = await columnExists("pins", "user_id");
+
+  const deleteFilter: Record<string, string> = { cloud_id: `eq.${cloudId}` };
+  if (hasUserCol) deleteFilter.user_id = `eq.${userId}`;
+  await supabaseDelete("pins", deleteFilter);
 
   for (const pin of pinArr) {
     try {
-      await supabaseInsert("pins", {
+      const insertData: Record<string, unknown> = {
         cloud_id: cloudId,
-        user_id: userId,
         pin,
-      });
+      };
+      if (hasUserCol) insertData.user_id = userId;
+      await supabaseInsert("pins", insertData);
     } catch { /* skip duplicate */ }
   }
 }

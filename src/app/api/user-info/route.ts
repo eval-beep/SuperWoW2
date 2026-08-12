@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseSelect, supabaseInsert, supabaseUpdate } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, columnExists } from "@/lib/user-settings";
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,26 +36,36 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const userCloudId = await getUserCloudId(user.id);
+    const hasUserCol = await columnExists("userinfos", "user_id");
 
     const body = await request.json();
     const { pin, name, privilege, password, rfid } = body;
     if (!pin || !name) return NextResponse.json({ error: "pin dan name harus diisi" }, { status: 400 });
 
+    const existingFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}` };
+    if (hasUserCol) existingFilter.user_id = `eq.${user.id}`;
+
     const { data: existing } = await supabaseSelect("userinfos", {
-      select: "id", filters: { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}`, user_id: `eq.${user.id}` },
+      select: "id", filters: existingFilter,
     });
 
     if (existing && existing.length > 0) {
+      const updateFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}` };
+      if (hasUserCol) updateFilter.user_id = `eq.${user.id}`;
+
       const result = await supabaseUpdate("userinfos", {
         name, privilege: privilege || 1, password: password || "", rfid: rfid || "", synced_at: new Date().toISOString(),
-      }, { cloud_id: `eq.${userCloudId}`, pin: `eq.${pin}`, user_id: `eq.${user.id}` });
+      }, updateFilter);
       return NextResponse.json({ success: true, data: result });
     }
 
-    const result = await supabaseInsert("userinfos", {
-      cloud_id: userCloudId, user_id: user.id, pin, name, privilege: privilege || 1, password: password || "", rfid: rfid || "",
+    const insertData: Record<string, unknown> = {
+      cloud_id: userCloudId, pin, name, privilege: privilege || 1, password: password || "", rfid: rfid || "",
       template: "", raw_payload: { source: "manual", cloud_id: userCloudId, pin, name }, synced_at: new Date().toISOString(),
-    });
+    };
+    if (hasUserCol) insertData.user_id = user.id;
+
+    const result = await supabaseInsert("userinfos", insertData);
     return NextResponse.json({ success: true, data: result });
   } catch (e) {
     if ((e as Error).message === "UNAUTHORIZED") {
@@ -68,6 +78,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request);
+    const hasUserCol = await columnExists("userinfos", "user_id");
 
     const body = await request.json();
     const { id, pin, name, privilege } = body;
@@ -80,8 +91,9 @@ export async function PUT(request: NextRequest) {
     if (Object.keys(updateData).length === 0) return NextResponse.json({ error: "Minimal satu field harus diupdate" }, { status: 400 });
 
     const filters: Record<string, string> = id
-      ? { id: `eq.${id}`, user_id: `eq.${user.id}` }
-      : { pin: `eq.${pin}`, user_id: `eq.${user.id}` };
+      ? { id: `eq.${id}` }
+      : { pin: `eq.${pin}` };
+    if (hasUserCol) filters.user_id = `eq.${user.id}`;
 
     const result = await supabaseUpdate("userinfos", updateData, filters);
     return NextResponse.json({ success: true, data: result });

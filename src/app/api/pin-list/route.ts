@@ -2,17 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand } from "@/lib/fingerspot";
 import { supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, columnExists } from "@/lib/user-settings";
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const userCloudId = await getUserCloudId(user.id);
+    const hasUserCol = await columnExists("pins", "user_id");
+
+    const filters: Record<string, string> = { cloud_id: `eq.${userCloudId}` };
+    if (hasUserCol) filters.user_id = `eq.${user.id}`;
 
     const { data: pins } = await supabaseSelect("pins", {
       select: "*",
       order: { column: "pin", ascending: true },
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters,
     });
 
     return NextResponse.json({ success: true, data: pins || [] });
@@ -28,14 +32,22 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const userCloudId = await getUserCloudId(user.id);
+    const hasUserCol = await columnExists("pins", "user_id");
+
+    const pinsFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}` };
+    const userinfosFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}` };
+    if (hasUserCol) {
+      pinsFilter.user_id = `eq.${user.id}`;
+      userinfosFilter.user_id = `eq.${user.id}`;
+    }
 
     const { data: pins } = await supabaseSelect("pins", {
       select: "pin",
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: pinsFilter,
     });
     const { data: existingUsers } = await supabaseSelect("userinfos", {
       select: "pin",
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: userinfosFilter,
     });
     const existingPins = new Set((existingUsers as { pin: string }[] || []).map((u) => u.pin));
     const missingPins = (pins as { pin: string }[] || []).filter((p) => !existingPins.has(p.pin)).map((p) => p.pin);

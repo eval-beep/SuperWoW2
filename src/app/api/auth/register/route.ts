@@ -55,37 +55,9 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (data.user && !data.session) {
-    return NextResponse.json({
-      success: true,
-      message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
-      requiresVerification: true,
-    });
-  }
-
-  if (data.user && data.session) {
-    const response = NextResponse.json({
-      success: true,
-      user: { id: data.user.id, email: data.user.email },
-    });
-
-    response.cookies.set("sb-access-token", data.session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24,
-    });
-    response.cookies.set("sb-refresh-token", data.session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-
-    return response;
-  }
-
-  return NextResponse.json({ error: "Registrasi gagal. Silakan coba lagi." }, { status: 500 });
+  return NextResponse.json({
+    success: true,
+    message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
+    requiresVerification: true,
+  });
 }
