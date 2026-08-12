@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatFingerspotDate, formatFingerspotTime, parseFingerspotTimestamp } from "@/lib/utils";
+import { useThemeLanguage } from "@/contexts/ThemeLanguageContext";
 
 interface Stats {
   totalUsers: number;
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(0);
   const [cloudIdFilter, setCloudIdFilter] = useState("");
+  const { theme, t } = useThemeLanguage();
 
   useEffect(() => {
     loadSettings().then(() => loadDashboard());
@@ -108,12 +110,21 @@ export default function DashboardPage() {
     }
   }
 
+  const cardStyle = { background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` };
+  const headingColor = theme === "dark" ? "#e4e1ed" : "#1a1c1c";
+  const mutedColor = theme === "dark" ? "#908fa0" : "#737687";
+  const subtleColor = theme === "dark" ? "#c7c4d7" : "#424656";
+  const altBorderColor = theme === "dark" ? "rgba(70,69,84,0.5)" : "rgba(195,198,216,0.2)";
+  const altBgBorder = theme === "dark" ? "rgba(70,69,84,0.5)" : "rgba(195,198,216,0.1)";
+  const rowAltBg = theme === "dark" ? "rgba(41,41,50,0.3)" : "rgba(243,243,243,0.3)";
+  const infoBg = theme === "dark" ? "#292932" : "#f3f3f3";
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="flex items-center gap-3" style={{ color: "#737687" }}>
+        <div className="flex items-center gap-3" style={{ color: mutedColor }}>
           <span className="material-symbols-outlined animate-spin">progress_activity</span>
-          <span style={{ fontFamily: "JetBrains Mono" }}>Memuat dashboard...</span>
+          <span style={{ fontFamily: "JetBrains Mono" }}>{t("loading")}</span>
         </div>
       </div>
     );
@@ -129,29 +140,29 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Device Status Header */}
-      <div className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+      <div className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={cardStyle}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: sc.bg }}>
             <span className="material-symbols-outlined text-xl" style={{ color: sc.color }}>{sc.icon}</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Status Mesin</h2>
+              <h2 className="text-sm font-bold" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>{t("deviceStatus")}</h2>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: sc.bg, color: sc.color }}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: sc.dot }} />
                 {sc.label}
               </span>
             </div>
-            <p className="text-[10px] mt-0.5" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>
-              {deviceStatus.cloudId ? `Cloud ID: ${deviceStatus.cloudId}` : "Tidak ada device terdeteksi"}
+            <p className="text-[10px] mt-0.5" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>
+              {deviceStatus.cloudId ? `${t("cloudId")}: ${deviceStatus.cloudId}` : "Tidak ada device terdeteksi"}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-[10px]" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>
+        <div className="flex items-center gap-4 text-[10px]" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>
           {deviceStatus.lastActivity && (
             <span className="flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">schedule</span>
-              Aktivitas terakhir: {formatTimeAgo(deviceStatus.lastActivity, now)}
+              {t("lastActivity")}: {formatTimeAgo(deviceStatus.lastActivity, now)}
             </span>
           )}
         </div>
@@ -159,11 +170,11 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-xl p-5" style={cardStyle}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: "#737687", letterSpacing: "0.05em" }}>Pengguna Total</p>
-              <p className="text-3xl font-bold mt-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>{stats.totalUsers.toLocaleString()}</p>
+              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: mutedColor, letterSpacing: "0.05em" }}>{t("totalUsers")}</p>
+              <p className="text-3xl font-bold mt-2" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>{stats.totalUsers.toLocaleString()}</p>
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#dbe1ff" }}>
               <span className="material-symbols-outlined text-xl" style={{ color: "#004ccd" }}>group</span>
@@ -171,11 +182,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-xl p-5" style={cardStyle}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: "#737687", letterSpacing: "0.05em" }}>Total Absensi</p>
-              <p className="text-3xl font-bold mt-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>{stats.totalAttlogs.toLocaleString()}</p>
+              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: mutedColor, letterSpacing: "0.05em" }}>{t("totalAttlogs")}</p>
+              <p className="text-3xl font-bold mt-2" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>{stats.totalAttlogs.toLocaleString()}</p>
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#defbe6" }}>
               <span className="material-symbols-outlined text-xl" style={{ color: "#006e2b" }}>fact_check</span>
@@ -183,11 +194,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-xl p-5" style={cardStyle}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: "#737687", letterSpacing: "0.05em" }}>Total Webhook</p>
-              <p className="text-3xl font-bold mt-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>{stats.totalWebhooks.toLocaleString()}</p>
+              <p className="text-xs uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", color: mutedColor, letterSpacing: "0.05em" }}>{t("totalWebhooks")}</p>
+              <p className="text-3xl font-bold mt-2" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>{stats.totalWebhooks.toLocaleString()}</p>
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#fff1f1" }}>
               <span className="material-symbols-outlined text-xl" style={{ color: "#da1e28" }}>webhook</span>
@@ -198,30 +209,30 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Attendance */}
-        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-2xl p-5" style={cardStyle}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Absensi Terbaru</h3>
-            <a href="/attendance-logs" className="text-xs font-medium hover:underline" style={{ color: "#004ccd" }}>Lihat Semua</a>
+            <h3 className="text-base font-bold" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>{t("recentScans")}</h3>
+            <a href="/attendance-logs" className="text-xs font-medium hover:underline" style={{ color: "#004ccd" }}>{t("viewAll")}</a>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>PIN</th>
-                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>Nama</th>
-                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>Tanggal</th>
-                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>Waktu</th>
-                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>Status</th>
+                <tr style={{ borderBottom: `1px solid ${altBorderColor}` }}>
+                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>PIN</th>
+                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>{t("name")}</th>
+                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>{t("date")}</th>
+                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>{t("time")}</th>
+                  <th className="text-left py-3 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>{t("status")}</th>
                 </tr>
               </thead>
               <tbody>
                 {recentAttlogs.length > 0 ? (
                   recentAttlogs.map((log, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                    <tr key={i} style={{ borderBottom: `1px solid ${altBgBorder}`, background: i % 2 === 0 ? "transparent" : rowAltBg }}>
                       <td className="py-3 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{log.pin}</td>
-                      <td className="py-3 px-3" style={{ color: "#1a1c1c" }}>{log.name}</td>
-                      <td className="py-3 px-3" style={{ color: "#737687" }}>{log.date}</td>
-                      <td className="py-3 px-3" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{log.time}</td>
+                      <td className="py-3 px-3" style={{ color: headingColor }}>{log.name}</td>
+                      <td className="py-3 px-3" style={{ color: mutedColor }}>{log.date}</td>
+                      <td className="py-3 px-3" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>{log.time}</td>
                       <td className="py-3 px-3">
                         <span
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
@@ -230,13 +241,13 @@ export default function DashboardPage() {
                             color: log.status === "MASUK" ? "#006e2b" : "#004ccd",
                           }}
                         >
-                          {log.status}
+                          {log.status === "MASUK" ? t("scanIn") : t("scanOut")}
                         </span>
                       </td>
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan={5} className="py-6 text-center" style={{ color: "#737687" }}>Belum ada data absensi</td></tr>
+                  <tr><td colSpan={5} className="py-6 text-center" style={{ color: mutedColor }}>{t("noActivity")}</td></tr>
                 )}
               </tbody>
             </table>
@@ -244,24 +255,24 @@ export default function DashboardPage() {
         </div>
 
         {/* System Health */}
-        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <h3 className="text-base font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Kesehatan Sistem</h3>
+        <div className="rounded-2xl p-5" style={cardStyle}>
+          <h3 className="text-base font-bold mb-4" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>{t("dataHealth")}</h3>
           <div className="space-y-4">
-            <div className="rounded-xl p-4" style={{ background: "#f3f3f3" }}>
+            <div className="rounded-xl p-4" style={{ background: infoBg }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-outlined text-lg" style={{ color: "#004ccd" }}>speed</span>
-                <span className="text-xs font-medium" style={{ color: "#424656" }}>Tingkat Respons</span>
+                <span className="text-xs font-medium" style={{ color: subtleColor }}>{t("responseRate")}</span>
               </div>
-              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>240</p>
-              <p className="text-[10px] mt-1" style={{ color: "#737687" }}>ms average</p>
+              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: headingColor }}>240</p>
+              <p className="text-[10px] mt-1" style={{ color: mutedColor }}>ms average</p>
             </div>
-            <div className="rounded-xl p-4" style={{ background: "#f3f3f3" }}>
+            <div className="rounded-xl p-4" style={{ background: infoBg }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-outlined text-lg" style={{ color: "#006e2b" }}>timer</span>
-                <span className="text-xs font-medium" style={{ color: "#424656" }}>Latensi</span>
+                <span className="text-xs font-medium" style={{ color: subtleColor }}>{t("latency")}</span>
               </div>
-              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>0.338</p>
-              <p className="text-[10px] mt-1" style={{ color: "#737687" }}>seconds / 400</p>
+              <p className="text-2xl font-bold" style={{ fontFamily: "JetBrains Mono", color: headingColor }}>0.338</p>
+              <p className="text-[10px] mt-1" style={{ color: mutedColor }}>seconds / 400</p>
             </div>
           </div>
         </div>
