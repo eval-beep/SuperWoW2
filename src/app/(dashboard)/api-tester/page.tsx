@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useThemeLanguage } from "@/contexts/ThemeLanguageContext";
 
 const COMMAND_TYPES = [
   { value: "get_attlog", label: "Get Attendance Log" },
@@ -36,6 +37,7 @@ interface ApiResponse {
 
 function ApiTesterContent() {
   const searchParams = useSearchParams();
+  const { theme, t } = useThemeLanguage();
   const [command, setCommand] = useState(searchParams.get("command") || "get_all_pin");
   const [cloudId, setCloudId] = useState(searchParams.get("cloud_id") || "C2697842930C1634");
   const [pin, setPin] = useState("");
@@ -163,7 +165,7 @@ function ApiTesterContent() {
     if (responseJson) navigator.clipboard.writeText(responseJson);
   }
 
-  const inputStyle = { border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c", fontSize: "12px", padding: "6px 10px", borderRadius: "8px", width: "100%" as const };
+  const inputStyle = { border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c", fontSize: "12px", padding: "6px 10px", borderRadius: "8px", width: "100%" as const };
 
   const filteredTz = TIMEZONES.map((g) => ({
     ...g,
@@ -173,21 +175,21 @@ function ApiTesterContent() {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Pengujian API</h1>
-        <p className="text-xs sm:text-sm mt-1" style={{ color: "#737687" }}>Kirim perintah langsung ke device biometrik</p>
+        <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("apiTester")}</h1>
+        <p className="text-xs sm:text-sm mt-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("apiTesterDesc")}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Request Panel */}
-        <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-3" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-lg sm:text-xl" style={{ color: "#004ccd" }}>send_and_archive</span>
-            <h3 className="text-sm font-semibold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Request Builder</h3>
+            <h3 className="text-sm font-semibold" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>Request Builder</h3>
           </div>
 
           {/* Command */}
           <div>
-            <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>Command</label>
+            <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Command</label>
               <select value={command} onChange={(e) => setCommand(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }}>
               {COMMAND_TYPES.map((cmd) => <option key={cmd.value} value={cmd.value}>{cmd.label}</option>)}
             </select>
@@ -195,12 +197,12 @@ function ApiTesterContent() {
 
           {/* Cloud ID — always shown */}
           <div>
-            <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>cloud_id</label>
+            <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>cloud_id</label>
             <input value={cloudId} onChange={(e) => setCloudId(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="C2697842930C1634" />
             {cloudIdHistory.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1">
                 {cloudIdHistory.map((id) => (
-                  <button key={id} onClick={() => setCloudId(id)} className="text-[10px] px-2 py-0.5 rounded-lg hover:bg-[#dbe1ff]" style={{ background: "#f3f3f3", fontFamily: "JetBrains Mono" }}>{id}</button>
+                  <button key={id} onClick={() => setCloudId(id)} className="text-[10px] px-2 py-0.5 rounded-lg hover:bg-[#dbe1ff]" style={{ background: theme === "dark" ? "#292932" : "#f3f3f3", fontFamily: "JetBrains Mono" }}>{id}</button>
                 ))}
               </div>
             )}
@@ -210,11 +212,11 @@ function ApiTesterContent() {
           {command === "get_attlog" && (
             <>
               <div>
-                <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>start_date</label>
+                <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>start_date</label>
                 <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full rounded-lg text-xs" style={inputStyle} />
               </div>
               <div>
-                <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>end_date</label>
+                <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>end_date</label>
                 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full rounded-lg text-xs" style={inputStyle} />
               </div>
             </>
@@ -223,7 +225,7 @@ function ApiTesterContent() {
           {/* === GET USER INFO === */}
           {command === "get_userinfo" && (
             <div>
-              <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>pin</label>
+              <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>pin</label>
               <input value={pin} onChange={(e) => setPin(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="1" />
             </div>
           )}
@@ -235,16 +237,16 @@ function ApiTesterContent() {
                 <p className="text-[9px] uppercase tracking-wider mb-1.5 font-bold" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>data object</p>
                 <div className="space-y-2">
                   <div>
-                    <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>pin</label>
+                    <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>pin</label>
                     <input value={pin} onChange={(e) => setPin(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="1" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>name</label>
+                    <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>name</label>
                     <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg text-xs" style={inputStyle} placeholder="john" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>privilege</label>
+                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>privilege</label>
                       <select value={privilege} onChange={(e) => setPrivilege(e.target.value)} className="w-full rounded-lg text-xs" style={inputStyle}>
                         <option value="1">1 — User</option>
                         <option value="2">2 — Admin</option>
@@ -252,17 +254,17 @@ function ApiTesterContent() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>password</label>
+                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>password</label>
                       <input value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="111" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>rfid</label>
+                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>rfid</label>
                       <input value={rfid} onChange={(e) => setRfid(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="XXXXX" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>template</label>
+                      <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>template</label>
                       <input value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="5345dsfd..." />
                     </div>
                   </div>
@@ -274,7 +276,7 @@ function ApiTesterContent() {
           {/* === DELETE USER INFO === */}
           {command === "delete_userinfo" && (
             <div>
-              <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>pin</label>
+              <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>pin</label>
               <input value={pin} onChange={(e) => setPin(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="1" />
             </div>
           )}
@@ -283,11 +285,11 @@ function ApiTesterContent() {
           {command === "register_online" && (
             <>
               <div>
-                <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>pin</label>
+                <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>pin</label>
                 <input value={pin} onChange={(e) => setPin(e.target.value)} className="w-full rounded-lg text-xs" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }} placeholder="1" />
               </div>
               <div>
-                <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>verification</label>
+                <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>verification</label>
                 <select value={verification} onChange={(e) => setVerification(e.target.value)} className="w-full rounded-lg text-xs" style={inputStyle}>
                   <option value="0">0 — Password</option>
                   <option value="1">1 — Fingerprint</option>
@@ -301,27 +303,27 @@ function ApiTesterContent() {
           {/* === SET TIME === */}
           {command === "set_time" && (
             <div data-tz-picker>
-              <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>timezone</label>
+              <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>timezone</label>
               <div className="relative">
                 <button type="button" onClick={() => { setTzOpen(!tzOpen); setTzSearch(""); }} className="w-full px-3 py-1.5 rounded-lg text-xs text-left flex items-center justify-between" style={{ ...inputStyle, fontFamily: "JetBrains Mono" }}>
                   <span>{timezone}</span>
-                  <span className="material-symbols-outlined text-[14px]" style={{ color: "#737687" }}>unfold_more</span>
+                  <span className="material-symbols-outlined text-[14px]" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>unfold_more</span>
                 </button>
                 {tzOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-lg shadow-lg overflow-hidden" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)", maxHeight: "180px" }}>
-                    <div className="p-1.5" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
-                      <input autoFocus value={tzSearch} onChange={(e) => setTzSearch(e.target.value)} className="w-full px-2 py-1 rounded text-[11px] outline-none" style={{ background: "#f3f3f3", color: "#1a1c1c" }} placeholder="Cari timezone..." />
+                  <div className="absolute z-50 mt-1 w-full rounded-lg shadow-lg overflow-hidden" style={{ background: theme === "dark" ? "#1f1f27" : "#ffffff", border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, maxHeight: "180px" }}>
+                    <div className="p-1.5" style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.2)" : "rgba(195,198,216,0.2)"}` }}>
+                      <input autoFocus value={tzSearch} onChange={(e) => setTzSearch(e.target.value)} className="w-full px-2 py-1 rounded text-[11px] outline-none" style={{ background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} placeholder="Cari timezone..." />
                     </div>
                     <div className="overflow-y-auto" style={{ maxHeight: "150px" }}>
                       {filteredTz.map((group) => (
                         <div key={group.group}>
-                          <div className="px-2.5 py-1 text-[9px] uppercase tracking-wider font-bold" style={{ fontFamily: "JetBrains Mono", color: "#737687", background: "#f9f9f9" }}>{group.group}</div>
+                          <div className="px-2.5 py-1 text-[9px] uppercase tracking-wider font-bold" style={{ fontFamily: "JetBrains Mono", color: theme === "dark" ? "#908fa0" : "#737687", background: "#f9f9f9" }}>{group.group}</div>
                           {group.items.map((tz) => (
-                            <button key={tz} onClick={() => { setTimezone(tz); setTzOpen(false); setTzSearch(""); }} className="w-full text-left px-2.5 py-1.5 text-[11px] hover:bg-[#dbe1ff] transition-colors" style={{ fontFamily: "JetBrains Mono", color: tz === timezone ? "#004ccd" : "#1a1c1c", background: tz === timezone ? "rgba(0,76,205,0.08)" : "transparent" }}>{tz}</button>
+                            <button key={tz} onClick={() => { setTimezone(tz); setTzOpen(false); setTzSearch(""); }} className="w-full text-left px-2.5 py-1.5 text-[11px] hover:bg-[#dbe1ff] transition-colors" style={{ fontFamily: "JetBrains Mono", color: tz === timezone ? "#004ccd" : (theme === "dark" ? "#e4e1ed" : "#1a1c1c"), background: tz === timezone ? "rgba(0,76,205,0.08)" : "transparent" }}>{tz}</button>
                           ))}
                         </div>
                       ))}
-                      {filteredTz.length === 0 && <div className="px-3 py-2 text-[11px]" style={{ color: "#737687" }}>Tidak ditemukan</div>}
+                      {filteredTz.length === 0 && <div className="px-3 py-2 text-[11px]" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("noData")}</div>}
                     </div>
                   </div>
                 )}
@@ -331,21 +333,21 @@ function ApiTesterContent() {
 
           {/* GET ALL PIN — no extra fields needed */}
           {command === "get_all_pin" && (
-            <div className="rounded-lg p-2 text-[10px]" style={{ background: "#f3f3f3", color: "#737687" }}>
+            <div className="rounded-lg p-2 text-[10px]" style={{ background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#908fa0" : "#737687" }}>
               Tidak ada parameter tambahan. Hanya <code style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>trans_id</code> + <code style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>cloud_id</code>.
             </div>
           )}
 
           {/* Request Body Preview */}
           <div>
-            <label className="block text-[10px] font-medium mb-0.5" style={{ color: "#737687" }}>Request Body</label>
+            <label className="block text-[10px] font-medium mb-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Request Body</label>
             <pre className="rounded-lg p-2 text-[10px] overflow-auto max-h-32" style={{ background: "#1a1c1c", fontFamily: "JetBrains Mono", color: "#a6e3a1" }}>{requestPreview}</pre>
           </div>
 
           {/* Execute */}
           <button onClick={handleExecute} disabled={loading || !cloudId} className="w-full py-2 rounded-lg text-white font-semibold text-xs flex items-center justify-center gap-2 disabled:opacity-50" style={{ background: "#004ccd" }}>
             <span className={`material-symbols-outlined text-[18px] ${loading ? "animate-spin" : ""}`}>{loading ? "progress_activity" : "bolt"}</span>
-            {loading ? "Mengirim..." : "Send Request"}
+            {loading ? t("loading") : t("send")}
           </button>
         </div>
 
@@ -353,7 +355,7 @@ function ApiTesterContent() {
         <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 space-y-0" style={{ background: "#1a1c1c" }}>
           <div className="mb-3 sm:mb-4">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-white" style={{ fontFamily: "Hanken Grotesk" }}>Device Endpoint</h3>
+              <h3 className="text-sm font-semibold text-white" style={{ fontFamily: "Hanken Grotesk" }}>{t("endpoint")}</h3>
               <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider" style={{ fontFamily: "JetBrains Mono", background: "rgba(0,110,43,0.2)", color: "#93f59e" }}>STABLE</span>
             </div>
             <div className="px-3 py-2 rounded-lg text-[10px] sm:text-xs break-all" style={{ fontFamily: "JetBrains Mono", background: "rgba(255,255,255,0.05)", color: "#908fa0" }}>{endpointUrl}</div>
