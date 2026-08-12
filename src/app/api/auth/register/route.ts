@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
-  const { email, password, full_name } = await request.json();
+  let body: Record<string, string>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Request body invalid" }, { status: 400 });
+  }
+
+  const email = body.email?.trim();
+  const password = body.password;
+  const full_name = body.full_name?.trim() || "";
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email dan password harus diisi" }, { status: 400 });
@@ -21,13 +30,18 @@ export async function POST(request: NextRequest) {
     email,
     password,
     options: {
-      data: { full_name: full_name || "", nickname: full_name || "" },
+      data: { full_name, nickname: full_name },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/auth/callback`,
     },
   });
 
   if (error) {
+    console.error("[Register Error]", error.message);
     if (error.message.includes("already registered")) {
-      return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 409 });
+      return NextResponse.json({ error: "Email sudah terdaftar. Silakan masuk." }, { status: 409 });
+    }
+    if (error.message.includes("valid email")) {
+      return NextResponse.json({ error: "Format email tidak valid" }, { status: 400 });
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -35,17 +49,17 @@ export async function POST(request: NextRequest) {
   if (data.user && !data.session) {
     return NextResponse.json({
       success: true,
-      message: "Registrasi berhasil. Silakan cek email untuk verifikasi.",
+      message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
       requiresVerification: true,
     });
   }
 
-  const response = NextResponse.json({
-    success: true,
-    user: { id: data.user!.id, email: data.user!.email },
-  });
+  if (data.user && data.session) {
+    const response = NextResponse.json({
+      success: true,
+      user: { id: data.user.id, email: data.user.email },
+    });
 
-  if (data.session) {
     response.cookies.set("sb-access-token", data.session.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -60,7 +74,9 @@ export async function POST(request: NextRequest) {
       path: "/",
       maxAge: 60 * 60 * 24 * 30,
     });
+
+    return response;
   }
 
-  return response;
+  return NextResponse.json({ error: "Registrasi gagal. Silakan coba lagi." }, { status: 500 });
 }

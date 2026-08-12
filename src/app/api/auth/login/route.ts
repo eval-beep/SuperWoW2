@@ -2,7 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
-  const { email, password } = await request.json();
+  let body: Record<string, string>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Request body invalid" }, { status: 400 });
+  }
+
+  const email = body.email?.trim();
+  const password = body.password;
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email dan password harus diisi" }, { status: 400 });
@@ -19,10 +27,14 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    const msg = error.message.includes("Invalid login")
-      ? "Email atau password salah"
-      : error.message;
-    return NextResponse.json({ error: msg }, { status: 401 });
+    console.error("[Login Error]", error.message);
+    if (error.message.includes("Invalid login")) {
+      return NextResponse.json({ error: "Email atau password salah" }, { status: 401 });
+    }
+    if (error.message.includes("Email not confirmed")) {
+      return NextResponse.json({ error: "Email belum diverifikasi. Silakan cek inbox Anda." }, { status: 401 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
   const response = NextResponse.json({

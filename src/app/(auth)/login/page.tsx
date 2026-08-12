@@ -52,12 +52,12 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, full_name: fullName }),
+        body: JSON.stringify({ email: email.trim(), password, full_name: fullName.trim() }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         if (data.requiresVerification) {
-          setMessage("Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.");
+          setMessage(data.message || "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.");
           setView("login");
         } else {
           router.push("/dashboard");
@@ -65,7 +65,8 @@ export default function LoginPage() {
       } else {
         setError(data.error || "Registrasi gagal");
       }
-    } catch {
+    } catch (err) {
+      console.error("Register error:", err);
       setError("Gagal terhubung ke server");
     } finally {
       setLoading(false);
@@ -82,10 +83,16 @@ export default function LoginPage() {
           redirectTo: `${window.location.origin}/api/auth/callback`,
         },
       });
-      if (error) setError(error.message);
-      if (data?.url) window.location.href = data.url;
-    } catch {
-      setError("Gagal menginisiasi Google login");
+      if (error) {
+        console.error("Google OAuth error:", error);
+        setError("Google login gagal: " + error.message);
+      }
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("Gagal menginisiasi Google login. Pastikan Google OAuth sudah dikonfigurasi di Supabase.");
     } finally {
       setLoading(false);
     }
