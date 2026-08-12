@@ -8,19 +8,15 @@ interface Settings {
   supabase_anon_key: string;
   cloud_id: string;
   fingerspot_api_url: string;
-  theme: "light" | "dark";
-  language: "id" | "en";
 }
 
 export default function SettingsPage() {
-  const { theme, t } = useThemeLanguage();
+  const { theme, lang, setTheme, setLang, t } = useThemeLanguage();
   const [settings, setSettings] = useState<Settings>({
     supabase_url: "",
     supabase_anon_key: "",
     cloud_id: "",
     fingerspot_api_url: "",
-    theme: "light",
-    language: "id",
   });
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -43,8 +39,6 @@ export default function SettingsPage() {
           supabase_anon_key: data.supabase_anon_key || "",
           cloud_id: data.cloud_id || "",
           fingerspot_api_url: data.fingerspot_api_url || "",
-          theme: data.theme || "light",
-          language: data.language || "id",
         });
       }
     } catch (err) {
@@ -72,7 +66,7 @@ export default function SettingsPage() {
       await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({ ...settings, theme, language: lang }),
       });
       const toast = document.getElementById("settings-toast");
       if (toast) {
@@ -344,9 +338,9 @@ export default function SettingsPage() {
             {(["light", "dark"] as const).map((th) => (
               <button
                 key={th}
-                onClick={() => updateSetting("theme", th)}
+                onClick={() => setTheme(th)}
                 className="py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ border: settings.theme === th ? "2px solid #004ccd" : inputBorder, background: settings.theme === th ? "rgba(0,76,205,0.05)" : "transparent", color: settings.theme === th ? "#004ccd" : tertiaryText }}
+                style={{ border: theme === th ? "2px solid #004ccd" : inputBorder, background: theme === th ? "rgba(0,76,205,0.05)" : "transparent", color: theme === th ? "#004ccd" : tertiaryText }}
               >
                 {th === "light" ? "Terang" : "Gelap"}
               </button>
@@ -356,14 +350,14 @@ export default function SettingsPage() {
         <div>
           <label className="block text-xs font-medium mb-2" style={{ color: secondaryText }}>Bahasa</label>
           <div className="grid grid-cols-2 gap-2">
-            {(["id", "en"] as const).map((lang) => (
+            {(["id", "en"] as const).map((l) => (
               <button
-                key={lang}
-                onClick={() => updateSetting("language", lang)}
+                key={l}
+                onClick={() => setLang(l)}
                 className="py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ border: settings.language === lang ? "2px solid #004ccd" : inputBorder, background: settings.language === lang ? "rgba(0,76,205,0.05)" : "transparent", color: settings.language === lang ? "#004ccd" : tertiaryText }}
+                style={{ border: lang === l ? "2px solid #004ccd" : inputBorder, background: lang === l ? "rgba(0,76,205,0.05)" : "transparent", color: lang === l ? "#004ccd" : tertiaryText }}
               >
-                {lang === "id" ? "Indonesia" : "English"}
+                {l === "id" ? "Indonesia" : "English"}
               </button>
             ))}
           </div>
