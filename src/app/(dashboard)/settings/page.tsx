@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useThemeLanguage } from "@/contexts/ThemeLanguageContext";
 
 interface Settings {
   supabase_url: string;
@@ -12,6 +13,7 @@ interface Settings {
 }
 
 export default function SettingsPage() {
+  const { theme, t } = useThemeLanguage();
   const [settings, setSettings] = useState<Settings>({
     supabase_url: "",
     supabase_anon_key: "",
@@ -151,17 +153,24 @@ export default function SettingsPage() {
   const endpointUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://pktrdpqbowptkatbinhf.supabase.co"}/functions/v1/smart-task`;
   const webhookUrl = deviceResult?.data?.webhook_url || endpointUrl;
 
+  const cardStyle = { background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` };
+  const primaryText = theme === "dark" ? "#e4e1ed" : "#1a1c1c";
+  const secondaryText = theme === "dark" ? "#908fa0" : "#737687";
+  const tertiaryText = theme === "dark" ? "#c7c4d7" : "#424656";
+  const inputBg = theme === "dark" ? "#292932" : "#f3f3f3";
+  const inputBorder = `1px solid rgba(195,198,216,0.3)`;
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Pengaturan</h1>
-        <p className="text-sm mt-1" style={{ color: "#737687" }}>Konfigurasi aplikasi dan device</p>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>{t("settings")}</h1>
+        <p className="text-sm mt-1" style={{ color: secondaryText }}>Konfigurasi aplikasi dan device</p>
       </div>
 
       {/* Endpoint URL Card */}
-      <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+      <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>
+          <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
             <span className="material-symbols-outlined text-[20px]" style={{ color: "#006e2b" }}>link</span>Endpoint Webhook
           </h3>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "#defbe6", color: "#006e2b" }}>
@@ -169,10 +178,10 @@ export default function SettingsPage() {
             Aktif
           </span>
         </div>
-        <p className="text-xs" style={{ color: "#737687" }}>URL endpoint untuk menerima data scan dari device Fingerspot secara real-time. Atur URL ini di portal Fingerspot Customer.</p>
-        <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: "#f3f3f3", border: "1px solid rgba(195,198,216,0.2)" }}>
+        <p className="text-xs" style={{ color: secondaryText }}>URL endpoint untuk menerima data scan dari device Fingerspot secara real-time. Atur URL ini di portal Fingerspot Customer.</p>
+        <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: inputBg, border: "1px solid rgba(195,198,216,0.2)" }}>
           <span className="material-symbols-outlined text-[16px] flex-shrink-0" style={{ color: "#004ccd" }}>terminal</span>
-          <code className="flex-1 text-xs break-all" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{webhookUrl}</code>
+          <code className="flex-1 text-xs break-all" style={{ fontFamily: "JetBrains Mono", color: primaryText }}>{webhookUrl}</code>
           <button
             onClick={() => handleCopy(webhookUrl, "endpoint")}
             className="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-medium flex items-center gap-1 transition-all"
@@ -188,12 +197,12 @@ export default function SettingsPage() {
         <div className="rounded-xl p-3" style={{ background: "#fff8e1", border: "1px solid rgba(178,134,0,0.15)" }}>
           <div className="flex items-start gap-2">
             <span className="material-symbols-outlined text-[16px] mt-0.5" style={{ color: "#b28600" }}>info</span>
-            <div className="text-[11px] space-y-1" style={{ color: "#424656" }}>
+            <div className="text-[11px] space-y-1" style={{ color: tertiaryText }}>
               <p className="font-medium">Cara mengatur:</p>
-              <ol className="list-decimal list-inside space-y-0.5" style={{ color: "#737687" }}>
-                <li>Buka <span className="font-medium" style={{ color: "#424656" }}>Fingerspot Customer Portal</span></li>
+              <ol className="list-decimal list-inside space-y-0.5" style={{ color: secondaryText }}>
+                <li>Buka <span className="font-medium" style={{ color: tertiaryText }}>Fingerspot Customer Portal</span></li>
                 <li>Pilih device yang ingin diatur</li>
-                <li>Masukkan URL endpoint di atas ke kolom <span className="font-medium" style={{ color: "#424656" }}>Webhook URL</span></li>
+                <li>Masukkan URL endpoint di atas ke kolom <span className="font-medium" style={{ color: tertiaryText }}>Webhook URL</span></li>
                 <li>Simpan pengaturan di portal Fingerspot</li>
               </ol>
             </div>
@@ -202,20 +211,20 @@ export default function SettingsPage() {
       </div>
 
       {/* Cloud ID & Device */}
-      <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>
+      <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
+        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
           <span className="material-symbols-outlined text-[20px]" style={{ color: "#004ccd" }}>devices</span>Cloud ID Device
         </h3>
-        <p className="text-xs" style={{ color: "#737687" }}>Cloud ID digunakan untuk mengidentifikasi device Fingerspot. Bisa diambil otomatis dari device atau diisi manual.</p>
+        <p className="text-xs" style={{ color: secondaryText }}>Cloud ID digunakan untuk mengidentifikasi device Fingerspot. Bisa diambil otomatis dari device atau diisi manual.</p>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Cloud ID</label>
           <div className="flex gap-2">
             <input
               type="text"
               value={settings.cloud_id}
               onChange={(e) => updateSetting("cloud_id", e.target.value)}
               className="flex-1 px-3 py-2 rounded-xl text-sm"
-              style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}
+              style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
               placeholder="C2697842930C1634"
             />
             <button
@@ -241,21 +250,21 @@ export default function SettingsPage() {
               <div>
                 <p className="font-medium">{deviceResult.message}</p>
                 {deviceResult.data && (
-                  <div className="mt-2 space-y-1" style={{ color: "#424656" }}>
+                  <div className="mt-2 space-y-1" style={{ color: tertiaryText }}>
                     <div className="flex gap-2">
-                      <span style={{ color: "#737687" }}>Nama:</span>
+                      <span style={{ color: secondaryText }}>Nama:</span>
                       <span className="font-medium">{deviceResult.data.device_name}</span>
                     </div>
                     <div className="flex gap-2">
-                      <span style={{ color: "#737687" }}>Cloud ID:</span>
+                      <span style={{ color: secondaryText }}>Cloud ID:</span>
                       <span className="font-medium" style={{ fontFamily: "JetBrains Mono" }}>{deviceResult.data.cloud_id}</span>
                     </div>
                     <div className="flex gap-2 items-start">
-                      <span style={{ color: "#737687" }}>Webhook:</span>
+                      <span style={{ color: secondaryText }}>Webhook:</span>
                       <span className="font-medium break-all" style={{ fontFamily: "JetBrains Mono", fontSize: "10px" }}>{deviceResult.data.webhook_url}</span>
                     </div>
                     <div className="flex gap-2">
-                      <span style={{ color: "#737687" }}>Last Activity:</span>
+                      <span style={{ color: secondaryText }}>Last Activity:</span>
                       <span className="font-medium">{deviceResult.data.last_activity}</span>
                     </div>
                   </div>
@@ -267,40 +276,40 @@ export default function SettingsPage() {
       </div>
 
       {/* API Configuration */}
-      <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>
+      <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
+        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
           <span className="material-symbols-outlined text-[20px]" style={{ color: "#004ccd" }}>api</span>Konfigurasi API
         </h3>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Supabase URL</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Supabase URL</label>
           <input
             type="text"
             value={settings.supabase_url}
             onChange={(e) => updateSetting("supabase_url", e.target.value)}
             className="w-full px-3 py-2 rounded-xl text-sm"
-            style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}
+            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
             placeholder="https://xxx.supabase.co"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Supabase Anon Key</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Supabase Anon Key</label>
           <input
             type="password"
             value={settings.supabase_anon_key}
             onChange={(e) => updateSetting("supabase_anon_key", e.target.value)}
             className="w-full px-3 py-2 rounded-xl text-sm"
-            style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}
+            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
             placeholder="eyJhbGciOiJIUzI1NiIs..."
           />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: "#737687" }}>Fingerspot API URL</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Fingerspot API URL</label>
           <input
             type="text"
             value={settings.fingerspot_api_url}
             onChange={(e) => updateSetting("fingerspot_api_url", e.target.value)}
             className="w-full px-3 py-2 rounded-xl text-sm"
-            style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }}
+            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
             placeholder="https://developer.fingerspot.io/api"
           />
         </div>
@@ -308,7 +317,7 @@ export default function SettingsPage() {
           onClick={handleTestConnection}
           disabled={testing}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50"
-          style={{ border: "1px solid rgba(195,198,216,0.3)", color: "#424656" }}
+          style={{ border: inputBorder, color: tertiaryText }}
         >
           <span className={`material-symbols-outlined text-[18px] ${testing ? "animate-spin" : ""}`}>{testing ? "progress_activity" : "wifi"}</span>
           {testing ? "Menguji..." : "Test Koneksi"}
@@ -325,19 +334,19 @@ export default function SettingsPage() {
       </div>
 
       {/* Appearance */}
-      <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>
+      <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
+        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
           <span className="material-symbols-outlined text-[20px]" style={{ color: "#004ccd" }}>palette</span>Tampilan
         </h3>
         <div>
-          <label className="block text-xs font-medium mb-2" style={{ color: "#737687" }}>Tema</label>
+          <label className="block text-xs font-medium mb-2" style={{ color: secondaryText }}>Tema</label>
           <div className="grid grid-cols-2 gap-2">
             {(["light", "dark"] as const).map((th) => (
               <button
                 key={th}
                 onClick={() => updateSetting("theme", th)}
                 className="py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ border: settings.theme === th ? "2px solid #004ccd" : "1px solid rgba(195,198,216,0.3)", background: settings.theme === th ? "rgba(0,76,205,0.05)" : "transparent", color: settings.theme === th ? "#004ccd" : "#424656" }}
+                style={{ border: settings.theme === th ? "2px solid #004ccd" : inputBorder, background: settings.theme === th ? "rgba(0,76,205,0.05)" : "transparent", color: settings.theme === th ? "#004ccd" : tertiaryText }}
               >
                 {th === "light" ? "Terang" : "Gelap"}
               </button>
@@ -345,14 +354,14 @@ export default function SettingsPage() {
           </div>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-2" style={{ color: "#737687" }}>Bahasa</label>
+          <label className="block text-xs font-medium mb-2" style={{ color: secondaryText }}>Bahasa</label>
           <div className="grid grid-cols-2 gap-2">
             {(["id", "en"] as const).map((lang) => (
               <button
                 key={lang}
                 onClick={() => updateSetting("language", lang)}
                 className="py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ border: settings.language === lang ? "2px solid #004ccd" : "1px solid rgba(195,198,216,0.3)", background: settings.language === lang ? "rgba(0,76,205,0.05)" : "transparent", color: settings.language === lang ? "#004ccd" : "#424656" }}
+                style={{ border: settings.language === lang ? "2px solid #004ccd" : inputBorder, background: settings.language === lang ? "rgba(0,76,205,0.05)" : "transparent", color: settings.language === lang ? "#004ccd" : tertiaryText }}
               >
                 {lang === "id" ? "Indonesia" : "English"}
               </button>
@@ -373,14 +382,14 @@ export default function SettingsPage() {
       </button>
 
       {/* Account */}
-      <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>
+      <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
+        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
           <span className="material-symbols-outlined text-[20px]" style={{ color: "#004ccd" }}>person</span>Akun
         </h3>
         <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
           <div>
-            <p className="text-sm font-medium" style={{ color: "#1a1c1c" }}>Admin Fingerspot</p>
-            <p className="text-xs" style={{ color: "#737687" }}>fingerspot@gmail.com</p>
+            <p className="text-sm font-medium" style={{ color: primaryText }}>Admin Fingerspot</p>
+            <p className="text-xs" style={{ color: secondaryText }}>fingerspot@gmail.com</p>
           </div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#defbe6", color: "#006e2b" }}>Aktif</span>
         </div>
