@@ -69,8 +69,11 @@ Deno.serve(async (req: Request) => {
 
   console.log("=== SMART-TASK WEBHOOK ===");
   console.log("Full payload:", JSON.stringify(payload));
+  console.log("Payload keys:", Object.keys(payload));
 
   const { type, cloud_id, machine_id, trans_id, data } = payload;
+
+  console.log("type:", type, "cloud_id:", cloud_id, "trans_id:", trans_id, "data type:", typeof data, "data:", JSON.stringify(data)?.substring(0, 1000));
 
   if (!type || !VALID_TYPES.includes(type)) {
     console.error("Invalid type:", type);
@@ -252,53 +255,97 @@ async function processUserinfo(
   cloudId: string,
   data?: Record<string, unknown> | Record<string, unknown>[]
 ) {
+  console.log("processUserinfo called, data type:", typeof data, "isArray:", Array.isArray(data));
+  console.log("processUserinfo raw data:", JSON.stringify(data));
+
   if (!data) {
     console.log("No data in userinfo payload, skipping");
     return;
   }
-  const records = Array.isArray(data) ? data : [data];
+
+  // Handle nested data: device may send {data: {pin, name, ...}} or {data: [{pin, name, ...}]}
+  let records: Record<string, unknown>[];
+  if (Array.isArray(data)) {
+    records = data;
+  } else if (data.data && typeof data.data === "object") {
+    records = Array.isArray(data.data) ? data.data : [data.data as Record<string, unknown>];
+  } else {
+    records = [data];
+  }
 
   console.log(`Processing ${records.length} userinfo records for ${cloudId}`);
 
   for (const record of records) {
-    const pin = String(record.pin || record.PIN || "");
-    if (!pin) continue;
+    const pin = String(record.pin || record.PIN || record.PIN_NO || record.pin_no || "");
+    if (!pin) {
+      console.error("Skipping userinfo: no pin found in record:", JSON.stringify(record));
+      continue;
+    }
+
+    const name = record.name || record.Name || record.USER_NAME || record.user_name || null;
+    const privilege = Number(record.privilege || record.Privilege || record.PRIVILEGE || 0);
+    const password = record.password || record.Password || record.PASSWORD || null;
+    const rfid = record.rfid || record.RFID || record.rfid_card || record.RFID_CARD || null;
+    const finger = record.finger || record.Finger || record.FINGER || null;
+    const face = record.face || record.Face || record.FACE || null;
+    const vein = record.vein || record.Vein || record.VEIN || null;
+    const template = record.template || record.Template || record.TEMPLATE || null;
 
     const upsertData: Record<string, unknown> = {
       cloud_id: cloudId,
       pin,
-      name: record.name || record.Name || null,
-      password: record.password || record.Password || null,
-      privilege: Number(record.privilege || record.Privilege || 0),
-      finger_count: Number(record.finger_count || record.FingerCount || 0),
-      face_count: Number(record.face_count || record.FaceCount || 0),
-      rfid_count: Number(record.rfid_count || record.RFIDCount || 0),
-      vein_count: Number(record.vein_count || record.VeinCount || 0),
-      template: record.template || record.Template || null,
+      name,
+      password,
+      privilege,
+      finger_count: Number(finger || 0),
+      face_count: Number(face || 0),
+      rfid_count: rfid ? 1 : 0,
+      vein_count: Number(vein || 0),
+      template,
       raw_payload: record,
       synced_at: new Date().toISOString(),
     };
 
     console.log("Upserting userinfo:", JSON.stringify(upsertData).substring(0, 500));
 
-    const { error } = await supabase.from("userinfos").upsert(upsertData, {
-      onConflict: "cloud_id,pin",
-    });
-    if (error) {
-      console.error("userinfos upsert error:", error.message, error.details, error.hint);
+    // Try insert first, if duplicate (409) then update
+    const { error: insertErr } = await supabase.from("userinfos").insert(upsertData);
+    if (insertErr && insertErr.message?.includes("duplicate")) {
+      const { error: updateErr } = await supabase
+        .from("userinfos")
+        .update({
+          name,
+          password,
+          privilege,
+          finger_count: Number(finger || 0),
+          face_count: Number(face || 0),
+          rfid_count: rfid ? 1 : 0,
+          vein_count: Number(vein || 0),
+          template,
+          raw_payload: record,
+          synced_at: new Date().toISOString(),
+        })
+        .eq("cloud_id", cloudId)
+        .eq("pin", pin);
+      if (updateErr) {
+        console.error("userinfos update error:", updateErr.message, updateErr.details, updateErr.hint);
+      } else {
+        console.log("userinfo updated:", pin);
+      }
+    } else if (insertErr) {
+      console.error("userinfos insert error:", insertErr.message, insertErr.details, insertErr.hint);
     } else {
-      console.log("userinfo upserted:", pin);
+      console.log("userinfo inserted:", pin);
     }
 
-    const userName = record.name || record.Name || null;
-    if (userName) {
+    if (name) {
       const { error: pinError } = await supabase
         .from("pins")
-        .update({ name: userName })
+        .update({ name })
         .eq("cloud_id", cloudId)
         .eq("pin", pin);
       if (pinError) console.error("pins name update error:", pinError.message);
-      else console.log("pins name updated:", pin, "->", userName);
+      else console.log("pins name updated:", pin, "->", name);
     }
   }
 }
@@ -313,20 +360,26 @@ async function processGetAllPin(
     return;
   }
 
+  console.log("processGetAllPin raw data:", JSON.stringify(data));
+
   let pinArr: string[] = [];
 
   if (Array.isArray(data)) {
     pinArr = data.map((r) => String(r.pin || r.PIN || "")).filter(Boolean);
-  } else if (Array.isArray((data as Record<string, unknown>).pin_arr)) {
-    pinArr = ((data as Record<string, unknown>).pin_arr as unknown[])
-      .map((p) => String(p))
-      .filter(Boolean);
   } else {
-    const singlePin = String((data as Record<string, unknown>).pin || (data as Record<string, unknown>).PIN || "");
-    if (singlePin) pinArr = [singlePin];
+    const inner = data as Record<string, unknown>;
+    const rawPinArr = inner.pin_arr || inner.pin || inner.PIN_ARR || inner.PIN;
+    if (Array.isArray(rawPinArr)) {
+      pinArr = rawPinArr.map((p) => String(p)).filter(Boolean);
+    } else if (typeof rawPinArr === "string") {
+      // Handle space-separated string: "1 10 11 13 2 5555"
+      pinArr = rawPinArr.split(/\s+/).filter(Boolean);
+    } else if (rawPinArr) {
+      pinArr = [String(rawPinArr)];
+    }
   }
 
-  console.log(`Processing ${pinArr.length} pins for ${cloudId}`);
+  console.log(`Processing ${pinArr.length} pins for ${cloudId}:`, pinArr.join(", "));
 
   const { error: deleteError } = await supabase
     .from("pins")

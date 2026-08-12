@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     limit: 1,
     filters: { cloud_id: `eq.${cloudId}` },
   });
-  const transId = ((maxRow?.[0] as { trans_id?: number } | undefined)?.trans_id || 0) + 1;
+  const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
   try {
     const result = await sendFingerspotCommand(command, { ...params, trans_id: String(transId) });
