@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useThemeLanguage } from "@/contexts/ThemeLanguageContext";
 
 interface DeviceUser {
   id: string;
@@ -18,6 +19,7 @@ const PRIVILEGE_LABELS: Record<number, string> = {
 };
 
 export default function PinListPage() {
+  const { theme, t } = useThemeLanguage();
   const [users, setUsers] = useState<DeviceUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -95,15 +97,15 @@ export default function PinListPage() {
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Daftar PIN</h1>
-          <p className="text-xs mt-0.5" style={{ color: "#737687" }}>Kelola PIN karyawan</p>
+          <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("pinList")}</h1>
+          <p className="text-xs mt-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("addPin")}</p>
         </div>
         <button onClick={() => setAddModal(true)} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white" style={{ background: "#004ccd" }}>
-          <span className="material-symbols-outlined text-sm">add</span>Tambah PIN
+          <span className="material-symbols-outlined text-sm">add</span>{t("addPin")}
         </button>
       </div>
 
-      <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+      <div className="rounded-xl p-3" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
         <div className="flex gap-3 items-end">
           <div className="flex-1">
             <input
@@ -112,43 +114,43 @@ export default function PinListPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-xs"
-              style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}
+              style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}
             />
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+        <div className="rounded-xl p-8 text-center" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
           <span className="material-symbols-outlined animate-spin text-2xl" style={{ color: "#004ccd" }}>progress_activity</span>
-          <p className="text-xs mt-2" style={{ color: "#737687" }}>Memuat data...</p>
+          <p className="text-xs mt-2" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("loading")}</p>
         </div>
       ) : users.length === 0 ? (
-        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <span className="material-symbols-outlined text-3xl" style={{ color: "#c3c6d8" }}>inbox</span>
-          <p className="text-xs mt-2" style={{ color: "#737687" }}>Tidak ada data PIN</p>
+        <div className="rounded-xl p-8 text-center" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
+          <span className="material-symbols-outlined text-3xl" style={{ color: theme === "dark" ? "#c7c4d7" : "#c3c6d8" }}>inbox</span>
+          <p className="text-xs mt-2" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("noData")}</p>
         </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
-          <span className="material-symbols-outlined text-3xl" style={{ color: "#c3c6d8" }}>search_off</span>
-          <p className="text-xs mt-2" style={{ color: "#737687" }}>Tidak ditemukan</p>
+        <div className="rounded-xl p-8 text-center" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
+          <span className="material-symbols-outlined text-3xl" style={{ color: theme === "dark" ? "#c7c4d7" : "#c3c6d8" }}>search_off</span>
+          <p className="text-xs mt-2" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("search")}</p>
         </div>
       ) : (
         <>
-          <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
             <table className="w-full text-xs">
               <thead>
-                <tr style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
+                <tr style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.2)" : "rgba(195,198,216,0.2)"}` }}>
                     {["PIN", "Nama", "Privilege", "Aksi"].map((h) => (
-                    <th key={h} className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: "#737687" }}>{h}</th>
+                    <th key={h} className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider font-medium" style={{ fontFamily: "JetBrains Mono", color: theme === "dark" ? "#908fa0" : "#737687" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user, i) => (
-                    <tr key={user.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, user })} style={{ borderBottom: "1px solid rgba(195,198,216,0.1)", background: i % 2 === 0 ? "transparent" : "rgba(243,243,243,0.3)" }}>
+                    <tr key={user.id} className="cursor-pointer" onClick={() => setDetailModal({ open: true, user })} style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.1)" : "rgba(195,198,216,0.1)"}`, background: i % 2 === 0 ? "transparent" : theme === "dark" ? "rgba(41,41,50,0.3)" : "rgba(243,243,243,0.3)" }}>
                     <td className="py-2.5 px-3 font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</td>
-                    <td className="py-2.5 px-3" style={{ color: "#1a1c1c" }}>{user.name || "-"}</td>
+                    <td className="py-2.5 px-3" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{user.name || "-"}</td>
                     <td className="py-2.5 px-3">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{PRIVILEGE_LABELS[user.privilege] || "User"}</span>
                     </td>
@@ -167,17 +169,17 @@ export default function PinListPage() {
 
           <div className="md:hidden space-y-2">
             {filteredUsers.map((user) => (
-              <div key={user.id} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.3)" }}>
+              <div key={user.id} className="rounded-xl p-3" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-xs" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{user.pin}</span>
-                    <span className="text-xs" style={{ color: "#1a1c1c" }}>{user.name || "-"}</span>
+                    <span className="text-xs" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{user.name || "-"}</span>
                   </div>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{PRIVILEGE_LABELS[user.privilege] || "User"}</span>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleDelete(user)} className="flex-1 py-1.5 rounded-lg text-[10px] font-medium flex items-center justify-center gap-1" style={{ border: "1px solid rgba(219,14,14,0.2)", color: "#da1e28" }}>
-                    <span className="material-symbols-outlined text-xs">delete</span>Hapus
+                    <span className="material-symbols-outlined text-xs">delete</span>{t("delete")}
                   </button>
                 </div>
               </div>
@@ -188,24 +190,24 @@ export default function PinListPage() {
 
       {addModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setAddModal(false)}>
-          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Tambah PIN</h3>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: theme === "dark" ? "#292932" : "#ffffff", border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}` }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("addPin")}</h3>
             <div className="space-y-2">
               <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Cloud ID</label>
-                <input value={newForm.cloud_id} onChange={(e) => setNewForm({ ...newForm, cloud_id: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", fontFamily: "JetBrains Mono", color: "#1a1c1c" }} placeholder="C2697842930C1634" />
+                <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Cloud ID</label>
+                <input value={newForm.cloud_id} onChange={(e) => setNewForm({ ...newForm, cloud_id: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", fontFamily: "JetBrains Mono", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} placeholder="C2697842930C1634" />
               </div>
               <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>PIN</label>
-                <input value={newForm.pin} onChange={(e) => setNewForm({ ...newForm, pin: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }} />
+                <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>PIN</label>
+                <input value={newForm.pin} onChange={(e) => setNewForm({ ...newForm, pin: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} />
               </div>
               <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Nama</label>
-                <input value={newForm.name} onChange={(e) => setNewForm({ ...newForm, name: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }} />
+                <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Nama</label>
+                <input value={newForm.name} onChange={(e) => setNewForm({ ...newForm, name: e.target.value })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }} />
               </div>
               <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: "#737687" }}>Privilege</label>
-                <select value={newForm.privilege} onChange={(e) => setNewForm({ ...newForm, privilege: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: "1px solid rgba(195,198,216,0.3)", background: "#f3f3f3", color: "#1a1c1c" }}>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Privilege</label>
+                <select value={newForm.privilege} onChange={(e) => setNewForm({ ...newForm, privilege: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>
                   <option value={1}>User</option>
                   <option value={2}>Admin</option>
                   <option value={3}>Super Admin</option>
@@ -213,7 +215,7 @@ export default function PinListPage() {
               </div>
             </div>
             <div className="flex gap-2 mt-3">
-              <button onClick={() => setAddModal(false)} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#737687" }}>Batal</button>
+              <button onClick={() => setAddModal(false)} className="flex-1 py-2 text-xs rounded-lg" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("cancel")}</button>
               <button onClick={handleAdd} className="flex-1 py-2 text-xs font-medium text-white rounded-lg" style={{ background: "#004ccd" }}>Simpan</button>
             </div>
           </div>
@@ -222,28 +224,28 @@ export default function PinListPage() {
 
       {detailModal.open && detailModal.user && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)" }} onClick={() => setDetailModal({ open: false, user: null })}>
-          <div className="w-full max-w-md rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid rgba(195,198,216,0.3)" }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: "#1a1c1c" }}>Detail PIN</h3>
+          <div className="w-full max-w-md rounded-xl p-4" style={{ background: theme === "dark" ? "#292932" : "#ffffff", border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}` }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold mb-3" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>Detail PIN</h3>
             <div className="space-y-2">
-              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
-                <span style={{ color: "#737687" }}>PIN</span>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.15)" : "rgba(195,198,216,0.15)"}` }}>
+                <span style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>PIN</span>
                 <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#004ccd" }}>{detailModal.user.pin}</span>
               </div>
-              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
-                <span style={{ color: "#737687" }}>Nama</span>
-                <span className="font-medium" style={{ color: "#1a1c1c" }}>{detailModal.user.name || "-"}</span>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.15)" : "rgba(195,198,216,0.15)"}` }}>
+                <span style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Nama</span>
+                <span className="font-medium" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{detailModal.user.name || "-"}</span>
               </div>
-              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
-                <span style={{ color: "#737687" }}>Privilege</span>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.15)" : "rgba(195,198,216,0.15)"}` }}>
+                <span style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Privilege</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "#dbe1ff", color: "#004ccd" }}>{PRIVILEGE_LABELS[detailModal.user.privilege] || "User"}</span>
               </div>
-              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: "1px solid rgba(195,198,216,0.15)" }}>
-                <span style={{ color: "#737687" }}>Cloud ID</span>
-                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: "#1a1c1c" }}>{detailModal.user.cloud_id || "-"}</span>
+              <div className="flex justify-between items-center gap-3 py-1.5 text-xs" style={{ borderBottom: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.15)" : "rgba(195,198,216,0.15)"}` }}>
+                <span style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Cloud ID</span>
+                <span className="font-medium" style={{ fontFamily: "JetBrains Mono", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{detailModal.user.cloud_id || "-"}</span>
               </div>
             </div>
             <div className="flex gap-2 mt-3">
-              <button onClick={() => setDetailModal({ open: false, user: null })} className="flex-1 py-2 text-xs rounded-lg" style={{ color: "#424656", background: "#f3f3f3" }}>Tutup</button>
+              <button onClick={() => setDetailModal({ open: false, user: null })} className="flex-1 py-2 text-xs rounded-lg" style={{ color: theme === "dark" ? "#c7c4d7" : "#424656", background: theme === "dark" ? "#292932" : "#f3f3f3" }}>Tutup</button>
             </div>
           </div>
         </div>
