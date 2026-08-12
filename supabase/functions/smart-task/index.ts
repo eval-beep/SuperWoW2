@@ -98,20 +98,40 @@ Deno.serve(async (req: Request) => {
   // Map webhook_type to values allowed by DB CHECK constraint
   const dbType = type === "get_userid_list" ? "get_all_pin" : type === "attlog" ? "realtime_attlog" : type;
 
-  // Validate trans_id + command_type against command_logs
+  // Validate trans_id + command_type against command_logs, and fetch original request data
   let commandTypeMatch = false;
+  let originalRequest: Record<string, unknown> | null = null;
   if (trans_id) {
     const { data: cmdLog } = await supabase
       .from("command_logs")
-      .select("command_type")
+      .select("command_type, request_payload")
       .eq("trans_id", trans_id)
       .eq("cloud_id", cloud_id)
       .maybeSingle();
     if (cmdLog) {
       commandTypeMatch = cmdLog.command_type === dbType;
+      originalRequest = cmdLog.request_payload as Record<string, unknown> | null;
       console.log(`Validation: trans_id=${trans_id} cmd_type=${cmdLog.command_type} vs webhook=${dbType} match=${commandTypeMatch}`);
     } else {
       console.log(`Validation: trans_id=${trans_id} not found in command_logs`);
+    }
+  }
+
+  // Merge webhook response with original request data for richer payload
+  let enrichedPayload = payload;
+  if (originalRequest?.data && type !== "attlog" && type !== "realtime_attlog") {
+    const reqData = (typeof originalRequest.data === "object" && !Array.isArray(originalRequest.data))
+      ? originalRequest.data as Record<string, unknown>
+      : null;
+    const webhookData = (data && typeof data === "object" && !Array.isArray(data))
+      ? data as Record<string, unknown>
+      : {};
+    if (reqData) {
+      enrichedPayload = {
+        ...payload,
+        data: { ...reqData, ...webhookData },
+      };
+      console.log("Enriched payload with original request data");
     }
   }
 
@@ -120,7 +140,7 @@ Deno.serve(async (req: Request) => {
     webhook_type: dbType,
     cloud_id: cloud_id,
     trans_id: trans_id ?? null,
-    raw_payload: payload,
+    raw_payload: enrichedPayload,
     status: "success",
   }).select("id").maybeSingle();
   if (whLogError) {
