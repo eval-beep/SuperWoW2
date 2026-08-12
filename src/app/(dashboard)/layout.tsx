@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useThemeLanguage } from "@/contexts/ThemeLanguageContext";
+import { useAuth } from "@/lib/auth-browser";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { theme, lang, setTheme, setLang, t } = useThemeLanguage();
+  const { user, profile, loading: authLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [headerSearch, setHeaderSearch] = useState("");
@@ -123,12 +125,16 @@ export default function DashboardLayout({
 
         <div className="mt-auto p-4 border-t" style={{ borderColor: theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195, 198, 216, 0.2)" }}>
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl" style={{ background: theme === "dark" ? "rgba(41,41,50,0.8)" : "#f3f3f3" }}>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#93f59e" }}>
-              AD
-            </div>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+            ) : (
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#93f59e" }}>
+                {(profile?.nickname || profile?.full_name || user?.email || "AD").slice(0, 2).toUpperCase()}
+              </div>
+            )}
             <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-semibold truncate" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("admin")}</p>
-              <p className="text-[10px] truncate" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("superAdmin")}</p>
+              <p className="text-sm font-semibold truncate" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{profile?.nickname || profile?.full_name || user?.email?.split("@")[0] || "User"}</p>
+              <p className="text-[10px] truncate" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{user?.email || "user@email.com"}</p>
             </div>
           </div>
         </div>
@@ -270,12 +276,16 @@ export default function DashboardLayout({
             <div className="h-8 w-[1px] mx-2" style={{ background: theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195, 198, 216, 0.3)" }} />
             <div className="flex items-center gap-3 cursor-pointer group">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold leading-none" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("admin")}</p>
-                <p className="text-xs leading-none mt-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("superUser")}</p>
+                <p className="text-sm font-semibold leading-none" style={{ color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{profile?.nickname || profile?.full_name || user?.email?.split("@")[0] || "User"}</p>
+                <p className="text-xs leading-none mt-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{user?.email || ""}</p>
               </div>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white border-2 group-hover:border-[#004ccd] transition-colors" style={{ background: "#93f59e", borderColor: "rgba(219, 225, 255, 0.5)" }}>
-                AD
-              </div>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 group-hover:border-[#004ccd] transition-colors" style={{ borderColor: "rgba(219, 225, 255, 0.5)" }} />
+              ) : (
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white border-2 group-hover:border-[#004ccd] transition-colors" style={{ background: "#93f59e", borderColor: "rgba(219, 225, 255, 0.5)" }}>
+                  {(profile?.nickname || profile?.full_name || user?.email || "AD").slice(0, 2).toUpperCase()}
+                </div>
+              )}
             </div>
           </div>
         </header>

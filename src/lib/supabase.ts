@@ -5,7 +5,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export type SupabaseTable = "pins" | "userinfos" | "attlogs" | "settings" | "command_logs" | "webhook_logs";
+export type SupabaseTable = "pins" | "userinfos" | "attlogs" | "settings" | "command_logs" | "webhook_logs" | "profiles" | "otp_codes";
 
 export interface SupabaseQueryParams {
   select?: string;

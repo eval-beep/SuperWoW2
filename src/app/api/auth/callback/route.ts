@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(request: NextRequest) {
-  const { email, password } = await request.json();
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code");
 
-  if (!email || !password) {
-    return NextResponse.json({ error: "Email dan password harus diisi" }, { status: 400 });
+  if (!code) {
+    return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
   }
 
   const supabase = createClient(
@@ -13,22 +14,13 @@ export async function POST(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_KEY!
   );
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    const msg = error.message.includes("Invalid login")
-      ? "Email atau password salah"
-      : error.message;
-    return NextResponse.json({ error: msg }, { status: 401 });
+    return NextResponse.redirect(new URL("/login?error=auth_failed", request.url));
   }
 
-  const response = NextResponse.json({
-    success: true,
-    user: { id: data.user.id, email: data.user.email },
-  });
+  const response = NextResponse.redirect(new URL("/dashboard", request.url));
 
   response.cookies.set("sb-access-token", data.session.access_token, {
     httpOnly: true,

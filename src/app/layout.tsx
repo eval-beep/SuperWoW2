@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeLanguageProvider } from "@/contexts/ThemeLanguageContext";
+import { AuthProvider } from "@/lib/auth-browser";
 
 export const metadata: Metadata = {
   title: "Fingerspot Enterprise Console",
@@ -27,7 +28,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ThemeLanguageProvider>{children}</ThemeLanguageProvider>
+        <AuthProvider>
+          <ThemeLanguageProvider>{children}</ThemeLanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );

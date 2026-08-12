@@ -74,3 +74,24 @@ export interface Stats {
   today?: number;
   unique_employees?: number;
 }
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  nickname: string;
+  avatar_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OtpCode {
+  id: string;
+  user_id: string;
+  email: string;
+  code: string;
+  purpose: string;
+  expires_at: string;
+  used: boolean;
+  created_at: string;
+}

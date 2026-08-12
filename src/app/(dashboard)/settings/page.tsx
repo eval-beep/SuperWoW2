@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useThemeLanguage } from "@/contexts/ThemeLanguageContext";
+import { useAuth } from "@/lib/auth-browser";
 
 interface Settings {
   supabase_url: string;
@@ -12,8 +13,14 @@ interface Settings {
 
 export default function SettingsPage() {
   const { theme, lang, setTheme, setLang, t } = useThemeLanguage();
+  const { user, profile, refreshProfile } = useAuth();
   const [previewTheme, setPreviewTheme] = useState<"light" | "dark">(theme);
   const [previewLang, setPreviewLang] = useState<"id" | "en">(lang);
+  const [nickname, setNickname] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [settings, setSettings] = useState<Settings>({
     supabase_url: "",
     supabase_anon_key: "",
@@ -30,6 +37,54 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (profile) setNickname(profile.nickname || profile.full_name || "");
+  }, [profile]);
+
+  async function handleUploadAvatar(file: File) {
+    setUploading(true);
+    setProfileMsg(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/auth/avatar", { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await refreshProfile();
+        setProfileMsg({ type: "ok", text: "Foto profil berhasil diupdate" });
+      } else {
+        setProfileMsg({ type: "err", text: data.error || "Gagal upload foto" });
+      }
+    } catch {
+      setProfileMsg({ type: "err", text: "Gagal upload foto" });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleSaveNickname() {
+    setSavingProfile(true);
+    setProfileMsg(null);
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await refreshProfile();
+        setProfileMsg({ type: "ok", text: "Profil berhasil diupdate" });
+      } else {
+        setProfileMsg({ type: "err", text: data.error || "Gagal update profil" });
+      }
+    } catch {
+      setProfileMsg({ type: "err", text: "Gagal update profil" });
+    } finally {
+      setSavingProfile(false);
+    }
+  }
 
   async function loadSettings() {
     try {
@@ -165,7 +220,52 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-2xl" style={{ background: previewTheme === "dark" ? "#13131b" : "#f9f9f9", margin: "-2rem", padding: "2rem", borderRadius: "0", minHeight: "100vh" }}>
       <div>
         <h1 className="text-2xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>{t("settings")}</h1>
-        <p className="text-sm mt-1" style={{ color: secondaryText }}>Konfigurasi aplikasi dan device</p>
+        <p className="text-sm mt-1" style={{ color: secondaryText }}>Konfigurasi aplikasi dan profil Anda</p>
+      </div>
+
+      {/* Profile Card */}
+      <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
+        <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
+          <span className="material-symbols-outlined text-[20px]" style={{ color: "#004ccd" }}>person</span>Profil Saya
+        </h3>
+        <div className="flex items-center gap-4">
+          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="avatar" className="w-20 h-20 rounded-full object-cover border-2" style={{ borderColor: "#004ccd" }} />
+            ) : (
+              <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white" style={{ background: "#93f59e" }}>
+                {(profile?.nickname || profile?.full_name || profile?.email || "U").slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="material-symbols-outlined text-white text-xl">{uploading ? "progress_activity" : "photo_camera"}</span>
+            </div>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadAvatar(f); }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium" style={{ color: primaryText }}>{profile?.full_name || "Belum ada nama"}</p>
+            <p className="text-xs" style={{ color: secondaryText }}>{profile?.email || user?.email || ""}</p>
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Nickname</label>
+          <div className="flex gap-2">
+            <input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-xl text-sm"
+              style={{ border: inputBorder, background: inputBg, color: primaryText }}
+              placeholder="Masukkan nickname" />
+            <button onClick={handleSaveNickname} disabled={savingProfile || !nickname.trim()}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-white disabled:opacity-50"
+              style={{ background: "#004ccd" }}>
+              {savingProfile ? "Menyimpan..." : "Simpan"}
+            </button>
+          </div>
+        </div>
+        {profileMsg && (
+          <div className="rounded-xl p-3 text-xs" style={{ background: profileMsg.type === "ok" ? "#defbe6" : "#fff1f1", color: profileMsg.type === "ok" ? "#006e2b" : "#da1e28" }}>
+            {profileMsg.text}
+          </div>
+        )}
       </div>
 
       {/* Endpoint URL Card */}
@@ -389,8 +489,8 @@ export default function SettingsPage() {
         </h3>
         <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(195,198,216,0.2)" }}>
           <div>
-            <p className="text-sm font-medium" style={{ color: primaryText }}>Admin Fingerspot</p>
-            <p className="text-xs" style={{ color: secondaryText }}>fingerspot@gmail.com</p>
+            <p className="text-sm font-medium" style={{ color: primaryText }}>{profile?.nickname || profile?.full_name || "User"}</p>
+            <p className="text-xs" style={{ color: secondaryText }}>{user?.email || ""}</p>
           </div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium" style={{ background: "#defbe6", color: "#006e2b" }}>Aktif</span>
         </div>
