@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { ensureUserSettings } from "@/lib/user-settings";
-import { sendVerificationEmail } from "@/lib/email";
-import crypto from "crypto";
-
-function generateOTP(): string {
-  return crypto.randomInt(100000, 999999).toString();
-}
 
 export async function POST(request: NextRequest) {
   let body: Record<string, string>;
@@ -50,36 +44,25 @@ export async function POST(request: NextRequest) {
     console.error("[Login] Gagal memastikan settings:", e);
   }
 
-  const code = generateOTP();
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-  await supabase.from("otp_codes").insert({
-    user_id: data.user.id,
-    email,
-    code,
-    purpose: "login_2fa",
-    expires_at: expiresAt.toISOString(),
-  });
-
-  const emailSent = await sendVerificationEmail(email, code);
-  console.log(`[Login 2FA] ${email} -> OTP: ${code} (email sent: ${emailSent})`);
-
   const response = NextResponse.json({
     success: true,
-    requiresOtp: true,
-    message: "Kode verifikasi telah dikirim ke email Anda",
-    _debug_code: process.env.NODE_ENV === "development" ? code : undefined,
+    user: { id: data.user.id, email: data.user.email },
   });
 
-  response.cookies.set("sb-temp-token", JSON.stringify({
-    access_token: data.session.access_token,
-    refresh_token: data.session.refresh_token,
-  }), {
+  response.cookies.set("sb-access-token", data.session.access_token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 300,
+    maxAge: 60 * 60 * 24,
+  });
+
+  response.cookies.set("sb-refresh-token", data.session.refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
   });
 
   return response;

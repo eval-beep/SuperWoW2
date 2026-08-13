@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const cloudId = await getUserCloudId(user.id);
+    const userId = user.id;
 
     const { searchParams } = new URL(request.url);
     const from = searchParams.get("from") || "";
@@ -23,6 +24,7 @@ export async function GET(request: NextRequest) {
 
     const filters: Record<string, string | string[]> = {};
     filters.cloud_id = `eq.${cloudId}`;
+    filters.user_id = `eq.${userId}`;
     if (from && to) {
       const toDate = new Date(to + "T00:00:00");
       toDate.setDate(toDate.getDate() + 1);

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/auth-browser";
 
-type View = "login" | "register" | "forgot" | "otp";
+type View = "login" | "register" | "forgot";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,13 +47,8 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        if (data.requiresOtp) {
-          setMessage(data.message || "Kode verifikasi telah dikirim ke email Anda");
-          setView("otp");
-        } else {
-          const redirect = new URLSearchParams(window.location.search).get("redirect");
-          router.push(redirect || "/dashboard");
-        }
+        const redirect = new URLSearchParams(window.location.search).get("redirect");
+        router.push(redirect || "/dashboard");
       } else {
         setError(data.error || "Email atau password salah");
       }
@@ -85,55 +79,6 @@ export default function LoginPage() {
         setPassword("");
       } else {
         setError(data.error || "Registrasi gagal");
-      }
-    } catch {
-      setError("Gagal terhubung ke server");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    setError("");
-    if (!otpCode.trim() || otpCode.length !== 6) {
-      setError("Masukkan kode 6 digit");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/verify-otp-2fa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: otpCode.trim() }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        router.push("/dashboard");
-      } else {
-        setError(data.error || "Kode OTP salah atau sudah kedaluwarsa");
-      }
-    } catch {
-      setError("Gagal terhubung ke server");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setError("");
-    setMessage("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: "login_2fa" }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setMessage("Kode baru telah dikirim ke email Anda");
-      } else {
-        setError(data.error || "Gagal mengirim kode");
       }
     } catch {
       setError("Gagal terhubung ke server");
@@ -232,21 +177,18 @@ export default function LoginPage() {
           </div>
 
           <div className="p-8 sm:p-10">
-            {view !== "otp" && (
-              <div className="flex bg-gray-100 rounded-xl p-1 mb-8">
-                <button onClick={() => { setView("login"); setError(""); setMessage(""); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${view === "login" || view === "forgot" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                  Masuk
-                </button>
-                <button onClick={() => { setView("register"); setError(""); setMessage(""); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${view === "register" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                  Buat Akun
-                </button>
-              </div>
-            )}
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-8">
+              <button onClick={() => { setView("login"); setError(""); setMessage(""); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${view === "login" || view === "forgot" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                Masuk
+              </button>
+              <button onClick={() => { setView("register"); setError(""); setMessage(""); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${view === "register" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                Buat Akun
+              </button>
+            </div>
 
             {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>}
             {message && <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-600">{message}</div>}
 
-            {/* LOGIN */}
             {view === "login" && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-1">Selamat Datang Kembali</h2>
@@ -299,7 +241,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* REGISTER */}
             {view === "register" && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-1">Bergabung dengan Fingerspot</h2>
@@ -346,47 +287,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* OTP 2FA */}
-            {view === "otp" && (
-              <div>
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: "rgba(0, 76, 205, 0.1)" }}>
-                    <span className="material-symbols-outlined text-3xl" style={{ color: "#004ccd" }}>verified_user</span>
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Verifikasi 2FA</h2>
-                  <p className="text-gray-500 text-sm">Kode 6 digit telah dikirim ke</p>
-                  <p className="text-gray-900 text-sm font-medium">{email}</p>
-                </div>
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Kode Verifikasi</label>
-                    <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-                      placeholder="000000"
-                      maxLength={6}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-gray-50/50" />
-                  </div>
-                  <button onClick={handleVerifyOtp} disabled={loading || otpCode.length !== 6}
-                    className="w-full py-3 text-sm font-semibold text-white rounded-xl transition-all hover:opacity-90 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ background: "#004ccd" }}>
-                    {loading ? "Memverifikasi..." : "Verifikasi"}
-                  </button>
-                  <div className="text-center">
-                    <button onClick={handleResendOtp} disabled={loading}
-                      className="text-sm font-medium hover:underline disabled:opacity-50"
-                      style={{ color: "#004ccd" }}>
-                      Kirim ulang kode
-                    </button>
-                  </div>
-                  <button onClick={() => { setView("login"); setError(""); setMessage(""); setOtpCode(""); }}
-                    className="w-full py-3 text-sm font-medium text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all">
-                    Kembali ke Masuk
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* FORGOT PASSWORD */}
             {view === "forgot" && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-1">Reset Password</h2>

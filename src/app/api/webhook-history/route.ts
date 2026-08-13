@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const cloudId = await getUserCloudId(user.id);
+    const userId = user.id;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
 
     const filters: Record<string, string | string[]> = {};
     filters.cloud_id = `eq.${cloudId}`;
+    filters.user_id = `eq.${userId}`;
     if (search) filters.or = `(webhook_type.ilike.*${search}*,trans_id.ilike.*${search}*)`;
     if (status) filters.status = `eq.${status}`;
     if (webhookType) filters.webhook_type = `eq.${webhookType}`;
