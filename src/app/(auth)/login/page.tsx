@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/auth-browser";
 
@@ -17,20 +17,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const verified = params.get("verified");
-    const err = params.get("error");
-    if (verified === "true") {
-      setMessage("Email berhasil diverifikasi! Silakan masuk.");
-    } else if (err) {
-      setError(`Verifikasi gagal: ${err}`);
-    }
-    if (verified || err) {
-      window.history.replaceState({}, "", "/login");
-    }
-  }, []);
 
   const handleLogin = async () => {
     setError("");
@@ -70,12 +56,17 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setMessage(data.message || "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.");
-        setView("login");
+        if (data.requiresVerification) {
+          setMessage(data.message || "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.");
+          setView("login");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         setError(data.error || "Registrasi gagal");
       }
-    } catch {
+    } catch (err) {
+      console.error("Register error:", err);
       setError("Gagal terhubung ke server");
     } finally {
       setLoading(false);

@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Password minimal 6 karakter" }, { status: 400 });
   }
 
+  const origin = request.headers.get("origin") || request.nextUrl.origin;
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_KEY!
@@ -32,7 +34,7 @@ export async function POST(request: NextRequest) {
     password,
     options: {
       data: { full_name, nickname: full_name },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/auth/callback`,
+      emailRedirectTo: `${origin}/api/auth/callback`,
     },
   });
 
@@ -55,9 +57,21 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    success: true,
-    message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
-    requiresVerification: true,
-  });
+  if (data.user && !data.session) {
+    return NextResponse.json({
+      success: true,
+      message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
+      requiresVerification: true,
+    });
+  }
+
+  if (data.user && data.session) {
+    return NextResponse.json({
+      success: true,
+      message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
+      requiresVerification: true,
+    });
+  }
+
+  return NextResponse.json({ error: "Registrasi gagal. Silakan coba lagi." }, { status: 500 });
 }

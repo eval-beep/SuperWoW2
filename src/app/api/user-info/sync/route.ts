@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand } from "@/lib/fingerspot";
 import { supabaseInsert, supabaseUpdate, supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId, columnExists } from "@/lib/user-settings";
+import { getUserCloudId } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const userCloudId = await getUserCloudId(user.id);
-    const hasUserCol = await columnExists("command_logs", "user_id");
 
     const body = await request.json();
     const { pin } = body;
@@ -17,14 +16,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "pin harus diisi" }, { status: 400 });
     }
 
-    const transFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}` };
-    if (hasUserCol) transFilter.user_id = `eq.${user.id}`;
-
     const { data: maxRow } = await supabaseSelect("command_logs", {
       select: "trans_id",
       order: { column: "trans_id", ascending: false },
       limit: 1,
-      filters: transFilter,
+      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
     });
     const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
@@ -40,20 +36,14 @@ export async function POST(request: NextRequest) {
       const userData = responseData.data as Record<string, unknown>;
       const userPin = String(userData.pin || pin);
 
-      const existingFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}`, pin: `eq.${userPin}` };
-      if (hasUserCol) existingFilter.user_id = `eq.${user.id}`;
-
       const { data: existing } = await supabaseSelect("userinfos", {
         select: "id",
-        filters: existingFilter,
+        filters: { cloud_id: `eq.${userCloudId}`, pin: `eq.${userPin}`, user_id: `eq.${user.id}` },
       });
 
       const now = new Date().toISOString();
 
       if (existing && existing.length > 0) {
-        const updateFilter: Record<string, string> = { cloud_id: `eq.${userCloudId}`, pin: `eq.${userPin}` };
-        if (hasUserCol) updateFilter.user_id = `eq.${user.id}`;
-
         await supabaseUpdate("userinfos", {
           name: userData.name || null,
           privilege: Number(userData.privilege || 0),
@@ -62,10 +52,11 @@ export async function POST(request: NextRequest) {
           template: userData.template || null,
           raw_payload: userData,
           synced_at: now,
-        }, updateFilter);
+        }, { cloud_id: `eq.${userCloudId}`, pin: `eq.${userPin}`, user_id: `eq.${user.id}` });
       } else {
-        const insertData: Record<string, unknown> = {
+        await supabaseInsert("userinfos", {
           cloud_id: userCloudId,
+          user_id: user.id,
           pin: userPin,
           name: userData.name || null,
           privilege: Number(userData.privilege || 0),
@@ -74,10 +65,7 @@ export async function POST(request: NextRequest) {
           template: userData.template || null,
           raw_payload: userData,
           synced_at: now,
-        };
-        if (hasUserCol) insertData.user_id = user.id;
-
-        await supabaseInsert("userinfos", insertData);
+        });
       }
 
       return NextResponse.json({
