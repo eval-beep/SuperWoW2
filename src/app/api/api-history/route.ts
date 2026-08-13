@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
 
     const filters: Record<string, string | string[]> = {};
     filters.cloud_id = `eq.${cloudId}`;
-    filters.user_id = `eq.${userId}`;
     if (search) filters.or = `(command_type.ilike.*${search}*,trans_id.ilike.*${search}*)`;
     if (status) filters.status = `eq.${status}`;
     if (commandType) filters.command_type = `eq.${commandType}`;

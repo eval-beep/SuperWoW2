@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const { data: pins } = await supabaseSelect("pins", {
       select: "*",
       order: { column: "pin", ascending: true },
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: { cloud_id: `eq.${userCloudId}` },
     });
 
     return NextResponse.json({ success: true, data: pins || [] });
@@ -31,11 +31,11 @@ export async function POST(request: NextRequest) {
 
     const { data: pins } = await supabaseSelect("pins", {
       select: "pin",
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: { cloud_id: `eq.${userCloudId}` },
     });
     const { data: existingUsers } = await supabaseSelect("userinfos", {
       select: "pin",
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: { cloud_id: `eq.${userCloudId}` },
     });
     const existingPins = new Set((existingUsers as { pin: string }[] || []).map((u) => u.pin));
     const missingPins = (pins as { pin: string }[] || []).filter((p) => !existingPins.has(p.pin)).map((p) => p.pin);

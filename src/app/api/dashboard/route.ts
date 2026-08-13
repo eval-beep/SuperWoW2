@@ -10,20 +10,20 @@ export async function GET(request: NextRequest) {
     const userId = user.id;
 
     const [usersRes, attlogsRes, webhooksRes, attlogsListRes, latestAttlogRes] = await Promise.all([
-      supabaseSelect("userinfos", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` } }),
-      supabaseSelect("attlogs", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` } }),
-      supabaseSelect("webhook_logs", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` } }),
+      supabaseSelect("userinfos", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}` } }),
+      supabaseSelect("attlogs", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}` } }),
+      supabaseSelect("webhook_logs", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}` } }),
       supabaseSelect("attlogs", {
         select: "pin,name,scan_time,status_scan",
         order: { column: "scan_time", ascending: false },
         limit: 6,
-        filters: { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` },
+        filters: { cloud_id: `eq.${cloudId}` },
       }),
       supabaseSelect("attlogs", {
         select: "cloud_id,scan_time",
         order: { column: "scan_time", ascending: false },
         limit: 1,
-        filters: { cloud_id: `eq.${cloudId}`, user_id: `eq.${userId}` },
+        filters: { cloud_id: `eq.${cloudId}` },
       }),
     ]);
 

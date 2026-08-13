@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
 
     const filters: Record<string, string | string[]> = {};
     filters.cloud_id = `eq.${cloudId}`;
-    filters.user_id = `eq.${userId}`;
     if (from && to) {
       const toDate = new Date(to + "T00:00:00");
       toDate.setDate(toDate.getDate() + 1);
