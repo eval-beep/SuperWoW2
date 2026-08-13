@@ -237,6 +237,7 @@ async function processAttlog(
     }
 
     let userName = null;
+
     const { data: userInfo } = await supabase
       .from("userinfos")
       .select("name")
@@ -246,6 +247,31 @@ async function processAttlog(
       .maybeSingle();
     if (userInfo?.name) {
       userName = userInfo.name;
+    }
+
+    if (!userName) {
+      const { data: userInfoFallback } = await supabase
+        .from("userinfos")
+        .select("name")
+        .eq("cloud_id", cloudId)
+        .eq("pin", pin)
+        .is("user_id", null)
+        .maybeSingle();
+      if (userInfoFallback?.name) {
+        userName = userInfoFallback.name;
+      }
+    }
+
+    if (!userName) {
+      const { data: pinInfo } = await supabase
+        .from("pins")
+        .select("name")
+        .eq("cloud_id", cloudId)
+        .eq("pin", pin)
+        .maybeSingle();
+      if (pinInfo?.name) {
+        userName = pinInfo.name;
+      }
     }
 
     const insertData: Record<string, unknown> = {
