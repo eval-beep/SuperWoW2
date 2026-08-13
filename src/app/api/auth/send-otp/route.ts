@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { sendVerificationEmail, sendPasswordResetEmail } from "@/lib/email";
 
 function generateOTP(): string {
   return crypto.randomInt(100000, 999999).toString();
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
   }
 
   const code = generateOTP();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
   await supabase.from("otp_codes").insert({
     user_id: user.id,
@@ -37,11 +38,19 @@ export async function POST(request: NextRequest) {
     expires_at: expiresAt.toISOString(),
   });
 
-  await supabase.auth.admin.inviteUserByEmail(email, {
-    data: { otp_code: code, purpose: otpPurpose },
-  }).catch(() => {});
+  let emailSent = false;
+  if (otpPurpose === "reset_password") {
+    emailSent = await sendPasswordResetEmail(email, code);
+  } else {
+    emailSent = await sendVerificationEmail(email, code);
+  }
 
-  console.log(`[OTP] ${email} -> ${code} (expires: ${expiresAt.toISOString()})`);
+  if (!emailSent) {
+    console.error(`[OTP] Failed to send email to ${email}`);
+    return NextResponse.json({ error: "Gagal mengirim email. Silakan coba lagi." }, { status: 500 });
+  }
+
+  console.log(`[OTP] ${email} -> ${code} (purpose: ${otpPurpose}, expires: ${expiresAt.toISOString()})`);
 
   return NextResponse.json({
     success: true,

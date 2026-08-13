@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { ensureUserSettings } from "@/lib/user-settings";
+import { sendVerificationEmail } from "@/lib/email";
+import crypto from "crypto";
+
+function generateOTP(): string {
+  return crypto.randomInt(100000, 999999).toString();
+}
 
 export async function POST(request: NextRequest) {
   let body: Record<string, string>;
@@ -22,8 +28,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Password minimal 6 karakter" }, { status: 400 });
   }
 
-  const origin = request.headers.get("origin") || request.nextUrl.origin;
-
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_KEY!
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
     password,
     options: {
       data: { full_name, nickname: full_name },
-      emailRedirectTo: `${origin}/api/auth/callback`,
+      emailRedirectTo: `${request.headers.get("origin") || request.nextUrl.origin}/api/auth/callback`,
     },
   });
 
@@ -57,18 +61,57 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (data.user && !data.session) {
+  if (data.user && data.session) {
+    const code = generateOTP();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await supabase.from("otp_codes").insert({
+      user_id: data.user.id,
+      email,
+      code,
+      purpose: "email_verification",
+      expires_at: expiresAt.toISOString(),
+    });
+
+    const emailSent = await sendVerificationEmail(email, code);
+    console.log(`[Register] ${email} registered, OTP: ${code} (email sent: ${emailSent})`);
+
     return NextResponse.json({
       success: true,
-      message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
+      message: "Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.",
       requiresVerification: true,
+      _debug_code: process.env.NODE_ENV === "development" ? code : undefined,
     });
   }
 
-  if (data.user && data.session) {
+  if (data.user && !data.session) {
+    const code = generateOTP();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_KEY!
+    );
+
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+    const user = users?.users?.find((u) => u.id === data.user!.id);
+
+    if (user) {
+      await supabaseAdmin.from("otp_codes").insert({
+        user_id: data.user.id,
+        email,
+        code,
+        purpose: "email_verification",
+        expires_at: expiresAt.toISOString(),
+      });
+
+      const emailSent = await sendVerificationEmail(email, code);
+      console.log(`[Register] ${email} registered (no session), OTP: ${code} (email sent: ${emailSent})`);
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Registrasi berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.",
+      message: "Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.",
       requiresVerification: true,
     });
   }
