@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/auth-browser";
 
@@ -18,8 +18,27 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const verified = params.get("verified");
+    const err = params.get("error");
+    if (verified === "true") {
+      setMessage("Email berhasil diverifikasi! Silakan masuk.");
+    } else if (err) {
+      if (err === "verification_failed") {
+        setError("Verifikasi email gagal. Silakan coba lagi.");
+      } else {
+        setError(`Terjadi kesalahan: ${err}`);
+      }
+    }
+    if (verified || err) {
+      window.history.replaceState({}, "", "/login");
+    }
+  }, []);
+
   const handleLogin = async () => {
     setError("");
+    setMessage("");
     setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
@@ -29,8 +48,13 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        const redirect = new URLSearchParams(window.location.search).get("redirect");
-        router.push(redirect || "/dashboard");
+        if (data.requiresOtp) {
+          setMessage(data.message || "Kode verifikasi telah dikirim ke email Anda");
+          setView("otp");
+        } else {
+          const redirect = new URLSearchParams(window.location.search).get("redirect");
+          router.push(redirect || "/dashboard");
+        }
       } else {
         setError(data.error || "Email atau password salah");
       }
@@ -56,17 +80,13 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        if (data.requiresVerification) {
-          setMessage(data.message || "Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.");
-          setView("otp");
-        } else {
-          router.push("/dashboard");
-        }
+        setMessage(data.message || "Registrasi berhasil! Silakan cek email Anda untuk verifikasi.");
+        setView("login");
+        setPassword("");
       } else {
         setError(data.error || "Registrasi gagal");
       }
-    } catch (err) {
-      console.error("Register error:", err);
+    } catch {
       setError("Gagal terhubung ke server");
     } finally {
       setLoading(false);
@@ -81,16 +101,14 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/verify-otp", {
+      const res = await fetch("/api/auth/verify-otp-2fa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code: otpCode.trim() }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setMessage("Email berhasil diverifikasi! Silakan masuk.");
-        setView("login");
-        setOtpCode("");
+        router.push("/dashboard");
       } else {
         setError(data.error || "Kode OTP salah atau sudah kedaluwarsa");
       }
@@ -109,7 +127,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: "email_verification" }),
+        body: JSON.stringify({ email, purpose: "login_2fa" }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -141,9 +159,8 @@ export default function LoginPage() {
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch (err) {
-      console.error("Google login error:", err);
-      setError("Gagal menginisiasi Google login. Pastikan Google OAuth sudah dikonfigurasi di Supabase.");
+    } catch {
+      setError("Gagal menginisiasi Google login.");
     } finally {
       setLoading(false);
     }
@@ -329,14 +346,14 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* OTP VERIFICATION */}
+            {/* OTP 2FA */}
             {view === "otp" && (
               <div>
                 <div className="text-center mb-8">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: "rgba(0, 76, 205, 0.1)" }}>
-                    <span className="material-symbols-outlined text-3xl" style={{ color: "#004ccd" }}>mail</span>
+                    <span className="material-symbols-outlined text-3xl" style={{ color: "#004ccd" }}>verified_user</span>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Verifikasi Email</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Verifikasi 2FA</h2>
                   <p className="text-gray-500 text-sm">Kode 6 digit telah dikirim ke</p>
                   <p className="text-gray-900 text-sm font-medium">{email}</p>
                 </div>

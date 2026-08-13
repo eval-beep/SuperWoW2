@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
-import { sendVerificationEmail, sendPasswordResetEmail } from "@/lib/email";
 
 function generateOTP(): string {
   return crypto.randomInt(100000, 999999).toString();
@@ -37,18 +36,6 @@ export async function POST(request: NextRequest) {
     purpose: otpPurpose,
     expires_at: expiresAt.toISOString(),
   });
-
-  let emailSent = false;
-  if (otpPurpose === "reset_password") {
-    emailSent = await sendPasswordResetEmail(email, code);
-  } else {
-    emailSent = await sendVerificationEmail(email, code);
-  }
-
-  if (!emailSent) {
-    console.error(`[OTP] Failed to send email to ${email}`);
-    return NextResponse.json({ error: "Gagal mengirim email. Silakan coba lagi." }, { status: 500 });
-  }
 
   console.log(`[OTP] ${email} -> ${code} (purpose: ${otpPurpose}, expires: ${expiresAt.toISOString()})`);
 

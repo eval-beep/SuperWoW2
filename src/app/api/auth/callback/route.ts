@@ -5,15 +5,30 @@ import { ensureUserSettings } from "@/lib/user-settings";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-
-  if (!code) {
-    return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
-  }
+  const tokenHash = searchParams.get("token_hash");
+  const type = searchParams.get("type");
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_KEY!
   );
+
+  if (tokenHash && type) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as "signup" | "magiclink" | "recovery" | "email_change",
+    });
+
+    if (error) {
+      return NextResponse.redirect(new URL("/login?error=verification_failed", request.url));
+    }
+
+    return NextResponse.redirect(new URL("/login?verified=true", request.url));
+  }
+
+  if (!code) {
+    return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
+  }
 
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
