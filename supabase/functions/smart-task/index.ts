@@ -386,6 +386,15 @@ async function processUserinfo(
         .eq("pin", pin)
         .eq("user_id", userId || "");
       if (pinError) console.error("pins name update error:", pinError.message);
+
+      const { error: attlogError } = await supabase
+        .from("attlogs")
+        .update({ name })
+        .eq("cloud_id", cloudId)
+        .eq("pin", pin)
+        .is("name", null);
+      if (attlogError) console.error("attlogs name backfill error:", attlogError.message);
+      else console.log("attlogs name backfilled:", name, "pin:", pin);
     }
   }
 }

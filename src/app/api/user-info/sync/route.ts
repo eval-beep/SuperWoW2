@@ -68,6 +68,14 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      if (userData.name) {
+        await supabaseUpdate("attlogs", { name: userData.name }, {
+          cloud_id: `eq.${userCloudId}`,
+          pin: `eq.${userPin}`,
+          name: "is.null",
+        });
+      }
+
       return NextResponse.json({
         success: true,
         source: "api",
