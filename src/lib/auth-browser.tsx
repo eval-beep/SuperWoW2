@@ -82,6 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
         } else if (event === "TOKEN_REFRESHED" && session?.user) {
           setUser({ id: session.user.id, email: session.user.email || "" });
+          fetch("/api/auth/sync-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+            }),
+          });
         }
         setLoading(false);
       }

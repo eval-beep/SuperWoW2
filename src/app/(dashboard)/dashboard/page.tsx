@@ -29,6 +29,7 @@ export default function DashboardPage() {
   const [recentAttlogs, setRecentAttlogs] = useState<RecentAttlog[]>([]);
   const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ status: "offline", lastActivity: null, cloudId: "" });
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
   const [now, setNow] = useState(0);
   const { theme, t } = useThemeLanguage();
 
@@ -49,7 +50,7 @@ export default function DashboardPage() {
       const json = await res.json();
 
       if (json.error === "Unauthorized") {
-        window.location.href = "/login";
+        setAuthError(true);
         return;
       }
 
@@ -107,6 +108,28 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3" style={{ color: mutedColor }}>
           <span className="material-symbols-outlined animate-spin">progress_activity</span>
           <span style={{ fontFamily: "JetBrains Mono" }}>{t("loading")}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center space-y-4">
+          <span className="material-symbols-outlined text-5xl" style={{ color: "#da1e28" }}>error</span>
+          <p className="text-lg font-semibold" style={{ fontFamily: "Hanken Grotesk", color: headingColor }}>Sesi telah berakhir</p>
+          <p className="text-sm" style={{ color: mutedColor }}>Silakan login ulang untuk melanjutkan.</p>
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: "#004ccd", fontFamily: "Inter" }}
+          >
+            Login Ulang
+          </button>
         </div>
       </div>
     );
