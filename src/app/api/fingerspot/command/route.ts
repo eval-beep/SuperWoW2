@@ -151,8 +151,15 @@ async function savePins(cloudId: string, userId: string, data: Record<string, un
 
   if (Array.isArray(inner)) {
     pinArr = inner.map((r: Record<string, unknown>) => String(r.pin || "")).filter(Boolean);
-  } else if (Array.isArray((inner as Record<string, unknown>).pin_arr)) {
-    pinArr = ((inner as Record<string, unknown>).pin_arr as unknown[]).map(String).filter(Boolean);
+  } else {
+    const rawPinArr = (inner as Record<string, unknown>)?.pin_arr || (inner as Record<string, unknown>)?.pin || (inner as Record<string, unknown>)?.PIN_ARR;
+    if (Array.isArray(rawPinArr)) {
+      pinArr = rawPinArr.map(String).filter(Boolean);
+    } else if (typeof rawPinArr === "string") {
+      pinArr = rawPinArr.split(/\s+/).filter(Boolean);
+    } else if (rawPinArr) {
+      pinArr = [String(rawPinArr)];
+    }
   }
 
   if (pinArr.length === 0) return;

@@ -204,6 +204,19 @@ async function processAttlog(
   }
   const records = Array.isArray(data) ? data : [data];
 
+  if (!userId) {
+    const { data: settingsRow } = await supabase
+      .from("settings")
+      .select("user_id")
+      .eq("key", "cloud_id")
+      .eq("value", cloudId)
+      .maybeSingle();
+    if (settingsRow?.user_id) {
+      userId = settingsRow.user_id;
+      console.log(`Resolved user_id from settings: ${userId}`);
+    }
+  }
+
   console.log(`Processing ${records.length} attlog records for ${cloudId} user_id=${userId}`);
 
   for (const record of records) {
@@ -306,6 +319,19 @@ async function processUserinfo(
   if (!data) {
     console.log("No data in userinfo payload, skipping");
     return;
+  }
+
+  if (!userId) {
+    const { data: settingsRow } = await supabase
+      .from("settings")
+      .select("user_id")
+      .eq("key", "cloud_id")
+      .eq("value", cloudId)
+      .maybeSingle();
+    if (settingsRow?.user_id) {
+      userId = settingsRow.user_id;
+      console.log(`Resolved user_id from settings: ${userId}`);
+    }
   }
 
   let records: Record<string, unknown>[];
@@ -427,6 +453,19 @@ async function processGetAllPin(
   }
 
   console.log(`Processing ${pinArr.length} pins for ${cloudId} user_id=${userId}`);
+
+  if (!userId) {
+    const { data: settingsRow } = await supabase
+      .from("settings")
+      .select("user_id")
+      .eq("key", "cloud_id")
+      .eq("value", cloudId)
+      .maybeSingle();
+    if (settingsRow?.user_id) {
+      userId = settingsRow.user_id;
+      console.log(`Resolved user_id from settings: ${userId}`);
+    }
+  }
 
   const { error: deleteError } = await supabase
     .from("pins")
