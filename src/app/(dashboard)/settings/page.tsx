@@ -162,7 +162,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           command: "get_device",
-          params: { trans_id: "1", cloud_id: settings.cloud_id || "C2697842930C1634" },
+          params: { trans_id: "1", cloud_id: settings.cloud_id },
         }),
         credentials: "include",
       });
@@ -218,6 +218,17 @@ export default function SettingsPage() {
     }
   }
 
+  async function saveCloudSettings(updates: { cloud_id?: string; cloud_ids?: string }) {
+    try {
+      await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+        credentials: "include",
+      });
+    } catch { /* ignore */ }
+  }
+
   function handleAddDevice() {
     const id = newDeviceId.trim();
     if (!id) return;
@@ -227,12 +238,15 @@ export default function SettingsPage() {
       .filter(Boolean);
     if (list.includes(id)) return;
     const updated = [...list, id];
+    const newCloudIds = updated.join(", ");
+    const newDefault = settings.cloud_id || id;
     setSettings((prev) => ({
       ...prev,
-      cloud_ids: updated.join(", "),
-      cloud_id: prev.cloud_id || id,
+      cloud_ids: newCloudIds,
+      cloud_id: newDefault,
     }));
     setNewDeviceId("");
+    saveCloudSettings({ cloud_id: newDefault, cloud_ids: newCloudIds });
   }
 
   function handleRemoveDevice(id: string) {
@@ -242,15 +256,19 @@ export default function SettingsPage() {
       .filter(Boolean);
     if (list.length <= 1) return;
     const updated = list.filter((d) => d !== id);
-    setSettings((prev) => {
-      const next = { ...prev, cloud_ids: updated.join(", ") };
-      if (prev.cloud_id === id) next.cloud_id = updated[0] || "";
-      return next;
-    });
+    const newCloudIds = updated.join(", ");
+    const newDefault = settings.cloud_id === id ? (updated[0] || "") : settings.cloud_id;
+    setSettings((prev) => ({
+      ...prev,
+      cloud_ids: newCloudIds,
+      cloud_id: newDefault,
+    }));
+    saveCloudSettings({ cloud_id: newDefault, cloud_ids: newCloudIds });
   }
 
   function handleSetDefault(id: string) {
     setSettings((prev) => ({ ...prev, cloud_id: id }));
+    saveCloudSettings({ cloud_id: id });
   }
 
   async function handleLogout() {
