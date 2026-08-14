@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
     }
 
-    let targetCloudId = defaultCloudId;
+    let targetCloudId = params?.cloud_id || defaultCloudId;
     if (params?.cloud_id) {
       const allowedIds = await getUserCloudIds(user.id);
-      if (allowedIds.includes(params.cloud_id)) {
-        targetCloudId = params.cloud_id;
+      if (!allowedIds.includes(params.cloud_id)) {
+        targetCloudId = defaultCloudId;
       }
     }
 

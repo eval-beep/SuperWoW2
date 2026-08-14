@@ -179,18 +179,6 @@ export default function SettingsPage() {
             last_activity: d.last_activity || "N/A",
           },
         });
-        if (d.cloud_id) {
-          const list = (settings.cloud_ids || settings.cloud_id || "")
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean);
-          if (!list.includes(d.cloud_id)) list.push(d.cloud_id);
-          setSettings((prev) => ({
-            ...prev,
-            cloud_id: d.cloud_id,
-            cloud_ids: list.join(", "),
-          }));
-        }
       } else {
         setDeviceResult({ success: false, message: result.data?.error || "Device tidak ditemukan" });
       }
