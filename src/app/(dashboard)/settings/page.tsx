@@ -8,6 +8,7 @@ interface Settings {
   supabase_url: string;
   supabase_anon_key: string;
   cloud_id: string;
+  cloud_ids: string;
   fingerspot_api_url: string;
 }
 
@@ -25,8 +26,10 @@ export default function SettingsPage() {
     supabase_url: "",
     supabase_anon_key: "",
     cloud_id: "",
+    cloud_ids: "",
     fingerspot_api_url: "",
   });
+  const [newDeviceId, setNewDeviceId] = useState("");
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -96,6 +99,7 @@ export default function SettingsPage() {
           supabase_url: data.supabase_url || "",
           supabase_anon_key: data.supabase_anon_key || "",
           cloud_id: data.cloud_id || "",
+          cloud_ids: data.cloud_ids || data.cloud_id || "",
           fingerspot_api_url: data.fingerspot_api_url || "",
         });
         if (data.theme) setPreviewTheme(data.theme);
@@ -171,7 +175,16 @@ export default function SettingsPage() {
           },
         });
         if (d.cloud_id) {
-          setSettings((prev) => ({ ...prev, cloud_id: d.cloud_id }));
+          const list = (settings.cloud_ids || settings.cloud_id || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+          if (!list.includes(d.cloud_id)) list.push(d.cloud_id);
+          setSettings((prev) => ({
+            ...prev,
+            cloud_id: d.cloud_id,
+            cloud_ids: list.join(", "),
+          }));
         }
       } else {
         setDeviceResult({ success: false, message: result.data?.error || "Device tidak ditemukan" });
@@ -200,6 +213,41 @@ export default function SettingsPage() {
     }
   }
 
+  function handleAddDevice() {
+    const id = newDeviceId.trim();
+    if (!id) return;
+    const list = (settings.cloud_ids || settings.cloud_id || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (list.includes(id)) return;
+    const updated = [...list, id];
+    setSettings((prev) => ({
+      ...prev,
+      cloud_ids: updated.join(", "),
+      cloud_id: prev.cloud_id || id,
+    }));
+    setNewDeviceId("");
+  }
+
+  function handleRemoveDevice(id: string) {
+    const list = (settings.cloud_ids || settings.cloud_id || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (list.length <= 1) return;
+    const updated = list.filter((d) => d !== id);
+    setSettings((prev) => {
+      const next = { ...prev, cloud_ids: updated.join(", ") };
+      if (prev.cloud_id === id) next.cloud_id = updated[0] || "";
+      return next;
+    });
+  }
+
+  function handleSetDefault(id: string) {
+    setSettings((prev) => ({ ...prev, cloud_id: id }));
+  }
+
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     window.location.href = "/login";
@@ -218,6 +266,10 @@ export default function SettingsPage() {
   const tertiaryText = previewTheme === "dark" ? "#c7c4d7" : "#424656";
   const inputBg = previewTheme === "dark" ? "#292932" : "#f3f3f3";
   const inputBorder = `1px solid rgba(195,198,216,0.3)`;
+  const cloudIdList = (settings.cloud_ids || settings.cloud_id || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return (
     <div className="space-y-6 max-w-2xl" style={{ background: previewTheme === "dark" ? "#13131b" : "#f9f9f9", margin: "-2rem", padding: "2rem", borderRadius: "0", minHeight: "100vh" }}>
@@ -314,36 +366,88 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Cloud ID & Device */}
+      {/* Cloud ID & Devices */}
       <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
         <h3 className="font-semibold flex items-center gap-2" style={{ fontFamily: "Hanken Grotesk", color: primaryText }}>
           <span className="material-symbols-outlined text-[20px]" style={{ color: "#004ccd" }}>devices</span>Cloud ID Device
         </h3>
-        <p className="text-xs" style={{ color: secondaryText }}>Cloud ID digunakan untuk mengidentifikasi device Fingerspot. Bisa diambil otomatis dari device atau diisi manual.</p>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Cloud ID</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={settings.cloud_id}
-              onChange={(e) => updateSetting("cloud_id", e.target.value)}
-              className="flex-1 px-3 py-2 rounded-xl text-sm"
-              style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
-              placeholder="C2697842930C1634"
-            />
-            <button
-              onClick={handleFetchDeviceInfo}
-              disabled={fetchingDevice}
-              className="px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 text-white"
-              style={{ background: "#004ccd" }}
-            >
-              <span className={`material-symbols-outlined text-[16px] ${fetchingDevice ? "animate-spin" : ""}`}>
-                {fetchingDevice ? "progress_activity" : "qr_code_scanner"}
-              </span>
-              {fetchingDevice ? "Mengambil..." : "Ambil dari Device"}
-            </button>
-          </div>
+        <p className="text-xs" style={{ color: secondaryText }}>Kelola daftar device Fingerspot. Device pertama dijadikan device default.</p>
+
+        <div className="space-y-2">
+          {cloudIdList.map((id) => {
+            const isDefault = id === settings.cloud_id;
+            return (
+              <div
+                key={id}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer"
+                style={{
+                  background: isDefault ? "rgba(0,76,205,0.08)" : inputBg,
+                  border: isDefault ? "2px solid rgba(0,76,205,0.3)" : inputBorder,
+                }}
+                onClick={() => handleSetDefault(id)}
+              >
+                <div
+                  className="w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center"
+                  style={{
+                    borderColor: isDefault ? "#004ccd" : secondaryText,
+                    background: isDefault ? "#004ccd" : "transparent",
+                  }}
+                >
+                  {isDefault && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </div>
+                <span className="flex-1 text-xs" style={{ fontFamily: "JetBrains Mono", color: primaryText }}>{id}</span>
+                {isDefault && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#dbe1ff", color: "#004ccd" }}>
+                    Default
+                  </span>
+                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleRemoveDevice(id); }}
+                  disabled={cloudIdList.length <= 1}
+                  className="flex-shrink-0 p-1 rounded-lg disabled:opacity-30 transition-all"
+                  style={{ color: "#da1e28" }}
+                  title={cloudIdList.length <= 1 ? "Tidak bisa menghapus device terakhir" : "Hapus device"}
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              </div>
+            );
+          })}
         </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newDeviceId}
+            onChange={(e) => setNewDeviceId(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleAddDevice(); }}
+            className="flex-1 px-3 py-2 rounded-xl text-sm"
+            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
+            placeholder="Masukkan Cloud ID baru"
+          />
+          <button
+            onClick={handleAddDevice}
+            disabled={!newDeviceId.trim()}
+            className="px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 text-white"
+            style={{ background: "#006e2b" }}
+          >
+            <span className="material-symbols-outlined text-[16px]">add</span>
+            Tambah
+          </button>
+        </div>
+
+        <button
+          onClick={handleFetchDeviceInfo}
+          disabled={fetchingDevice}
+          className="w-full px-4 py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 disabled:opacity-50 text-white"
+          style={{ background: "#004ccd" }}
+        >
+          <span className={`material-symbols-outlined text-[16px] ${fetchingDevice ? "animate-spin" : ""}`}>
+            {fetchingDevice ? "progress_activity" : "qr_code_scanner"}
+          </span>
+          {fetchingDevice ? "Mengambil..." : "Ambil dari Device"}
+        </button>
+
         {deviceResult && (
           <div
             className="rounded-xl p-3 text-xs"

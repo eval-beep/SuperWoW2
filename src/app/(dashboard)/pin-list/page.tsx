@@ -27,6 +27,8 @@ export default function PinListPage() {
   const [newForm, setNewForm] = useState({ pin: "", name: "", privilege: 1 });
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [allCloudIds, setAllCloudIds] = useState<string[]>([]);
+  const [selectedCloudId, setSelectedCloudId] = useState("");
 
   const [detailModal, setDetailModal] = useState<{ open: boolean; user: DeviceUser | null }>({ open: false, user: null });
 
@@ -50,12 +52,27 @@ export default function PinListPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadUsers(); }, [loadUsers]);
+  useEffect(() => { loadUsers(); loadCloudIds(); }, [loadUsers]);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("q");
     if (q) setSearch(q);
   }, []);
+
+  async function loadCloudIds() {
+    try {
+      const res = await fetch("/api/settings", { credentials: "include" });
+      const data = await res.json();
+      if (data?.cloud_ids) {
+        const ids = data.cloud_ids.split(",").map((s: string) => s.trim()).filter(Boolean);
+        setAllCloudIds(ids);
+        if (ids.length > 0 && !selectedCloudId) setSelectedCloudId(ids[0]);
+      } else if (data?.cloud_id) {
+        setAllCloudIds([data.cloud_id]);
+        if (!selectedCloudId) setSelectedCloudId(data.cloud_id);
+      }
+    } catch { /* ignore */ }
+  }
 
   const filteredUsers = search
     ? users.filter((u) =>
@@ -71,7 +88,7 @@ export default function PinListPage() {
       const cmdRes = await fetch("/api/fingerspot/command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: "get_all_pin", logToHistory: true }),
+        body: JSON.stringify({ command: "get_all_pin", params: { cloud_id: selectedCloudId }, logToHistory: true }),
         credentials: "include",
       });
       const cmdData = await cmdRes.json();
@@ -143,7 +160,12 @@ export default function PinListPage() {
           <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("pinList")}</h1>
           <p className="text-xs mt-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("addPin")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center flex-wrap">
+          {allCloudIds.length > 1 && (
+            <select value={selectedCloudId} onChange={(e) => setSelectedCloudId(e.target.value)} className="px-3 py-2 rounded-xl text-xs font-medium" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c", fontFamily: "JetBrains Mono" }}>
+              {allCloudIds.map((id) => <option key={id} value={id}>{id}</option>)}
+            </select>
+          )}
           <button onClick={handleSyncFromDevice} disabled={syncing}
             className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: syncing ? "#908fa0" : "#006e2b" }}>

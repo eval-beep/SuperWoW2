@@ -31,22 +31,39 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
   const [now, setNow] = useState(0);
+  const [allCloudIds, setAllCloudIds] = useState<string[]>([]);
+  const [selectedDeviceFilter, setSelectedDeviceFilter] = useState("");
   const { theme, t } = useThemeLanguage();
 
   useEffect(() => {
+    loadCloudIds();
     loadDashboard();
     const interval = setInterval(loadDashboard, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedDeviceFilter]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
 
+  async function loadCloudIds() {
+    try {
+      const res = await fetch("/api/settings", { credentials: "include" });
+      const data = await res.json();
+      if (data?.cloud_ids) {
+        const ids = data.cloud_ids.split(",").map((s: string) => s.trim()).filter(Boolean);
+        setAllCloudIds(ids);
+      } else if (data?.cloud_id) {
+        setAllCloudIds([data.cloud_id]);
+      }
+    } catch { /* ignore */ }
+  }
+
   async function loadDashboard() {
     try {
-      const res = await fetch("/api/dashboard", { credentials: "include" });
+      const url = selectedDeviceFilter ? `/api/dashboard?cloud_id=${encodeURIComponent(selectedDeviceFilter)}` : "/api/dashboard";
+      const res = await fetch(url, { credentials: "include" });
       const json = await res.json();
 
       if (json.error === "Unauthorized") {
@@ -163,13 +180,21 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-[10px]" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>
-          {deviceStatus.lastActivity && (
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">schedule</span>
-              {t("lastActivity")}: {formatTimeAgo(deviceStatus.lastActivity, now)}
-            </span>
+        <div className="flex items-center gap-3">
+          {allCloudIds.length > 1 && (
+            <select value={selectedDeviceFilter} onChange={(e) => setSelectedDeviceFilter(e.target.value)} className="px-3 py-2 rounded-xl text-xs font-medium" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c", fontFamily: "JetBrains Mono" }}>
+              <option value="">Semua</option>
+              {allCloudIds.map((id) => <option key={id} value={id}>{id}</option>)}
+            </select>
           )}
+          <div className="flex items-center gap-4 text-[10px]" style={{ fontFamily: "JetBrains Mono", color: mutedColor }}>
+            {deviceStatus.lastActivity && (
+              <span className="flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">schedule</span>
+                {t("lastActivity")}: {formatTimeAgo(deviceStatus.lastActivity, now)}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

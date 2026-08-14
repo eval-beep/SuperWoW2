@@ -48,6 +48,7 @@ export default function UserInfoPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [allCloudIds, setAllCloudIds] = useState<string[]>([]);
+  const [selectedCloudId, setSelectedCloudId] = useState("");
   const [privilegeFilter, setPrivilegeFilter] = useState("");
   const [actionMenu, setActionMenu] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; user: Userinfo | null }>({
@@ -111,7 +112,14 @@ export default function UserInfoPage() {
     try {
       const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
-      if (data?.cloud_id) setAllCloudIds([data.cloud_id]);
+      if (data?.cloud_ids) {
+        const ids = data.cloud_ids.split(",").map((s: string) => s.trim()).filter(Boolean);
+        setAllCloudIds(ids);
+        if (ids.length > 0 && !selectedCloudId) setSelectedCloudId(ids[0]);
+      } else if (data?.cloud_id) {
+        setAllCloudIds([data.cloud_id]);
+        if (!selectedCloudId) setSelectedCloudId(data.cloud_id);
+      }
     } catch { /* ignore */ }
   }
 
@@ -180,7 +188,7 @@ export default function UserInfoPage() {
       const res = await fetch("/api/user-info/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: syncPin.trim() }),
+        body: JSON.stringify({ pin: syncPin.trim(), cloud_id: selectedCloudId }),
         credentials: "include",
       });
       const data = await res.json();
@@ -415,6 +423,14 @@ export default function UserInfoPage() {
             </h3>
             <p className="text-xs mb-3" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("syncDesc")}</p>
             <div className="space-y-3">
+              {allCloudIds.length > 1 && (
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>Device</label>
+                  <select value={selectedCloudId} onChange={(e) => setSelectedCloudId(e.target.value)} className="w-full px-3 py-2 rounded-xl text-xs" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", fontFamily: "JetBrains Mono", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>
+                    {allCloudIds.map((id) => <option key={id} value={id}>{id}</option>)}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-[10px] font-medium mb-1" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("pin")}</label>
                 <input value={syncPin} onChange={(e) => setSyncPin(e.target.value)}

@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand, COMMAND_TYPES } from "@/lib/fingerspot";
 import { supabaseInsert, supabaseDelete, supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    const userCloudId = await getUserCloudId(user.id);
+    const defaultCloudId = await getUserCloudId(user.id);
 
     const body = await request.json();
     const { command, params } = body;
@@ -16,20 +16,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Command tidak valid" }, { status: 400 });
     }
 
+    let targetCloudId = defaultCloudId;
+    if (params?.cloud_id) {
+      const allowedIds = await getUserCloudIds(user.id);
+      if (allowedIds.includes(params.cloud_id)) {
+        targetCloudId = params.cloud_id;
+      }
+    }
+
     const { data: maxRow } = await supabaseSelect("command_logs", {
       select: "trans_id",
       order: { column: "trans_id", ascending: false },
       limit: 1,
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: { cloud_id: `eq.${targetCloudId}`, user_id: `eq.${user.id}` },
     });
     const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
-    const result = await sendFingerspotCommand(command, { ...params, cloud_id: userCloudId, trans_id: String(transId) });
+    const result = await sendFingerspotCommand(command, { ...params, cloud_id: targetCloudId, trans_id: String(transId) });
 
     try {
       await supabaseInsert("command_logs", {
         command_type: command,
-        cloud_id: userCloudId,
+        cloud_id: targetCloudId,
         user_id: user.id,
         trans_id: transId,
         endpoint: command,
@@ -42,15 +50,15 @@ export async function POST(request: NextRequest) {
 
     if (result.success && result.data) {
       if (command === "get_attlog") {
-        await saveAttlogs(userCloudId, user.id, transId, result.data);
+        await saveAttlogs(targetCloudId, user.id, transId, result.data);
       } else if (command === "get_userinfo") {
-        await saveUserinfo(userCloudId, user.id, result.data);
+        await saveUserinfo(targetCloudId, user.id, result.data);
       } else if (command === "get_all_pin") {
-        await savePins(userCloudId, user.id, result.data);
+        await savePins(targetCloudId, user.id, result.data);
       }
     }
 
-    return NextResponse.json({ ...result, trans_id: transId });
+    return NextResponse.json({ ...result, trans_id: transId, cloud_id: targetCloudId });
   } catch (e) {
     if ((e as Error).message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -58,21 +66,29 @@ export async function POST(request: NextRequest) {
 
     try {
       const user = await requireAuth(request);
-      const userCloudId = await getUserCloudId(user.id);
+      const defaultCloudId = await getUserCloudId(user.id);
       const body = await request.json();
       const { command, params } = body;
+
+      let targetCloudId = defaultCloudId;
+      if (params?.cloud_id) {
+        const allowedIds = await getUserCloudIds(user.id);
+        if (allowedIds.includes(params.cloud_id)) {
+          targetCloudId = params.cloud_id;
+        }
+      }
 
       const { data: maxRow } = await supabaseSelect("command_logs", {
         select: "trans_id",
         order: { column: "trans_id", ascending: false },
         limit: 1,
-        filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+        filters: { cloud_id: `eq.${targetCloudId}`, user_id: `eq.${user.id}` },
       });
       const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
       await supabaseInsert("command_logs", {
         command_type: command,
-        cloud_id: userCloudId,
+        cloud_id: targetCloudId,
         user_id: user.id,
         trans_id: transId,
         endpoint: command,

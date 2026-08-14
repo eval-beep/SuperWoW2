@@ -1,20 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    const cloudId = await getUserCloudId(user.id);
-    const userId = user.id;
+    const defaultCloudId = await getUserCloudId(user.id);
 
     const { searchParams } = new URL(request.url);
+    const requestedCloudId = searchParams.get("cloud_id");
     const page = parseInt(searchParams.get("page") || "1");
     const perPage = parseInt(searchParams.get("per_page") || "20");
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
     const webhookType = searchParams.get("webhook_type") || "";
+
+    let cloudId = defaultCloudId;
+    if (requestedCloudId) {
+      const allowedIds = await getUserCloudIds(user.id);
+      if (allowedIds.includes(requestedCloudId)) {
+        cloudId = requestedCloudId;
+      }
+    }
 
     const offset = (page - 1) * perPage;
 

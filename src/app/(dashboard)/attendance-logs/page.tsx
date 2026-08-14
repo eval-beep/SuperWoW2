@@ -46,6 +46,7 @@ export default function AttendanceLogsPage() {
   const [detailModal, setDetailModal] = useState<{ open: boolean; log: Attlog | null }>({ open: false, log: null });
   const [getAttlogModal, setGetAttlogModal] = useState(false);
   const [allCloudIds, setAllCloudIds] = useState<string[]>([]);
+  const [selectedCloudId, setSelectedCloudId] = useState("");
   const [getForm, setGetForm] = useState({ cloud_id: "", pin: "", start_date: "", end_date: "" });
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -70,7 +71,6 @@ export default function AttendanceLogsPage() {
 
   useEffect(() => {
     loadLogs();
-    loadCloudIds();
     loadSettings();
   }, [loadLogs]);
 
@@ -82,6 +82,14 @@ export default function AttendanceLogsPage() {
         setCloudIdFromSettings(data.cloud_id);
         setGetForm((prev) => ({ ...prev, cloud_id: prev.cloud_id || data.cloud_id }));
       }
+      if (data?.cloud_ids) {
+        const ids = data.cloud_ids.split(",").map((s: string) => s.trim()).filter(Boolean);
+        setAllCloudIds(ids);
+        if (ids.length > 0 && !selectedCloudId) setSelectedCloudId(ids[0]);
+      } else if (data?.cloud_id) {
+        setAllCloudIds([data.cloud_id]);
+        if (!selectedCloudId) setSelectedCloudId(data.cloud_id);
+      }
     } catch { /* ignore */ }
   }
 
@@ -90,13 +98,7 @@ export default function AttendanceLogsPage() {
     if (q) setPinSearch(q);
   }, []);
 
-  async function loadCloudIds() {
-    try {
-      const res = await fetch("/api/settings", { credentials: "include" });
-      const data = await res.json();
-      if (data?.cloud_id) setAllCloudIds([data.cloud_id]);
-    } catch { /* ignore */ }
-  }
+  // loadCloudIds merged into loadSettings
 
   async function handleExport() {
     const params = new URLSearchParams();
@@ -130,7 +132,7 @@ export default function AttendanceLogsPage() {
   }
 
   async function handleSyncAttlog() {
-    const cid = cloudIdFromSettings || "C2697842930C1634";
+    const cid = selectedCloudId || cloudIdFromSettings || "C2697842930C1634";
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -185,7 +187,12 @@ export default function AttendanceLogsPage() {
           <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("attendance-logs")}</h1>
           <p className="text-xs mt-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("attendance-logs-description")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {allCloudIds.length > 1 && (
+            <select value={selectedCloudId} onChange={(e) => setSelectedCloudId(e.target.value)} className="px-3 py-2 rounded-xl text-xs font-medium" style={{ border: `1px solid ${theme === "dark" ? "rgba(70,69,84,0.3)" : "rgba(195,198,216,0.3)"}`, background: theme === "dark" ? "#292932" : "#f3f3f3", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c", fontFamily: "JetBrains Mono" }}>
+              {allCloudIds.map((id) => <option key={id} value={id}>{id}</option>)}
+            </select>
+          )}
           <button onClick={handleSyncAttlog} disabled={syncing} className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 text-white disabled:opacity-50" style={{ background: "#006e2b" }}>
             <span className={`material-symbols-outlined text-sm ${syncing ? "animate-spin" : ""}`}>{syncing ? "progress_activity" : "sync"}</span>{syncing ? `${t("syncAttlog")}...` : t("syncAttlog")}
           </button>

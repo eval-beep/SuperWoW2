@@ -2,29 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand } from "@/lib/fingerspot";
 import { supabaseInsert, supabaseUpdate, supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    const userCloudId = await getUserCloudId(user.id);
+    const defaultCloudId = await getUserCloudId(user.id);
 
     const body = await request.json();
-    const { pin } = body;
+    const { pin, cloud_id } = body;
 
     if (!pin) {
       return NextResponse.json({ error: "pin harus diisi" }, { status: 400 });
+    }
+
+    let targetCloudId = defaultCloudId;
+    if (cloud_id) {
+      const allowedIds = await getUserCloudIds(user.id);
+      if (allowedIds.includes(cloud_id)) {
+        targetCloudId = cloud_id;
+      }
     }
 
     const { data: maxRow } = await supabaseSelect("command_logs", {
       select: "trans_id",
       order: { column: "trans_id", ascending: false },
       limit: 1,
-      filters: { cloud_id: `eq.${userCloudId}`, user_id: `eq.${user.id}` },
+      filters: { cloud_id: `eq.${targetCloudId}`, user_id: `eq.${user.id}` },
     });
     const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
-    const result = await sendFingerspotCommand("get_userinfo", { cloud_id: userCloudId, pin, trans_id: String(transId) });
+    const result = await sendFingerspotCommand("get_userinfo", { cloud_id: targetCloudId, pin, trans_id: String(transId) });
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.data?.error || "Command gagal" }, { status: 500 });
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest) {
 
       const { data: existing } = await supabaseSelect("userinfos", {
         select: "id",
-        filters: { cloud_id: `eq.${userCloudId}`, pin: `eq.${userPin}`, user_id: `eq.${user.id}` },
+        filters: { cloud_id: `eq.${targetCloudId}`, pin: `eq.${userPin}`, user_id: `eq.${user.id}` },
       });
 
       const now = new Date().toISOString();
@@ -52,10 +60,10 @@ export async function POST(request: NextRequest) {
           template: userData.template || null,
           raw_payload: userData,
           synced_at: now,
-        }, { cloud_id: `eq.${userCloudId}`, pin: `eq.${userPin}`, user_id: `eq.${user.id}` });
+        }, { cloud_id: `eq.${targetCloudId}`, pin: `eq.${userPin}`, user_id: `eq.${user.id}` });
       } else {
         await supabaseInsert("userinfos", {
-          cloud_id: userCloudId,
+          cloud_id: targetCloudId,
           user_id: user.id,
           pin: userPin,
           name: userData.name || null,
@@ -70,7 +78,7 @@ export async function POST(request: NextRequest) {
 
       if (userData.name) {
         await supabaseUpdate("attlogs", { name: userData.name }, {
-          cloud_id: `eq.${userCloudId}`,
+          cloud_id: `eq.${targetCloudId}`,
           pin: `eq.${userPin}`,
           name: "is.null",
         });
@@ -80,6 +88,7 @@ export async function POST(request: NextRequest) {
         success: true,
         source: "api",
         data: userData,
+        cloud_id: targetCloudId,
         message: `Data user PIN ${userPin} berhasil disimpan`,
       });
     }
@@ -88,6 +97,7 @@ export async function POST(request: NextRequest) {
       success: true,
       source: "pending",
       data: null,
+      cloud_id: targetCloudId,
       message: "Command diterima device. Data akan muncul setelah device merespons via webhook.",
     });
   } catch (e) {

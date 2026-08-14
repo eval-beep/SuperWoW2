@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
 
 function getWIBDateStr(date: Date): string {
   const utc = date.getTime() + date.getTimezoneOffset() * 60000;
@@ -15,10 +15,18 @@ function getWIBDateStr(date: Date): string {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    const cloudId = await getUserCloudId(user.id);
-    const userId = user.id;
+    const defaultCloudId = await getUserCloudId(user.id);
 
     const { searchParams } = new URL(request.url);
+    const requestedCloudId = searchParams.get("cloud_id");
+
+    let cloudId = defaultCloudId;
+    if (requestedCloudId) {
+      const allowedIds = await getUserCloudIds(user.id);
+      if (allowedIds.includes(requestedCloudId)) {
+        cloudId = requestedCloudId;
+      }
+    }
     const page = parseInt(searchParams.get("page") || "1");
     const perPage = parseInt(searchParams.get("per_page") || "15");
     const search = searchParams.get("search") || "";

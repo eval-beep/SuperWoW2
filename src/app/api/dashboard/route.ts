@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    const cloudId = await getUserCloudId(user.id);
-    const userId = user.id;
+    const defaultCloudId = await getUserCloudId(user.id);
+
+    const { searchParams } = new URL(request.url);
+    const requestedCloudId = searchParams.get("cloud_id");
+
+    let cloudId = defaultCloudId;
+    if (requestedCloudId) {
+      const allowedIds = await getUserCloudIds(user.id);
+      if (allowedIds.includes(requestedCloudId)) {
+        cloudId = requestedCloudId;
+      }
+    }
 
     const [usersRes, attlogsRes, webhooksRes, attlogsListRes, latestAttlogRes] = await Promise.all([
       supabaseSelect("userinfos", { count: true, limit: 1, filters: { cloud_id: `eq.${cloudId}` } }),
