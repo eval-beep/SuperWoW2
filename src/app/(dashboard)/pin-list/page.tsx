@@ -25,6 +25,8 @@ export default function PinListPage() {
   const [search, setSearch] = useState("");
   const [addModal, setAddModal] = useState(false);
   const [newForm, setNewForm] = useState({ pin: "", name: "", privilege: 1 });
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const [detailModal, setDetailModal] = useState<{ open: boolean; user: DeviceUser | null }>({ open: false, user: null });
 
@@ -61,6 +63,46 @@ export default function PinListPage() {
         (u.name && u.name.toLowerCase().includes(search.toLowerCase()))
       )
     : users;
+
+  async function handleSyncFromDevice() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const cmdRes = await fetch("/api/fingerspot/command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: "get_all_pin", logToHistory: true }),
+        credentials: "include",
+      });
+      const cmdData = await cmdRes.json();
+
+      if (!cmdData.success) {
+        setSyncResult({ success: false, message: cmdData.data?.error || "Gagal mengambil data dari device" });
+        return;
+      }
+
+      const pinCount = Array.isArray(cmdData.data?.data)
+        ? cmdData.data.data.length
+        : Array.isArray(cmdData.data)
+          ? cmdData.data.length
+          : 0;
+
+      fetch("/api/pin-list", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }).catch(() => {});
+
+      await loadUsers();
+
+      setSyncResult({ success: true, message: `Berhasil mengambil ${pinCount} PIN dari device` });
+    } catch (err) {
+      console.error("Sync error:", err);
+      setSyncResult({ success: false, message: "Gagal terhubung ke device" });
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   async function handleAdd() {
     if (!newForm.pin.trim()) return alert("PIN harus diisi");
@@ -101,10 +143,32 @@ export default function PinListPage() {
           <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Hanken Grotesk", color: theme === "dark" ? "#e4e1ed" : "#1a1c1c" }}>{t("pinList")}</h1>
           <p className="text-xs mt-0.5" style={{ color: theme === "dark" ? "#908fa0" : "#737687" }}>{t("addPin")}</p>
         </div>
-        <button onClick={() => setAddModal(true)} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white" style={{ background: "#004ccd" }}>
-          <span className="material-symbols-outlined text-sm">add</span>{t("addPin")}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={handleSyncFromDevice} disabled={syncing}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: syncing ? "#908fa0" : "#006e2b" }}>
+            <span className="material-symbols-outlined text-sm">{syncing ? "progress_activity" : "sync"}</span>
+            {syncing ? "Mengambil..." : "Ambil dari Device"}
+          </button>
+          <button onClick={() => setAddModal(true)} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white" style={{ background: "#004ccd" }}>
+            <span className="material-symbols-outlined text-sm">add</span>{t("addPin")}
+          </button>
+        </div>
       </div>
+
+      {syncResult && (
+        <div className="rounded-xl p-3 flex items-center gap-2" style={{
+          background: syncResult.success ? "#defbe6" : "#fff1f1",
+          border: `1px solid ${syncResult.success ? "#a7f0d0" : "#ffafb2"}`,
+        }}>
+          <span className="material-symbols-outlined text-sm" style={{ color: syncResult.success ? "#006e2b" : "#da1e28" }}>
+            {syncResult.success ? "check_circle" : "error"}
+          </span>
+          <span className="text-xs font-medium" style={{ color: syncResult.success ? "#006e2b" : "#da1e28", fontFamily: "JetBrains Mono" }}>
+            {syncResult.message}
+          </span>
+        </div>
+      )}
 
       <div className="rounded-xl p-3" style={{ background: theme === "dark" ? "rgba(31,31,39,0.7)" : "rgba(255,255,255,0.6)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)"}` }}>
         <div className="flex gap-3 items-end">

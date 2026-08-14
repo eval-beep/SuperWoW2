@@ -1,0 +1,1104 @@
+
+> fingerspot-console@3.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.16:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.4s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 915ms (115 modules)
+ ○ Compiling /login ...
+ ✓ Compiled /login in 15.6s (637 modules)
+ GET /login 200 in 17342ms
+ GET /login 200 in 198ms
+ GET /login 200 in 169ms
+ GET /login 200 in 340ms
+ ○ Compiling /api/auth/register ...
+ ✓ Compiled /api/auth/register in 1491ms (699 modules)
+ ✓ Compiled in 1253ms (278 modules)
+ GET /login 200 in 620ms
+ GET /login 200 in 95ms
+ GET /login 200 in 89ms
+ GET /login 200 in 84ms
+ POST /api/auth/register 200 in 5294ms
+ ○ Compiling /api/auth/callback ...
+ ✓ Compiled /api/auth/callback in 686ms (701 modules)
+ GET /api/auth/callback 307 in 926ms
+ GET /login 200 in 570ms
+ GET /login?error=missing_code 200 in 573ms
+ GET /login 200 in 132ms
+ ✓ Compiled /api/auth/login in 504ms (689 modules)
+[Login Error] Invalid login credentials
+ POST /api/auth/login 401 in 836ms
+ POST /api/auth/login 200 in 275ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 2.4s (763 modules)
+ GET /dashboard 200 in 2926ms
+ POST /api/auth/login 200 in 297ms
+ ○ Compiling /api/settings ...
+ ✓ Compiled /api/settings in 1339ms (766 modules)
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 1787ms
+ GET /dashboard 200 in 1768ms
+ ○ Compiling /api/supabase ...
+ ✓ Compiled /api/supabase in 917ms (768 modules)
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 1211ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 1556ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 1548ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 1570ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 1573ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 1614ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 137ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 180ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 183ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 188ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 126ms
+ ○ Compiling /attendance-logs ...
+ ✓ Compiled /attendance-logs in 1472ms (777 modules)
+ GET /attendance-logs 200 in 1735ms
+ GET /attendance-logs 200 in 82ms
+ GET /attendance-logs 200 in 72ms
+ ○ Compiling /api/attendance-logs ...
+ ✓ Compiled /api/attendance-logs in 1120ms (779 modules)
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 1454ms
+ GET /api/supabase?table=attlogs&select=cloud_id 200 in 1490ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 117ms
+ GET /api/attendance-logs?page=1&per_page=15 200 in 1657ms
+ GET /api/supabase?table=attlogs&select=cloud_id 200 in 160ms
+ GET /api/attendance-logs?page=1&per_page=15&cloud_id=C2697842930C1634 200 in 220ms
+ ○ Compiling /user-info ...
+ ✓ Compiled /user-info in 1402ms (786 modules)
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 1677ms
+ GET /api/supabase?table=attlogs&select=cloud_id 200 in 1803ms
+ GET /api/attendance-logs?page=1&per_page=15 200 in 1834ms
+ GET /user-info 200 in 1892ms
+ GET /api/supabase?table=userinfos&select=cloud_id 200 in 133ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 155ms
+ GET /api/supabase?table=userinfos&select=cloud_id 200 in 119ms
+ GET /api/supabase?table=userinfos&count=true&order=created_at.desc&page=1&per_page=15 200 in 316ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 134ms
+ GET /api/supabase?table=userinfos&count=true&order=created_at.desc&page=1&per_page=15 200 in 156ms
+ GET /attendance-logs 200 in 98ms
+ GET /api/supabase?table=attlogs&select=cloud_id 200 in 163ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 173ms
+ GET /api/attendance-logs?page=1&per_page=15 200 in 293ms
+ GET /api/supabase?table=attlogs&select=cloud_id 200 in 132ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 168ms
+ GET /api/attendance-logs?page=1&per_page=15&cloud_id=C2697842930C1634 200 in 260ms
+ GET /api/supabase?table=attlogs&select=cloud_id 200 in 173ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 91ms
+ GET /api/attendance-logs?page=1&per_page=15 200 in 252ms
+ ✓ Compiled in 2.3s (296 modules)
+ GET /attendance-logs 200 in 223ms
+ GET /dashboard 200 in 331ms
+ GET /dashboard 200 in 132ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 801ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 214ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 117ms
+Supabase query error [settings]: 404 {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.settings' in the schema cache"}
+ GET /api/settings 200 in 108ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 540ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 544ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 548ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 563ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 625ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 140ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 183ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 196ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 208ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 210ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 188ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 350ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 232ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 258ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 150ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 555ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 564ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 500ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 576ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 109ms
+ ✓ Compiled in 468ms (296 modules)
+ GET /attendance-logs 200 in 234ms
+ GET /dashboard 200 in 211ms
+ GET /dashboard 200 in 100ms
+ ✓ Compiled in 1245ms (789 modules)
+ GET /attendance-logs 200 in 530ms
+ GET /dashboard 200 in 524ms
+ GET /dashboard 200 in 100ms
+ ✓ Compiled in 413ms (296 modules)
+ GET /attendance-logs 200 in 202ms
+ GET /dashboard 200 in 237ms
+ GET /dashboard 200 in 108ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 487ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 509ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 512ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 517ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 554ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 117ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 152ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 156ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 160ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 171ms
+ ✓ Compiled in 422ms (296 modules)
+ GET /attendance-logs 200 in 169ms
+ GET /dashboard 200 in 204ms
+ GET /dashboard 200 in 99ms
+ ✓ Compiled in 416ms (296 modules)
+ GET /attendance-logs 200 in 170ms
+ GET /dashboard 200 in 222ms
+ GET /dashboard 200 in 108ms
+ ✓ Compiled in 343ms (296 modules)
+ GET /attendance-logs 200 in 143ms
+ GET /dashboard 200 in 182ms
+ GET /dashboard 200 in 101ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 513ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 532ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 536ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 547ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 607ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 170ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 224ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 227ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 234ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 110ms
+ ✓ Compiled in 569ms (296 modules)
+ GET /attendance-logs 200 in 146ms
+ GET /dashboard 200 in 216ms
+ GET /dashboard 200 in 149ms
+ ✓ Compiled in 578ms (296 modules)
+ GET /attendance-logs 200 in 299ms
+ GET /dashboard 200 in 218ms
+ GET /dashboard 200 in 118ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 254ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 257ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 269ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 263ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 340ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 95ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 140ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 145ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 150ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 86ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 233ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 239ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 253ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 259ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 282ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 151ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 137ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 175ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 128ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 140ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 251ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 257ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 263ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 278ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 329ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 132ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 136ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 155ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 140ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 111ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 229ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 260ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 279ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 285ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 99ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 181ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 128ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 139ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 142ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 234ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 247ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 269ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 271ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 276ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 133ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 161ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 128ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 117ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 139ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 248ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 269ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 276ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 289ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 325ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 139ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 128ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 144ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 177ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 135ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 238ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 253ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 269ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 136ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 179ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 117ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 143ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 156ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 657ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 682ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 684ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 686ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 718ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 117ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 154ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 157ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 161ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 133ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 428ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 431ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 437ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 434ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 475ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 103ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 140ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 144ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 152ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 101ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 261ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 270ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 272ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 274ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 302ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 101ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 138ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 141ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 145ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 151ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 236ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 261ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 265ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 274ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 285ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 111ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 181ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 120ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 136ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 141ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 226ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 247ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 259ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 252ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 93ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 168ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 136ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 128ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 130ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 516ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 526ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 545ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 551ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 628ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 100ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 147ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 139ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 157ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 98ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 235ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 254ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 283ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 102ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 160ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 120ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 122ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 132ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 227ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 248ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 265ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 261ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 269ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 91ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 165ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 124ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 128ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 129ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 488ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 481ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 492ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 486ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 524ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 102ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 138ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 140ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 144ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 107ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 233ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 246ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 250ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 253ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 262ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 132ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 137ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 174ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 155ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 169ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 257ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 266ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 277ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 307ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 127ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 139ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 159ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 150ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 106ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 523ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 490ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 541ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 544ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 573ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 104ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 143ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 153ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 156ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 132ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 221ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 246ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 257ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 272ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 105ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 176ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 130ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 132ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 133ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 248ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 256ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 265ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 270ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 282ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 118ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 129ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 131ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 138ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 149ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 341ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 356ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 378ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 367ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 384ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 88ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 160ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 127ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 132ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 134ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 273ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 282ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 286ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 298ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 307ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 276ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 289ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 292ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 409ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 411ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 415ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 418ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 429ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 648ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 653ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 659ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 661ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 670ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 241ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 257ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 264ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 266ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 289ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 271ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 277ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 281ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 285ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 293ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 245ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 253ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 262ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 269ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 271ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 248ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 269ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 281ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 306ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 287ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 296ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 303ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 311ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 228ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 256ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 260ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 275ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 244ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 251ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 266ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 278ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 257ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 269ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 278ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 291ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 306ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 635ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 643ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 646ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 654ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 670ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 302ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 311ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 315ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 330ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 296ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 299ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 325ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 344ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 355ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 310ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 313ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 319ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 322ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 333ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 283ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 296ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 310ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 311ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 316ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 296ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 304ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 313ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 315ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 330ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 286ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 304ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 317ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 319ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 335ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 294ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 299ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 304ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 313ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 317ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 318ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 341ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 344ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 349ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 364ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 313ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 325ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 331ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 341ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 677ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 690ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 692ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 694ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 709ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 275ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 284ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 306ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 313ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 287ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 304ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 320ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 324ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 251ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 287ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 303ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 324ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 318ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 320ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 357ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 360ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 372ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 276ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 304ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 307ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 342ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 369ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 374ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 382ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 385ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 393ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 332ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 350ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 352ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 354ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 369ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 263ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 284ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 287ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 298ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 302ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 297ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 317ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 322ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 335ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 487ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 490ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 494ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 499ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 510ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 420ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 421ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 431ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 435ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 458ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 274ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 286ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 294ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 305ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 327ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 329ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 333ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 340ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 371ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 225ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 284ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 290ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 317ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 253ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 274ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 285ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 291ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 309ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 249ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 256ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 268ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 272ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 256ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 264ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 270ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 276ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 284ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 264ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 271ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 275ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 299ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 314ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 699ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 708ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 717ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 719ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 730ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 358ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 389ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 404ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 408ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 421ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 1271ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 1284ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 1304ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 1304ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 1328ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 556ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 560ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 566ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 573ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 587ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 306ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 349ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 358ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 365ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 371ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 281ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 286ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 289ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 293ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 302ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 299ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 312ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 326ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 329ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 342ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 384ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 386ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 391ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 396ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 409ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 278ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 319ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 325ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 327ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 342ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 286ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 290ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 296ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 298ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 305ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 551ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 555ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 560ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 563ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 573ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 1103ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 1101ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 1115ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 1118ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 1141ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 287ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 293ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 296ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 325ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 266ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 282ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 305ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 311ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 363ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 293ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 299ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 300ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 307ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 309ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 310ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 325ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 327ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 329ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 336ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 272ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 275ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 279ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 283ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 291ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 289ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 299ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 300ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 314ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 257ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 282ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 288ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 303ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 314ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 251ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 260ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 279ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 293ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 296ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 289ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 303ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 305ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 306ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 316ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 360ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 524ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 530ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 534ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 543ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 272ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 311ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 318ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 320ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 322ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 752ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 759ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 762ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 767ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 779ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 270ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 310ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 318ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 323ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 331ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 288ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 291ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 303ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 304ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 315ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 275ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 289ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 311ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 314ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 321ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 256ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 279ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 297ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 306ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 308ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 281ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 306ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 307ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 310ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 320ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 271ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 290ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 302ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 314ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 274ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 284ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 303ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 327ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 343ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 1097ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 1098ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 1108ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 1118ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 1123ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 274ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 291ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 328ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 331ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 281ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 287ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 289ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 307ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 281ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 292ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 295ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 303ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 310ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 259ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 284ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 289ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 324ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 245ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 267ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 272ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 285ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 334ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 258ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 294ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 303ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 307ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 325ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 298ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 299ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 302ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 310ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 315ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 248ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 296ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 306ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 309ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 256ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 283ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 291ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 304ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 317ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 1001ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 1006ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 1011ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 1015ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 1025ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 288ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 293ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 295ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 303ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 339ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 290ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 311ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 315ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 324ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 245ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 273ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 288ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 291ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 449ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 453ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 457ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 458ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 467ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 282ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 291ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 322ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 328ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 295ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 298ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 310ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 320ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 276ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 293ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 284ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 282ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 294ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 304ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 316ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 265ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 277ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 286ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 292ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 297ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 447ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 456ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 460ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 462ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 470ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 269ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 288ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 316ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 318ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 340ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 285ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 290ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 292ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 303ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 293ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 296ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 307ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 315ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 292ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 317ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 319ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 321ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 333ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 257ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 286ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 293ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 297ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 283ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 286ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 289ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 407ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 294ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 304ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 310ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 315ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 323ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 237ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 257ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 279ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 286ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 291ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 288ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 304ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 307ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 309ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 312ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 358ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 360ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 362ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 369ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 378ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 281ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 284ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 291ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 293ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 304ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 452ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 459ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 461ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 466ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 475ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 255ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 272ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 307ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 364ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 295ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 303ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 307ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 316ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 268ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 281ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 301ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 304ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 307ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 270ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 308ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 314ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 322ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 339ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 244ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 266ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 276ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 289ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 265ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 273ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 278ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 297ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 301ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 248ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 253ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 262ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 330ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 320ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 323ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 324ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 327ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 334ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 286ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 308ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 320ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 321ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 325ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 262ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 269ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 280ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 299ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 302ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 282ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 293ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 305ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 309ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 311ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 512ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 515ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 519ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 522ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 531ms
+ GET /api/supabase?table=webhook_logs&count=true&limit=1 200 in 304ms
+ GET /api/supabase?table=attlogs&count=true&limit=1 200 in 319ms
+ GET /api/supabase?table=attlogs&select=pin,name,scan_time,status_scan&order=scan_time.desc&limit=6 200 in 310ms
+ GET /api/supabase?table=attlogs&select=cloud_id,scan_time&order=scan_time.desc&limit=1 200 in 312ms
+ GET /api/supabase?table=userinfos&count=true&limit=1 200 in 333ms
+ GET /dashboard 200 in 1527ms
+ ✓ Compiled in 2.1s (296 modules)
+ ✓ Compiled in 449ms (296 modules)
+ ✓ Compiled in 1724ms (838 modules)
+ ✓ Compiled in 335ms (296 modules)
+ ✓ Compiled in 739ms (824 modules)
+ ✓ Compiled in 344ms (296 modules)
+ ✓ Compiled in 325ms (296 modules)
+ ✓ Compiled in 500ms (296 modules)
+ ✓ Compiled in 392ms (296 modules)
+ ✓ Compiled in 341ms (296 modules)
+ ✓ Compiled in 348ms (296 modules)
+ ✓ Compiled in 295ms (296 modules)
+ ✓ Compiled in 1956ms (723 modules)
+ ✓ Compiled in 327ms (296 modules)
+ ✓ Compiled in 388ms (296 modules)
+ ✓ Compiled in 328ms (296 modules)
+ ✓ Compiled in 449ms (296 modules)
+ ✓ Compiled in 413ms (296 modules)
+ ✓ Compiled in 395ms (296 modules)
+ ✓ Compiled in 431ms (296 modules)
+ ✓ Compiled in 407ms (296 modules)
+ ✓ Compiled in 438ms (296 modules)
+ ✓ Compiled in 526ms (296 modules)
+ ✓ Compiled in 434ms (296 modules)
+ ✓ Compiled in 396ms (296 modules)
+ ✓ Compiled in 479ms (296 modules)
+ ✓ Compiled in 413ms (296 modules)
+ ✓ Compiled in 493ms (296 modules)
+ ✓ Compiled in 1221ms (723 modules)
+ ✓ Compiled in 348ms (296 modules)
+ ✓ Compiled in 358ms (296 modules)
+ ✓ Compiled in 838ms (296 modules)
+ ✓ Compiled in 454ms (296 modules)
+ ✓ Compiled in 349ms (296 modules)
+ ✓ Compiled in 341ms (296 modules)
+ ○ Compiling /api/auth/callback ...
+ ✓ Compiled /api/auth/callback in 7.7s (488 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json',
+  page: '/api/auth/callback'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json',
+  page: '/api/auth/callback'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 6.9s (1131 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json',
+  page: '/api/auth/callback'
+}
+[Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json',
+  page: '/api/auth/callback'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'E:\SuperWoW V3.0\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\SuperWoW V3.0\\.next\\routes-manifest.json'
+}
+ GET /api/auth/callback 500 in 23387ms
+ GET /api/auth/callback 500 in 1364ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'E:\SuperWoW V3.0\.next\cache\webpack\client-development-fallback\0.pack.gz_' -> 'E:\SuperWoW V3.0\.next\cache\webpack\client-development-fallback\0.pack.gz'
