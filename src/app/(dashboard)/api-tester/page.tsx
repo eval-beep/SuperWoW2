@@ -62,7 +62,7 @@ function ApiTesterContent() {
     const history = localStorage.getItem("cloud_id_history");
     if (history) setCloudIdHistory(JSON.parse(history));
     if (!searchParams.get("cloud_id")) {
-      fetch("/api/settings").then(r => r.json()).then(d => {
+      fetch("/api/settings", { credentials: "include" }).then(r => r.json()).then(d => {
         if (d?.cloud_id && !cloudId) setCloudId(d.cloud_id);
       }).catch(() => {});
     }
@@ -134,6 +134,7 @@ function ApiTesterContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command, params: buildParams(), logToHistory: true }),
+        credentials: "include",
       });
       const data = await res.json();
       setResponse(data);

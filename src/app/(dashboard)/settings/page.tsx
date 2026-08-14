@@ -48,7 +48,7 @@ export default function SettingsPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/auth/avatar", { method: "POST", body: formData });
+      const res = await fetch("/api/auth/avatar", { method: "POST", body: formData, credentials: "include" });
       const data = await res.json();
       if (res.ok && data.success) {
         await refreshProfile();
@@ -71,6 +71,7 @@ export default function SettingsPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nickname }),
+        credentials: "include",
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -88,7 +89,7 @@ export default function SettingsPage() {
 
   async function loadSettings() {
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data) {
         setSettings({
@@ -109,7 +110,7 @@ export default function SettingsPage() {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch("/api/settings/test");
+      const res = await fetch("/api/settings/test", { credentials: "include" });
       const data = await res.json();
       setTestResult({ success: data.success, message: data.message });
     } catch {
@@ -128,6 +129,7 @@ export default function SettingsPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...settings, theme: previewTheme, language: previewLang }),
+        credentials: "include",
       });
       const toast = document.getElementById("settings-toast");
       if (toast) {
@@ -153,6 +155,7 @@ export default function SettingsPage() {
           command: "get_device",
           params: { cloud_id: settings.cloud_id || "C2697842930C1634" },
         }),
+        credentials: "include",
       });
       const result = await res.json();
       if (result.success && result.data) {
@@ -198,7 +201,7 @@ export default function SettingsPage() {
   }
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     window.location.href = "/login";
   }
 

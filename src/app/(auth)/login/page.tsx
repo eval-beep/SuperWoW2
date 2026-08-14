@@ -47,6 +47,12 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.session) {
+          await supabaseBrowser.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
+        }
         const redirect = new URLSearchParams(window.location.search).get("redirect");
         router.push(redirect || "/dashboard");
       } else {

@@ -81,7 +81,7 @@ export default function UserInfoPage() {
     });
     if (search) params.set("search", search);
 
-    const res = await fetch(`/api/user-info?${params.toString()}`);
+    const res = await fetch(`/api/user-info?${params.toString()}`, { credentials: "include" });
     const data = await res.json();
     setUsers(data.data || []);
     setTotal(data.total || 0);
@@ -109,7 +109,7 @@ export default function UserInfoPage() {
 
   async function loadCloudIds() {
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data?.cloud_id) setAllCloudIds([data.cloud_id]);
     } catch { /* ignore */ }
@@ -123,6 +123,7 @@ export default function UserInfoPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pin, mode }),
+        credentials: "include",
       });
       setDeleteModal({ open: false, user: null });
       loadUsers();
@@ -138,6 +139,7 @@ export default function UserInfoPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pin: addForm.pin, name: addForm.name, privilege: addForm.privilege, password: addForm.password, rfid: addForm.rfid }),
+        credentials: "include",
       });
       setAddModal(false);
       setAddForm({ pin: "", name: "", privilege: 1, password: "", rfid: "" });
@@ -159,6 +161,7 @@ export default function UserInfoPage() {
           name: editForm.name,
           privilege: editForm.privilege,
         }),
+        credentials: "include",
       });
       setEditModal({ open: false, user: null });
       loadUsers();
@@ -178,6 +181,7 @@ export default function UserInfoPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pin: syncPin.trim() }),
+        credentials: "include",
       });
       const data = await res.json();
       if (data.success) {

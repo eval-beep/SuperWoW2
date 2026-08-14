@@ -31,7 +31,7 @@ export default function PinListPage() {
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/pin-list");
+      const res = await fetch("/api/pin-list", { credentials: "include" });
       const result = await res.json();
       const raw: Record<string, unknown>[] = result.data || [];
       setUsers(raw.map((u, idx) => ({
@@ -73,6 +73,7 @@ export default function PinListPage() {
           name: newForm.name,
           privilege: newForm.privilege,
         }),
+        credentials: "include",
       });
       setAddModal(false);
       setNewForm({ pin: "", name: "", privilege: 1 });
@@ -88,6 +89,7 @@ export default function PinListPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ command: "delete_userinfo", params: { cloud_id: user.cloud_id, pin: user.pin }, logToHistory: true }),
+      credentials: "include",
     });
     loadUsers();
   }

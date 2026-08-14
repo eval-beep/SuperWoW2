@@ -46,7 +46,7 @@ export default function DashboardPage() {
 
   async function loadDashboard() {
     try {
-      const res = await fetch("/api/dashboard");
+      const res = await fetch("/api/dashboard", { credentials: "include" });
       const json = await res.json();
 
       if (json.error === "Unauthorized") {
@@ -122,7 +122,7 @@ export default function DashboardPage() {
           <p className="text-sm" style={{ color: mutedColor }}>Silakan login ulang untuk melanjutkan.</p>
           <button
             onClick={async () => {
-              await fetch("/api/auth/logout", { method: "POST" });
+              await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
               window.location.href = "/login";
             }}
             className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"

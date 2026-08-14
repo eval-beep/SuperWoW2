@@ -64,13 +64,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   useEffect(() => {
-    supabaseBrowser.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email || "" });
-        fetchProfile(session.user.id);
+    let mounted = true;
+
+    const init = async () => {
+      try {
+        // First try to get session from Supabase client (localStorage)
+        const { data: { session } } = await supabaseBrowser.auth.getSession();
+
+        if (session?.user && mounted) {
+          setUser({ id: session.user.id, email: session.user.email || "" });
+          fetchProfile(session.user.id);
+        } else if (mounted) {
+          // No session in localStorage — try to initialize from cookies
+          try {
+            const res = await fetch("/api/auth/get-session", { credentials: "include" });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.access_token && data.refresh_token) {
+                const { data: { session: newSession } } = await supabaseBrowser.auth.setSession({
+                  access_token: data.access_token,
+                  refresh_token: data.refresh_token,
+                });
+                if (newSession?.user && mounted) {
+                  setUser({ id: newSession.user.id, email: newSession.user.email || "" });
+                  fetchProfile(newSession.user.id);
+                }
+              }
+            }
+          } catch {
+            // Silent — user just won't be logged in
+          }
+        }
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    init();
 
     const { data: { subscription } } = supabaseBrowser.auth.onAuthStateChange(
       async (event, session) => {
@@ -85,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           fetch("/api/auth/sync-session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
               access_token: session.access_token,
               refresh_token: session.refresh_token,
@@ -95,7 +126,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [fetchProfile]);
 
   return (

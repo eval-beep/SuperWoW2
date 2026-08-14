@@ -45,7 +45,7 @@ export default function WebhookHistoryPage() {
     if (search) params.set("search", search);
     if (typeFilter) params.set("webhook_type", typeFilter);
     if (cloudIdFromSettings) params.set("cloud_id", cloudIdFromSettings);
-    const res = await fetch(`/api/webhook-history?${params.toString()}`);
+    const res = await fetch(`/api/webhook-history?${params.toString()}`, { credentials: "include" });
     const data = await res.json();
     setLogs(data.data || []);
     setTotal(data.total || 0);
@@ -58,7 +58,7 @@ export default function WebhookHistoryPage() {
 
   async function loadSettings() {
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data?.cloud_id) setCloudIdFromSettings(data.cloud_id);
     } catch { /* ignore */ }

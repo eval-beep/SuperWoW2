@@ -60,7 +60,7 @@ export default function AttendanceLogsPage() {
     if (dateFrom) params.set("from", dateFrom);
     if (dateTo) params.set("to", dateTo);
     if (cloudIdFromSettings) params.set("cloud_id", cloudIdFromSettings);
-    const res = await fetch(`/api/attendance-logs?${params.toString()}`);
+    const res = await fetch(`/api/attendance-logs?${params.toString()}`, { credentials: "include" });
     const data = await res.json();
     setLogs(data.data || []);
     setTotal(data.count || 0);
@@ -76,7 +76,7 @@ export default function AttendanceLogsPage() {
 
   async function loadSettings() {
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data?.cloud_id) {
         setCloudIdFromSettings(data.cloud_id);
@@ -92,7 +92,7 @@ export default function AttendanceLogsPage() {
 
   async function loadCloudIds() {
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data?.cloud_id) setAllCloudIds([data.cloud_id]);
     } catch { /* ignore */ }
@@ -121,6 +121,7 @@ export default function AttendanceLogsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: "get_attlog", params, logToHistory: true }),
+        credentials: "include",
       });
       setGetAttlogModal(false);
     } catch (err) {
@@ -144,6 +145,7 @@ export default function AttendanceLogsPage() {
           command: "get_attlog",
           params: { cloud_id: cid, start_date: fmt(yesterday), end_date: fmt(today) },
         }),
+        credentials: "include",
       });
       const result = await res.json();
       if (result.success) {

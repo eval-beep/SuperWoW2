@@ -55,7 +55,7 @@ export default function ApiHistoryPage() {
     if (statusFilter) params.set("status", statusFilter);
     if (commandFilter) params.set("command_type", commandFilter);
     if (cloudIdFromSettings) params.set("cloud_id", cloudIdFromSettings);
-    const res = await fetch(`/api/api-history?${params.toString()}`);
+    const res = await fetch(`/api/api-history?${params.toString()}`, { credentials: "include" });
     const data = await res.json();
     setLogs(data.data || []);
     setTotal(data.total || 0);
@@ -68,7 +68,7 @@ export default function ApiHistoryPage() {
 
   async function loadSettings() {
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data?.cloud_id) setCloudIdFromSettings(data.cloud_id);
     } catch { /* ignore */ }

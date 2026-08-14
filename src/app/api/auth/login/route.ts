@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({
     success: true,
     user: { id: data.user.id, email: data.user.email },
+    session: {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    },
   });
 
   response.cookies.set("sb-access-token", data.session.access_token, {
