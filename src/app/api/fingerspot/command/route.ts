@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand, COMMAND_TYPES } from "@/lib/fingerspot";
 import { supabaseInsert, supabaseDelete, supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds, getUserFingerspotConfig } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const defaultCloudId = await getUserCloudId(user.id);
+    const fsConfig = await getUserFingerspotConfig(user.id);
 
     const body = await request.json();
     const { command, params } = body;
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     });
     const transId = Number((maxRow?.[0] as { trans_id?: string | number } | undefined)?.trans_id || 0) + 1;
 
-    const result = await sendFingerspotCommand(command, { ...params, cloud_id: targetCloudId, trans_id: String(transId) });
+    const result = await sendFingerspotCommand(command, { ...params, cloud_id: targetCloudId, trans_id: String(transId) }, fsConfig);
 
     try {
       await supabaseInsert("command_logs", {

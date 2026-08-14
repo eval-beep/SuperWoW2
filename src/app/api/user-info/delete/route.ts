@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseDelete } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId } from "@/lib/user-settings";
+import { getUserCloudId, getUserFingerspotConfig } from "@/lib/user-settings";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,8 +14,9 @@ export async function POST(request: NextRequest) {
 
     if (mode === "device") {
       const { sendFingerspotCommand } = await import("@/lib/fingerspot");
+      const fsConfig = await getUserFingerspotConfig(user.id);
       try {
-        await sendFingerspotCommand("delete_userinfo", { trans_id: "1", cloud_id: userCloudId, pin });
+        await sendFingerspotCommand("delete_userinfo", { trans_id: "1", cloud_id: userCloudId, pin }, fsConfig);
       } catch { /* continue */ }
     }
 

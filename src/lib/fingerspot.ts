@@ -9,16 +9,22 @@ export interface FingerspotResponse {
   data: Record<string, unknown>;
 }
 
+export interface FingerspotConfig {
+  apiUrl?: string;
+  apiToken?: string;
+}
+
 const ENDPOINT_MAP: Record<string, string> = {
   register_online: "reg_online",
 };
 
 export async function sendFingerspotCommand(
   command: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
+  config?: FingerspotConfig
 ): Promise<FingerspotResponse> {
-  const apiUrl = process.env.FINGERSPOT_API_URL || "https://developer.fingerspot.io/api";
-  const apiKey = process.env.FINGERSPOT_API_KEY || "";
+  const apiUrl = config?.apiUrl || process.env.FINGERSPOT_API_URL || "https://developer.fingerspot.io/api";
+  const apiKey = config?.apiToken || process.env.FINGERSPOT_API_KEY || "";
 
   const endpoint = ENDPOINT_MAP[command] || command;
   const url = `${apiUrl}/${endpoint}`;

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFingerspotCommand } from "@/lib/fingerspot";
 import { supabaseSelect } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-server";
-import { getUserCloudId, getUserCloudIds } from "@/lib/user-settings";
+import { getUserCloudId, getUserCloudIds, getUserFingerspotConfig } from "@/lib/user-settings";
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const defaultCloudId = await getUserCloudId(user.id);
+    const fsConfig = await getUserFingerspotConfig(user.id);
 
     const body = await request.json().catch(() => ({}));
     const { cloud_id } = body;
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
           cloud_id: targetCloudId,
           pin,
           user_id: user.id,
-        });
+        }, fsConfig);
         sent++;
       } catch { failed++; }
       await new Promise((resolve) => setTimeout(resolve, 200));

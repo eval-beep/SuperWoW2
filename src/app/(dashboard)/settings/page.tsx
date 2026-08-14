@@ -9,7 +9,8 @@ interface Settings {
   supabase_anon_key: string;
   cloud_id: string;
   cloud_ids: string;
-  fingerspot_api_url: string;
+  api_url: string;
+  api_token: string;
 }
 
 export default function SettingsPage() {
@@ -27,7 +28,8 @@ export default function SettingsPage() {
     supabase_anon_key: "",
     cloud_id: "",
     cloud_ids: "",
-    fingerspot_api_url: "",
+    api_url: "",
+    api_token: "",
   });
   const [newDeviceId, setNewDeviceId] = useState("");
   const [testing, setTesting] = useState(false);
@@ -100,7 +102,8 @@ export default function SettingsPage() {
           supabase_anon_key: data.supabase_anon_key || "",
           cloud_id: data.cloud_id || "",
           cloud_ids: data.cloud_ids || data.cloud_id || "",
-          fingerspot_api_url: data.fingerspot_api_url || "",
+          api_url: data.api_url || "",
+          api_token: data.api_token || "",
         });
         if (data.theme) setPreviewTheme(data.theme);
         if (data.language) setPreviewLang(data.language);
@@ -514,11 +517,22 @@ export default function SettingsPage() {
           <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Fingerspot API URL</label>
           <input
             type="text"
-            value={settings.fingerspot_api_url}
-            onChange={(e) => updateSetting("fingerspot_api_url", e.target.value)}
+            value={settings.api_url}
+            onChange={(e) => updateSetting("api_url", e.target.value)}
             className="w-full px-3 py-2 rounded-xl text-sm"
             style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
             placeholder="https://developer.fingerspot.io/api"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Fingerspot API Token</label>
+          <input
+            type="password"
+            value={settings.api_token}
+            onChange={(e) => updateSetting("api_token", e.target.value)}
+            className="w-full px-3 py-2 rounded-xl text-sm"
+            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
+            placeholder="Z5B2BKUMQV4ED3G7"
           />
         </div>
         <button

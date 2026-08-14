@@ -40,6 +40,14 @@ export async function getUserCloudIds(userId: string): Promise<string[]> {
   return ids;
 }
 
+export async function getUserFingerspotConfig(userId: string): Promise<{ apiUrl: string; apiToken: string }> {
+  const settings = await getUserSettings(userId);
+  return {
+    apiUrl: settings.api_url || SETTINGS_DEFAULTS.api_url,
+    apiToken: settings.api_token || SETTINGS_DEFAULTS.api_token,
+  };
+}
+
 export async function addUserCloudId(userId: string, cloudId: string): Promise<void> {
   const ids = await getUserCloudIds(userId);
   if (!ids.includes(cloudId)) {
