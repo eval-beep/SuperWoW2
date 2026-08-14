@@ -38,6 +38,8 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [fetchingDevice, setFetchingDevice] = useState(false);
   const [deviceResult, setDeviceResult] = useState<{ success: boolean; message: string; data?: Record<string, string> } | null>(null);
+  const [showAnonKey, setShowAnonKey] = useState(false);
+  const [showApiToken, setShowApiToken] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -160,13 +162,13 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           command: "get_device",
-          params: { cloud_id: settings.cloud_id || "C2697842930C1634" },
+          params: { trans_id: "1", cloud_id: settings.cloud_id || "C2697842930C1634" },
         }),
         credentials: "include",
       });
       const result = await res.json();
       if (result.success && result.data) {
-        const d = result.data;
+        const d = result.data.data || result.data;
         setDeviceResult({
           success: true,
           message: "Device ditemukan!",
@@ -504,14 +506,25 @@ export default function SettingsPage() {
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Supabase Anon Key</label>
-          <input
-            type="password"
-            value={settings.supabase_anon_key}
-            onChange={(e) => updateSetting("supabase_anon_key", e.target.value)}
-            className="w-full px-3 py-2 rounded-xl text-sm"
-            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
-            placeholder="eyJhbGciOiJIUzI1NiIs..."
-          />
+          <div className="relative">
+            <input
+              type={showAnonKey ? "text" : "password"}
+              value={settings.supabase_anon_key}
+              onChange={(e) => updateSetting("supabase_anon_key", e.target.value)}
+              className="w-full px-3 py-2 pr-10 rounded-xl text-sm"
+              style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
+              placeholder="eyJhbGciOiJIUzI1NiIs..."
+            />
+            <button
+              type="button"
+              onClick={() => setShowAnonKey(!showAnonKey)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded"
+              style={{ color: secondaryText }}
+              tabIndex={-1}
+            >
+              <span className="material-symbols-outlined text-[18px]">{showAnonKey ? "visibility" : "visibility_off"}</span>
+            </button>
+          </div>
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Fingerspot API URL</label>
@@ -526,14 +539,25 @@ export default function SettingsPage() {
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Fingerspot API Token</label>
-          <input
-            type="password"
-            value={settings.api_token}
-            onChange={(e) => updateSetting("api_token", e.target.value)}
-            className="w-full px-3 py-2 rounded-xl text-sm"
-            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
-            placeholder="Z5B2BKUMQV4ED3G7"
-          />
+          <div className="relative">
+            <input
+              type={showApiToken ? "text" : "password"}
+              value={settings.api_token}
+              onChange={(e) => updateSetting("api_token", e.target.value)}
+              className="w-full px-3 py-2 pr-10 rounded-xl text-sm"
+              style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
+              placeholder="Z5B2BKUMQV4ED3G7"
+            />
+            <button
+              type="button"
+              onClick={() => setShowApiToken(!showApiToken)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded"
+              style={{ color: secondaryText }}
+              tabIndex={-1}
+            >
+              <span className="material-symbols-outlined text-[18px]">{showApiToken ? "visibility" : "visibility_off"}</span>
+            </button>
+          </div>
         </div>
         <button
           onClick={handleTestConnection}

@@ -23,7 +23,9 @@ export async function sendFingerspotCommand(
   params: Record<string, unknown>,
   config?: FingerspotConfig
 ): Promise<FingerspotResponse> {
-  const apiUrl = config?.apiUrl || process.env.FINGERSPOT_API_URL || "https://developer.fingerspot.io/api";
+  let apiUrl = config?.apiUrl || process.env.FINGERSPOT_API_URL || "https://developer.fingerspot.io/api";
+  apiUrl = apiUrl.replace(/\/+$/, "");
+  if (!apiUrl.endsWith("/api")) apiUrl += "/api";
   const apiKey = config?.apiToken || process.env.FINGERSPOT_API_KEY || "";
 
   const endpoint = ENDPOINT_MAP[command] || command;
