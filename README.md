@@ -53,6 +53,10 @@
 
 ## Cara Kerja
 
+<p align="center">
+  <img src="docs/flow-diagram.svg" alt="Fingerspot API & Webhook Flow Diagram" width="100%" />
+</p>
+
 ### Arsitektur Umum
 
 ```

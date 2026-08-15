@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#004CCD"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#006e2b"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#888"/>
+    </marker>
+    <marker id="arrow-yellow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d6b656"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="850" fill="#fafbfc" rx="12"/>
+
+  <!-- Title -->
+  <text x="600" y="45" text-anchor="middle" font-size="22" font-weight="bold" fill="#1a1c1c">Fingerspot Console — API &amp; Webhook Flow</text>
+
+  <!-- ==================== PULL FLOW (LEFT) ==================== -->
+  <text x="40" y="95" font-size="15" font-weight="bold" fill="#004CCD">PULL FLOW (Kirim Perintah)</text>
+
+  <!-- Browser -->
+  <rect x="30" y="120" width="170" height="70" rx="12" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2" filter="url(#shadow)"/>
+  <text x="115" y="150" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1c1c">Browser</text>
+  <text x="115" y="168" text-anchor="middle" font-size="10" fill="#555">(React Dashboard)</text>
+
+  <!-- Arrow: Browser -> API -->
+  <line x1="115" y1="190" x2="115" y2="240" stroke="#004CCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <rect x="25" y="200" width="180" height="30" rx="6" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1"/>
+  <text x="115" y="220" text-anchor="middle" font-size="9" font-weight="bold" fill="#333">POST /api/fingerspot/command</text>
+
+  <!-- Next.js API -->
+  <rect x="20" y="245" width="200" height="120" rx="10" fill="#fff2cc" stroke="#d6b656" stroke-width="2" filter="url(#shadow)"/>
+  <text x="120" y="268" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1c1c">Next.js API Route</text>
+  <line x1="30" y1="275" x2="210" y2="275" stroke="#d6b656" stroke-width="0.5"/>
+  <text x="30" y="292" font-size="9" fill="#555">1. requireAuth()</text>
+  <text x="30" y="306" font-size="9" fill="#555">2. getUserCloudId()</text>
+  <text x="30" y="320" font-size="9" fill="#555">3. getUserFingerspotConfig()</text>
+  <text x="30" y="334" font-size="9" fill="#555">4. sendFingerspotCommand()</text>
+
+  <!-- Arrow: API -> Fingerspot Cloud -->
+  <line x1="120" y1="365" x2="120" y2="430" stroke="#004CCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <rect x="15" y="378" width="210" height="40" rx="6" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1"/>
+  <text x="120" y="393" text-anchor="middle" font-size="9" font-weight="bold" fill="#333">POST developer.fingerspot.io/api/{cmd}</text>
+  <text x="120" y="408" text-anchor="middle" font-size="8" fill="#666">Bearer {API_KEY} + {cloud_id, trans_id}</text>
+
+  <!-- Fingerspot Cloud -->
+  <ellipse cx="120" cy="480" rx="100" ry="40" fill="#e1d5e7" stroke="#9673a6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="120" y="477" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a1c1c">Fingerspot</text>
+  <text x="120" y="493" text-anchor="middle" font-size="10" fill="#555">Cloud API</text>
+
+  <!-- Arrow: Cloud -> Device -->
+  <line x1="120" y1="520" x2="120" y2="580" stroke="#004CCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="125" y="555" font-size="9" fill="#666">Forward perintah</text>
+
+  <!-- Device Pull -->
+  <rect x="25" y="585" width="190" height="55" rx="12" fill="#d5e8d4" stroke="#82b366" stroke-width="2" filter="url(#shadow)"/>
+  <text x="120" y="608" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a1c1c">Fingerspot Device</text>
+  <text x="120" y="624" text-anchor="middle" font-size="9" fill="#555">(Fingerprint / Face)</text>
+
+  <!-- Arrow: Device -> Cloud (response) -->
+  <line x1="230" y1="612" x2="280" y2="480" stroke="#82b366" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <text x="268" y="545" font-size="8" fill="#82b366" transform="rotate(-50,268,545)">Response</text>
+
+  <!-- Arrow: Cloud -> API (response) -->
+  <line x1="230" y1="465" x2="280" y2="305" stroke="#82b366" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <text x="270" y="380" font-size="8" fill="#82b366" transform="rotate(-50,270,380)">Response</text>
+
+  <!-- Arrow: API -> Browser (response) -->
+  <line x1="230" y1="280" x2="280" y2="155" stroke="#82b366" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <text x="268" y="215" font-size="8" fill="#82b366" transform="rotate(-50,268,215)">Response</text>
+
+  <!-- Arrow: API -> command_logs -->
+  <line x1="220" y1="365" x2="420" y2="750" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-yellow)"/>
+  <text x="340" y="580" font-size="8" fill="#d6b656" transform="rotate(45,340,580)">Log perintah</text>
+
+  <!-- ==================== PUSH FLOW (RIGHT) ==================== -->
+  <text x="620" y="95" font-size="15" font-weight="bold" fill="#006e2b">PUSH FLOW (Webhook)</text>
+
+  <!-- Device Push -->
+  <rect x="620" y="120" width="190" height="55" rx="12" fill="#d5e8d4" stroke="#82b366" stroke-width="2" filter="url(#shadow)"/>
+  <text x="715" y="143" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a1c1c">Fingerspot Device</text>
+  <text x="715" y="160" text-anchor="middle" font-size="9" fill="#555">Scan terdeteksi</text>
+
+  <!-- Arrow: Device -> Edge Function -->
+  <line x1="715" y1="175" x2="715" y2="230" stroke="#006e2b" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <rect x="620" y="185" width="190" height="35" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1"/>
+  <text x="715" y="200" text-anchor="middle" font-size="9" font-weight="bold" fill="#333">POST webhook</text>
+  <text x="715" y="213" text-anchor="middle" font-size="8" fill="#666">{ type, cloud_id, data }</text>
+
+  <!-- Edge Function -->
+  <rect x="610" y="235" width="210" height="130" rx="10" fill="#f8cecc" stroke="#b85450" stroke-width="2" filter="url(#shadow)"/>
+  <text x="715" y="258" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1c1c">Edge Function</text>
+  <text x="715" y="273" text-anchor="middle" font-size="10" fill="#555">smart-task/index.ts</text>
+  <line x1="620" y1="280" x2="810" y2="280" stroke="#b85450" stroke-width="0.5"/>
+  <text x="620" y="296" font-size="9" fill="#555">1. Parse webhook payload</text>
+  <text x="620" y="310" font-size="9" fill="#555">2. Resolve user_id dari cloud_id</text>
+  <text x="620" y="324" font-size="9" fill="#555">3. Enrich dari command_logs</text>
+  <text x="620" y="338" font-size="9" fill="#555">4. Simpan ke database</text>
+
+  <!-- Arrow: Edge Function -> Database -->
+  <line x1="715" y1="365" x2="715" y2="430" stroke="#b85450" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="720" y="400" font-size="9" fill="#b85450">Simpan data</text>
+
+  <!-- Database -->
+  <rect x="620" y="435" width="190" height="110" rx="10" fill="#e1d5e7" stroke="#9673a6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="715" y="458" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1c1c">Supabase</text>
+  <text x="715" y="473" text-anchor="middle" font-size="10" fill="#555">PostgreSQL</text>
+  <line x1="630" y1="480" x2="800" y2="480" stroke="#9673a6" stroke-width="0.5"/>
+  <text x="630" y="496" font-size="9" fill="#555">attlogs — Log absensi</text>
+  <text x="630" y="510" font-size="9" fill="#555">userinfos — Data biometrik</text>
+  <text x="630" y="524" font-size="9" fill="#555">pins — Daftar PIN</text>
+  <text x="630" y="538" font-size="9" fill="#555">webhook_logs — Log webhook</text>
+
+  <!-- Arrow: Edge Function -> webhook_logs -->
+  <line x1="820" y1="365" x2="950" y2="750" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-yellow)"/>
+  <text x="910" y="580" font-size="8" fill="#d6b656" transform="rotate(55,910,580)">Log webhook</text>
+
+  <!-- ==================== BOTTOM: ALL TABLES ==================== -->
+  <text x="600" y="620" text-anchor="middle" font-size="15" font-weight="bold" fill="#9673a6">DATABASE TABLES</text>
+
+  <!-- Table boxes -->
+  <rect x="40" y="640" width="130" height="50" rx="8" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="105" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">command_logs</text>
+  <text x="105" y="678" text-anchor="middle" font-size="8" fill="#888">Log perintah API</text>
+
+  <rect x="185" y="640" width="130" height="50" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="250" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">attlogs</text>
+  <text x="250" y="678" text-anchor="middle" font-size="8" fill="#888">Log absensi</text>
+
+  <rect x="330" y="640" width="130" height="50" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="395" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">userinfos</text>
+  <text x="395" y="678" text-anchor="middle" font-size="8" fill="#888">Data biometrik</text>
+
+  <rect x="475" y="640" width="130" height="50" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="540" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">pins</text>
+  <text x="540" y="678" text-anchor="middle" font-size="8" fill="#888">Daftar PIN</text>
+
+  <rect x="620" y="640" width="130" height="50" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="685" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">settings</text>
+  <text x="685" y="678" text-anchor="middle" font-size="8" fill="#888">Config per user</text>
+
+  <rect x="765" y="640" width="130" height="50" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="830" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">profiles</text>
+  <text x="830" y="678" text-anchor="middle" font-size="8" fill="#888">User profile</text>
+
+  <rect x="910" y="640" width="130" height="50" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="975" y="662" text-anchor="middle" font-size="10" font-weight="bold" fill="#1a1c1c">webhook_logs</text>
+  <text x="975" y="678" text-anchor="middle" font-size="8" fill="#888">Log webhook</text>
+
+  <!-- ==================== LEGEND ==================== -->
+  <rect x="1020" y="120" width="165" height="160" rx="10" fill="#f5f5f5" stroke="#ccc" stroke-width="1" filter="url(#shadow)"/>
+  <text x="1102" y="142" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1c1c">LEGENDA</text>
+  <line x1="1030" y1="150" x2="1175" y2="150" stroke="#ddd" stroke-width="0.5"/>
+
+  <line x1="1030" y1="168" x2="1060" y2="168" stroke="#004CCD" stroke-width="2"/>
+  <text x="1068" y="172" font-size="9" fill="#333">Request (Pull)</text>
+
+  <line x1="1030" y1="190" x2="1060" y2="190" stroke="#006e2b" stroke-width="2"/>
+  <text x="1068" y="194" font-size="9" fill="#333">Webhook (Push)</text>
+
+  <line x1="1030" y1="212" x2="1060" y2="212" stroke="#888" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1068" y="216" font-size="9" fill="#333">Response / Async</text>
+
+  <line x1="1030" y1="234" x2="1060" y2="234" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="1068" y="238" font-size="9" fill="#333">Log ke database</text>
+
+  <rect x="1030" y="250" width="14" height="10" rx="3" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1"/>
+  <text x="1050" y="259" font-size="9" fill="#333">User config</text>
+
+  <rect x="1110" y="250" width="14" height="10" rx="3" fill="#d5e8d4" stroke="#82b366" stroke-width="1"/>
+  <text x="1130" y="259" font-size="9" fill="#333">Device data</text>
+
+  <!-- ==================== INFO BOXES ==================== -->
+  <rect x="40" y="710" width="280" height="80" rx="10" fill="#e8f5e9" stroke="#82b366" stroke-width="1"/>
+  <text x="55" y="732" font-size="11" font-weight="bold" fill="#2e7d32">PULL: Kirim Perintah</text>
+  <text x="55" y="750" font-size="9" fill="#555">User klik tombol → API Route → Fingerspot API</text>
+  <text x="55" y="764" font-size="9" fill="#555">→ Device merespons → Data disimpan</text>
+  <text x="55" y="778" font-size="9" fill="#555">Contoh: get_attlog, get_userinfo, set_time</text>
+
+  <rect x="340" y="710" width="280" height="80" rx="10" fill="#fce4ec" stroke="#b85450" stroke-width="1"/>
+  <text x="355" y="732" font-size="11" font-weight="bold" fill="#c62828">PUSH: Webhook Real-time</text>
+  <text x="355" y="750" font-size="9" fill="#555">Device scan → POST ke Edge Function</text>
+  <text x="355" y="764" font-size="9" fill="#555">→ Resolve user → Simpan ke database</text>
+  <text x="355" y="778" font-size="9" fill="#555">Contoh: realtime_attlog, attlog</text>
+
+  <rect x="640" y="710" width="280" height="80" rx="10" fill="#e3f2fd" stroke="#6c8ebf" stroke-width="1"/>
+  <text x="655" y="732" font-size="11" font-weight="bold" fill="#1565c0">MULTI-DEVICE</text>
+  <text x="655" y="750" font-size="9" fill="#555">User dapat daftarkan banyak Cloud ID</text>
+  <text x="655" y="764" font-size="9" fill="#555">Satu device = default</text>
+  <text x="655" y="778" font-size="9" fill="#555">Data terisolasi per-user (RLS)</text>
+</svg>
