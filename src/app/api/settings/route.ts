@@ -22,9 +22,10 @@ export async function PUT(request: NextRequest) {
     await updateUserSettings(user.id, body);
     return NextResponse.json({ success: true, ...body });
   } catch (e) {
+    console.error("Settings save error:", e);
     if ((e as Error).message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ error: "Gagal menyimpan settings" }, { status: 500 });
+    return NextResponse.json({ error: (e as Error).message || "Gagal menyimpan settings", success: false }, { status: 500 });
   }
 }

@@ -81,24 +81,33 @@ export async function setDefaultCloudId(userId: string, cloudId: string): Promis
 }
 
 export async function updateUserSettings(userId: string, updates: Record<string, string>): Promise<void> {
+  const errors: string[] = [];
   for (const [key, value] of Object.entries(updates)) {
-    const { data: existing } = await supabaseSelect("settings", {
-      select: "id",
-      filters: { user_id: `eq.${userId}`, key: `eq.${key}` },
-    });
+    try {
+      const { data: existing } = await supabaseSelect("settings", {
+        select: "id",
+        filters: { user_id: `eq.${userId}`, key: `eq.${key}` },
+      });
 
-    if (existing && existing.length > 0) {
-      await supabaseUpdate("settings", { value, updated_at: new Date().toISOString() }, {
-        user_id: userId,
-        key,
-      });
-    } else {
-      await supabaseInsert("settings", {
-        user_id: userId,
-        key,
-        value,
-      });
+      if (existing && existing.length > 0) {
+        await supabaseUpdate("settings", { value, updated_at: new Date().toISOString() }, {
+          user_id: userId,
+          key,
+        });
+      } else {
+        await supabaseInsert("settings", {
+          user_id: userId,
+          key,
+          value,
+        });
+      }
+    } catch (e) {
+      console.error(`Failed to save setting [${key}]:`, e);
+      errors.push(key);
     }
+  }
+  if (errors.length > 0) {
+    throw new Error(`Gagal menyimpan: ${errors.join(", ")}`);
   }
 }
 

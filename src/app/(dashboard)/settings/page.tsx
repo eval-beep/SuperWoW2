@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [fetchingDevice, setFetchingDevice] = useState(false);
   const [deviceResult, setDeviceResult] = useState<{ success: boolean; message: string; data?: Record<string, string> } | null>(null);
@@ -114,9 +115,6 @@ export default function SettingsPage() {
           api_url: data.api_url || "",
           api_token: data.api_token || "",
         });
-        if (cleanedCloudIds !== (data.cloud_ids || "")) {
-          saveCloudSettings({ cloud_id: cleanedCloudId, cloud_ids: cleanedCloudIds, api_url: data.api_url || "", api_token: data.api_token || "" });
-        }
         if (data.theme) setPreviewTheme(data.theme);
         if (data.language) setPreviewLang(data.language);
       }
@@ -141,23 +139,30 @@ export default function SettingsPage() {
 
   async function handleSave() {
     setSaving(true);
+    setSaveMsg(null);
     try {
       setTheme(previewTheme);
       setLang(previewLang);
-      await fetch("/api/settings", {
+      const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...settings, theme: previewTheme, language: previewLang }),
         credentials: "include",
       });
-      const toast = document.getElementById("settings-toast");
-      if (toast) {
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 2500);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const toast = document.getElementById("settings-toast");
+        if (toast) {
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+        setTimeout(() => window.location.reload(), 300);
+      } else {
+        setSaveMsg({ type: "err", text: data.error || "Gagal menyimpan pengaturan" });
       }
-      setTimeout(() => window.location.reload(), 300);
     } catch (err) {
       console.error("Save error:", err);
+      setSaveMsg({ type: "err", text: "Gagal menyimpan pengaturan. Periksa koneksi." });
     } finally {
       setSaving(false);
     }
@@ -679,6 +684,16 @@ export default function SettingsPage() {
         <span className={`material-symbols-outlined text-[18px] ${saving ? "animate-spin" : ""}`}>{saving ? "progress_activity" : "save"}</span>
         {saving ? "Menyimpan..." : "Simpan Pengaturan"}
       </button>
+
+      {saveMsg && (
+        <div
+          className="px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-2"
+          style={{ background: saveMsg.type === "ok" ? "#defbe6" : "#fff1f1", color: saveMsg.type === "ok" ? "#006e2b" : "#da1e28" }}
+        >
+          <span className="material-symbols-outlined text-[16px]">{saveMsg.type === "ok" ? "check_circle" : "error"}</span>
+          {saveMsg.text}
+        </div>
+      )}
 
       {/* Account */}
       <div className="rounded-2xl p-5 space-y-4" style={cardStyle}>
