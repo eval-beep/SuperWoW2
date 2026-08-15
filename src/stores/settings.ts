@@ -11,9 +11,9 @@ interface SettingsState {
 }
 
 const defaultSettings: AppSettings = {
-  api_token: "Z5B2BKUMQV4ED3G7",
-  cloud_id: "C2697842930C1634",
-  api_url: "https://developer.fingerspot.io/api",
+  api_token: "",
+  cloud_id: "",
+  api_url: "",
   theme: "light",
   language: "id",
 };

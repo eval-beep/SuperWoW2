@@ -38,6 +38,7 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [fetchingDevice, setFetchingDevice] = useState(false);
   const [deviceResult, setDeviceResult] = useState<{ success: boolean; message: string; data?: Record<string, string> } | null>(null);
+  const [selectedFetchCloudId, setSelectedFetchCloudId] = useState("");
   const [showAnonKey, setShowAnonKey] = useState(false);
   const [showApiToken, setShowApiToken] = useState(false);
 
@@ -99,14 +100,23 @@ export default function SettingsPage() {
       const res = await fetch("/api/settings", { credentials: "include" });
       const data = await res.json();
       if (data) {
+        const rawCloudIds = (data.cloud_ids || data.cloud_id || "")
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter((s: string) => s && /^[A-Za-z0-9]{6,32}$/.test(s));
+        const cleanedCloudIds = rawCloudIds.join(", ");
+        const cleanedCloudId = rawCloudIds.includes(data.cloud_id) ? data.cloud_id : (rawCloudIds[0] || "");
         setSettings({
           supabase_url: data.supabase_url || "",
           supabase_anon_key: data.supabase_anon_key || "",
-          cloud_id: data.cloud_id || "",
-          cloud_ids: data.cloud_ids || data.cloud_id || "",
+          cloud_id: cleanedCloudId,
+          cloud_ids: cleanedCloudIds,
           api_url: data.api_url || "",
           api_token: data.api_token || "",
         });
+        if (cleanedCloudIds !== (data.cloud_ids || "")) {
+          saveCloudSettings({ cloud_id: cleanedCloudId, cloud_ids: cleanedCloudIds, api_url: data.api_url || "", api_token: data.api_token || "" });
+        }
         if (data.theme) setPreviewTheme(data.theme);
         if (data.language) setPreviewLang(data.language);
       }
@@ -154,6 +164,15 @@ export default function SettingsPage() {
   }
 
   async function handleFetchDeviceInfo() {
+    const targetId = selectedFetchCloudId || settings.cloud_id;
+    if (!targetId) {
+      setDeviceResult({ success: false, message: "Pilih device terlebih dahulu" });
+      return;
+    }
+    if (!settings.api_token) {
+      setDeviceResult({ success: false, message: "API Token belum diisi. Silakan isi di bagian Konfigurasi API." });
+      return;
+    }
     setFetchingDevice(true);
     setDeviceResult(null);
     try {
@@ -162,7 +181,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           command: "get_device",
-          params: { trans_id: "1", cloud_id: settings.cloud_id },
+          params: { trans_id: "1", cloud_id: targetId },
         }),
         credentials: "include",
       });
@@ -173,17 +192,18 @@ export default function SettingsPage() {
           success: true,
           message: "Device ditemukan!",
           data: {
-            cloud_id: d.cloud_id || "-",
-            device_name: d.device_name || "-",
-            webhook_url: d.webhook_url || "-",
-            last_activity: d.last_activity || "N/A",
+            cloud_id: d.cloud_id || targetId,
+            device_name: d.device_name || d.name || "-",
+            webhook_url: d.webhook_url || d.url || "-",
+            last_activity: d.last_activity || d.last_active || "N/A",
           },
         });
       } else {
-        setDeviceResult({ success: false, message: result.data?.error || "Device tidak ditemukan" });
+        const errMsg = result.data?.message || result.data?.error || result.error || "Device tidak ditemukan. Pastikan Cloud ID benar dan device online.";
+        setDeviceResult({ success: false, message: errMsg });
       }
     } catch {
-      setDeviceResult({ success: false, message: "Gagal mengambil info device" });
+      setDeviceResult({ success: false, message: "Gagal mengambil info device. Periksa koneksi dan konfigurasi API." });
     } finally {
       setFetchingDevice(false);
     }
@@ -206,7 +226,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function saveCloudSettings(updates: { cloud_id?: string; cloud_ids?: string }) {
+  async function saveCloudSettings(updates: Record<string, string>) {
     try {
       await fetch("/api/settings", {
         method: "PUT",
@@ -217,14 +237,25 @@ export default function SettingsPage() {
     } catch { /* ignore */ }
   }
 
+  function isValidCloudId(id: string): boolean {
+    return /^[A-Za-z0-9]{6,32}$/.test(id);
+  }
+
   function handleAddDevice() {
     const id = newDeviceId.trim();
     if (!id) return;
+    if (!isValidCloudId(id)) {
+      setDeviceResult({ success: false, message: "Format Cloud ID tidak valid. Cloud ID hanya boleh huruf dan angka (6-32 karakter)." });
+      return;
+    }
     const list = (settings.cloud_ids || settings.cloud_id || "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    if (list.includes(id)) return;
+    if (list.includes(id)) {
+      setDeviceResult({ success: false, message: "Cloud ID sudah terdaftar." });
+      return;
+    }
     const updated = [...list, id];
     const newCloudIds = updated.join(", ");
     const newDefault = settings.cloud_id || id;
@@ -234,7 +265,8 @@ export default function SettingsPage() {
       cloud_id: newDefault,
     }));
     setNewDeviceId("");
-    saveCloudSettings({ cloud_id: newDefault, cloud_ids: newCloudIds });
+    setDeviceResult(null);
+    saveCloudSettings({ cloud_id: newDefault, cloud_ids: newCloudIds, api_url: settings.api_url, api_token: settings.api_token });
   }
 
   function handleRemoveDevice(id: string) {
@@ -251,12 +283,12 @@ export default function SettingsPage() {
       cloud_ids: newCloudIds,
       cloud_id: newDefault,
     }));
-    saveCloudSettings({ cloud_id: newDefault, cloud_ids: newCloudIds });
+    saveCloudSettings({ cloud_id: newDefault, cloud_ids: newCloudIds, api_url: settings.api_url, api_token: settings.api_token });
   }
 
   function handleSetDefault(id: string) {
     setSettings((prev) => ({ ...prev, cloud_id: id }));
-    saveCloudSettings({ cloud_id: id });
+    saveCloudSettings({ cloud_id: id, cloud_ids: settings.cloud_ids, api_url: settings.api_url, api_token: settings.api_token });
   }
 
   async function handleLogout() {
@@ -447,9 +479,24 @@ export default function SettingsPage() {
           </button>
         </div>
 
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: secondaryText }}>Pilih device untuk diambil info</label>
+          <select
+            value={selectedFetchCloudId}
+            onChange={(e) => setSelectedFetchCloudId(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl text-sm"
+            style={{ border: inputBorder, background: inputBg, fontFamily: "JetBrains Mono", color: primaryText }}
+          >
+            <option value="">{settings.cloud_id ? `${settings.cloud_id} (Default)` : "-- Pilih Device --"}</option>
+            {cloudIdList.filter((id) => id !== settings.cloud_id).map((id) => (
+              <option key={id} value={id}>{id}</option>
+            ))}
+          </select>
+        </div>
+
         <button
           onClick={handleFetchDeviceInfo}
-          disabled={fetchingDevice}
+          disabled={fetchingDevice || cloudIdList.length === 0}
           className="w-full px-4 py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 disabled:opacity-50 text-white"
           style={{ background: "#004ccd" }}
         >

@@ -132,7 +132,11 @@ export default function AttendanceLogsPage() {
   }
 
   async function handleSyncAttlog() {
-    const cid = selectedCloudId || cloudIdFromSettings || "C2697842930C1634";
+    const cid = selectedCloudId || cloudIdFromSettings;
+    if (!cid) {
+      setSyncResult({ success: false, message: "Pilih device terlebih dahulu di Settings" });
+      return;
+    }
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);

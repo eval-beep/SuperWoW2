@@ -1,9 +1,9 @@
 import { supabaseSelect, supabaseInsert, supabaseUpdate } from "@/lib/supabase";
 
 const SETTINGS_DEFAULTS: Record<string, string> = {
-  api_token: "Z5B2BKUMQV4ED3G7",
-  cloud_id: "C2697842930C1634",
-  cloud_ids: "C2697842930C1634",
+  api_token: "",
+  cloud_id: "",
+  cloud_ids: "",
   api_url: "https://developer.fingerspot.io/api",
   theme: "light",
   language: "id",
