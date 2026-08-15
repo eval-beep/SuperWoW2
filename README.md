@@ -1,6 +1,28 @@
-# Fingerspot Enterprise Console
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+</p>
 
-Dashboard web untuk mengelola perangkat biometrik Fingerspot secara cloud-based. Mengirim perintah ke device, menerima data real-time via webhook, dan memantau semua aktivitas dalam satu panel.
+<h1 align="center">🏢 Fingerspot Enterprise Console</h1>
+
+<p align="center">
+  <b>Dashboard web untuk mengelola perangkat biometrik Fingerspot secara cloud-based.</b><br>
+  Kirim perintah ke device, terima data real-time via webhook, pantau semua aktivitas dalam satu panel.
+</p>
+
+<p align="center">
+  <a href="#fitur-utama">Fitur</a> •
+  <a href="#cara-kerja">Cara Kerja</a> •
+  <a href="#setup-lokal">Setup</a> •
+  <a href="#deploy-ke-vercel">Deploy</a> •
+  <a href="#api-endpoints">API</a> •
+  <a href="#troubleshooting">Troubleshooting</a>
+</p>
+
+---
 
 ## Tech Stack
 
@@ -13,58 +35,6 @@ Dashboard web untuk mengelola perangkat biometrik Fingerspot secara cloud-based.
 | Email | Resend |
 | State | Zustand |
 | Bahasa | TypeScript |
-
-## Cara Kerja
-
-### Arsitektur Umum
-
-```
-Browser (User)
-     |
-     v
-Next.js App (API Routes)
-     |
-     +---> Supabase PostgreSQL (data: attlogs, pins, userinfos, settings, logs)
-     |
-     +---> Fingerspot Cloud API (https://developer.fingerspot.io/api)
-     |         |
-     |         v
-     |    Perangkat Fingerspot (fingerprint/face device)
-     |
-     +---> Supabase Edge Function (webhook receiver: smart-task)
-               |
-               v
-          Data masuk ke database secara real-time
-```
-
-### Alur Data
-
-**1. Mengirim Perintah ke Device (Pull)**
-```
-User klik tombol di dashboard
-  -> Next.js API Route (/api/fingerspot/command)
-  -> Kirim POST ke Fingerspot Cloud API
-  -> Device merespons
-  -> Data disimpan ke database
-  -> Log tersimpan di command_logs
-```
-
-**2. Menerima Data dari Device (Push/Webhook)**
-```
-Device mendeteksi scan fingerprint
-  -> Kirim POST ke Supabase Edge Function (smart-task)
-  -> Edge Function resolve user_id berdasarkan cloud_id
-  -> Data disimpan ke attlogs/userinfos/pins
-  -> Log tersimpan di webhook_logs
-```
-
-**3. Multi-Device Support**
-```
-User dapat mendaftarkan banyak Cloud ID (device)
-  -> Satu device dijadikan default
-  -> Setiap operasi menggunakan Cloud ID yang dipilih
-  -> Data terisolasi per-user (RLS di Supabase)
-```
 
 ## Fitur Utama
 
@@ -81,6 +51,71 @@ User dapat mendaftarkan banyak Cloud ID (device)
 | Dark/Light Mode | Toggle tema gelap/terang |
 | Multi Language | Indonesia & English |
 
+## Cara Kerja
+
+### Arsitektur Umum
+
+```
+┌─────────────┐
+│   Browser   │  React Dashboard (User Interface)
+│  (Client)   │
+└──────┬──────┘
+       │
+       ▼
+┌──────────────────────────────────────────────────────────┐
+│                  Next.js API Routes                       │
+│  /api/fingerspot/command    /api/settings                 │
+│  /api/attendance-logs       /api/user-info                │
+│  /api/pin-list              /api/api-history              │
+└──────┬──────────────┬────────────────────┬───────────────┘
+       │              │                    │
+       ▼              ▼                    ▼
+┌────────────┐ ┌─────────────┐  ┌─────────────────────────┐
+│ Fingerspot │ │  Supabase   │  │  Supabase Edge Function  │
+│ Cloud API  │ │ PostgreSQL  │  │  (smart-task)            │
+│            │ │  Database   │  │  Webhook receiver        │
+└─────┬──────┘ └─────────────┘  └──────────┬──────────────┘
+      │                                     │
+      ▼                                     │
+┌─────────────┐                            │
+│  Fingerspot │ ◄──── POST webhook ─────────┘
+│   Device    │      (real-time push)
+│ (Fingerprint│
+│  /Face)     │
+└─────────────┘
+```
+
+### Alur Pull (Kirim Perintah)
+
+```
+User klik tombol di dashboard
+  → POST /api/fingerspot/command
+  → Next.js resolve Cloud ID & API Token dari settings
+  → POST ke Fingerspot Cloud API (https://developer.fingerspot.io/api/{command})
+  → Device merespons
+  → Data disimpan ke database
+  → Log tersimpan di command_logs
+```
+
+### Alur Push (Webhook)
+
+```
+Device mendeteksi scan fingerprint
+  → POST ke Supabase Edge Function (smart-task)
+  → Edge Function resolve user_id berdasarkan cloud_id
+  → Data disimpan ke attlogs / userinfos / pins
+  → Log tersimpan di webhook_logs
+```
+
+### Multi-Device
+
+```
+User dapat mendaftarkan banyak Cloud ID (device)
+  → Satu device dijadikan default
+  → Setiap operasi menggunakan Cloud ID yang dipilih
+  → Data terisolasi per-user (RLS di Supabase)
+```
+
 ## Yang Perlu Disiapkan
 
 ### 1. Akun & Layanan
@@ -90,40 +125,41 @@ User dapat mendaftarkan banyak Cloud ID (device)
 | [Supabase](https://supabase.com) | Database, Auth, Edge Functions, Storage | Ya (500MB DB, 1GB storage) |
 | [Fingerspot Cloud](https://developer.fingerspot.io) | API untuk komunikasi dengan device | Ya (device-dependent) |
 | [Resend](https://resend.com) | Email OTP, password reset | Ya (100 email/hari) |
-| [Vercel](https://vercel.com) (opsional) | Deploy Next.js | Ya (hobby) |
+| [Vercel](https://vercel.com) *(opsional)* | Deploy Next.js | Ya (hobby) |
 
 ### 2. Buat Project Supabase
 
 1. Buat project baru di [Supabase Dashboard](https://supabase.com/dashboard)
 2. Buka **SQL Editor** di dashboard Supabase
-3. Jalankan migration files dari folder `supabase/migrations/` secara berurutan:
-   - `20260812_complete_setup.sql` (schema utama: semua tabel, index, RLS, trigger)
-4. Buka **Storage** dan buat bucket `avatars` (public)
-5. Copy **Project URL** dan **Anon Key** dari Settings > API
+3. Jalankan migration file:
+   ```sql
+   -- Jalankan isi dari:
+   -- supabase/migrations/20260812_complete_setup.sql
+   ```
+4. Buka **Storage** → buat bucket `avatars` (public)
+5. Copy **Project URL** dan **Anon Key** dari Settings → API
 
 ### 3. Buat Akun Fingerspot Cloud
 
 1. Daftar di [Fingerspot Customer Portal](https://developer.fingerspot.io)
-2. Daftarkan device kamu dan dapatkan **Cloud ID** (format: `C...` atau `F...`, 16 karakter)
+2. Daftarkan device → dapatkan **Cloud ID** (format: `C...` atau `F...`, 16 karakter)
 3. Catat **API Token** dari portal
 4. Atur **Webhook URL** di portal Fingerspot:
    ```
    https://<project-ref>.supabase.co/functions/v1/smart-task
    ```
-   Ganti `<project-ref>` dengan ID project Supabase kamu.
 
 ### 4. Buat Akun Resend
 
 1. Daftar di [Resend](https://resend.com)
-2. Buka **API Keys** di dashboard
-3. Buat API key baru dan copy key-nya
+2. Buka **API Keys** → buat key baru → copy key-nya
 
 ## Setup Lokal
 
 ### Prasyarat
 
-- Node.js 18+ (direkomendasikan: 20+)
-- npm atau yarn atau pnpm
+- Node.js 18+ *(direkomendasikan: 20+)*
+- npm / yarn / pnpm
 - Git
 
 ### Instalasi
@@ -145,7 +181,7 @@ cp .env.example .env.local
 Buka `.env.local` dan isi semua variabel:
 
 ```env
-# Supabase (dari Supabase Dashboard > Settings > API)
+# Supabase (dari Supabase Dashboard → Settings → API)
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIs...
 
@@ -153,11 +189,11 @@ NEXT_PUBLIC_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIs...
 FINGERSPOT_API_URL=https://developer.fingerspot.io/api
 FINGERSPOT_API_KEY=your-api-key
 
-# Resend (dari Resend Dashboard > API Keys)
+# Resend (dari Resend Dashboard → API Keys)
 RESEND_API_KEY=re_xxxxxxxxxx
 ```
 
-### Jalankan Development Server
+### Jalankan
 
 ```bash
 npm run dev
@@ -171,29 +207,30 @@ Buka [http://localhost:3000](http://localhost:3000) di browser.
 
 ```
 auth.users (Supabase Auth)
-    |
-    +---> profiles (profil user: nama, avatar)
-    +---> settings (key-value: cloud_id, api_token, theme, dll)
-    +---> otp_codes (kode OTP untuk verifikasi)
-    |
-    +---> attlogs (log absensi)
-    +---> userinfos (data biometrik)
-    +---> pins (daftar PIN)
-    +---> command_logs (log perintah API)
-    +---> webhook_logs (log webhook masuk)
+    │
+    ├──▶ profiles          (profil user: nama, avatar)
+    ├──▶ settings          (key-value: cloud_id, api_token, theme)
+    ├──▶ otp_codes         (kode OTP untuk verifikasi)
+    │
+    ├──▶ attlogs           (log absensi)
+    ├──▶ userinfos         (data biometrik)
+    ├──▶ pins              (daftar PIN)
+    ├──▶ command_logs      (log perintah API)
+    └──▶ webhook_logs      (log webhook masuk)
 ```
 
 ### Relasi
 
-- Semua tabel data memiliki `user_id` (FK -> auth.users) untuk isolasi per-user
+- Semua tabel data memiliki `user_id` (FK → auth.users) untuk isolasi per-user
 - Semua tabel data memiliki `cloud_id` untuk identifikasi device
 - `settings` memiliki UNIQUE constraint `(user_id, key)`
-- `profiles` dibuat otomatis saat user pertama kali daftar (trigger)
+- `profiles` dibuat otomatis saat user daftar (trigger)
 - RLS aktif di `profiles` dan `otp_codes`
 
 ## API Endpoints
 
 ### Auth
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | POST | `/api/auth/login` | Login email + password |
@@ -206,9 +243,10 @@ auth.users (Supabase Auth)
 | PATCH | `/api/auth/profile` | Update profil |
 
 ### Data
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
-| GET/PUT | `/api/settings` | Ambil/simpan pengaturan |
+| GET/PUT | `/api/settings` | Ambil / simpan pengaturan |
 | POST | `/api/settings/test` | Test koneksi ke Fingerspot API |
 | POST | `/api/fingerspot/command` | Kirim perintah ke device |
 | GET | `/api/attendance-logs` | Ambil log absensi |
@@ -241,59 +279,61 @@ npm i -g vercel
 vercel
 
 # Set environment variables di Vercel Dashboard
-# Settings > Environment Variables
+# Settings → Environment Variables
 ```
 
-Pastikan environment variable di Vercel identik dengan `.env.local`.
+> Pastikan environment variable di Vercel identik dengan `.env.local`.
 
 ## Struktur Folder
 
 ```
 src/
-  app/
-    (auth)/login/          -- Halaman login/register
-    (dashboard)/           -- Semua halaman dashboard
-      dashboard/           -- Overview statistik
-      attendance-logs/     -- Log absensi
-      user-info/           -- Data biometrik
-      pin-list/            -- Daftar PIN
-      api-history/         -- Log perintah API
-      webhook-history/     -- Log webhook
-      api-tester/          -- Tester API interaktif
-      settings/            -- Pengaturan
-    api/                   -- API route handlers
-  lib/
-    auth-browser.tsx       -- Client-side auth (useAuth hook)
-    auth-server.ts         -- Server-side auth (requireAuth)
-    fingerspot.ts          -- Fingerspot API client
-    supabase.ts            -- Supabase REST client
-    user-settings.ts       -- Settings CRUD
-    email.ts               -- Resend email integration
-  stores/
-    settings.ts            -- Zustand store
-  contexts/
-    ThemeLanguageContext.tsx -- Theme & i18n provider
-  types/
-    database.ts            -- TypeScript type definitions
+├── app/
+│   ├── (auth)/login/              # Halaman login/register
+│   ├── (dashboard)/               # Semua halaman dashboard
+│   │   ├── dashboard/             #   Overview statistik
+│   │   ├── attendance-logs/       #   Log absensi
+│   │   ├── user-info/             #   Data biometrik
+│   │   ├── pin-list/              #   Daftar PIN
+│   │   ├── api-history/           #   Log perintah API
+│   │   ├── webhook-history/       #   Log webhook
+│   │   ├── api-tester/            #   Tester API interaktif
+│   │   └── settings/              #   Pengaturan
+│   └── api/                       # API route handlers
+├── lib/
+│   ├── auth-browser.tsx           # Client-side auth (useAuth)
+│   ├── auth-server.ts             # Server-side auth (requireAuth)
+│   ├── fingerspot.ts              # Fingerspot API client
+│   ├── supabase.ts                # Supabase REST client
+│   ├── user-settings.ts           # Settings CRUD
+│   └── email.ts                   # Resend email integration
+├── stores/
+│   └── settings.ts                # Zustand store
+├── contexts/
+│   └── ThemeLanguageContext.tsx    # Theme & i18n provider
+└── types/
+    └── database.ts                # TypeScript type definitions
 
 supabase/
-  migrations/              -- SQL schema
-  functions/
-    smart-task/            -- Webhook handler (production)
-    fingerspot-webhook/    -- Webhook handler (legacy)
+├── migrations/                    # SQL schema
+└── functions/
+    ├── smart-task/                # Webhook handler (production)
+    └── fingerspot-webhook/        # Webhook handler (legacy)
 ```
 
 ## Troubleshooting
 
 | Masalah | Solusi |
 |---------|--------|
-| Settings tidak tersimpan | Buka browser console, cek error dari `/api/settings` |
+| Settings tidak tersimpan | Buka browser console → cek error dari `/api/settings` |
 | Device tidak ditemukan | Pastikan Cloud ID benar dan device online di Fingerspot portal |
 | Webhook tidak masuk | Pastikan Webhook URL sudah diatur di Fingerspot portal |
 | Email tidak terkirim | Cek API key Resend dan pastikan email verified di Resend |
-| Auth error | Clear cookies dan login ulang |
+| Auth error | Clear cookies → login ulang |
 | Build error | Jalankan `npm run lint` untuk cek error |
 
-## License
+---
 
-Private - Untuk penggunaan internal.
+<p align="center">
+  Made with ❤️ for Fingerspot Enterprise
+</p>
