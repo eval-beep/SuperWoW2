@@ -1,261 +1,226 @@
-<mxfile host="app.diagrams.net" modified="2026-08-15T00:00:00.000Z" agent="draw.io" version="24.0.0" type="device">
-  <diagram id="fingerspot-api-webhook-flow" name="API &amp; Webhook Flow">
-    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+<mxfile host="app.diagrams.net" modified="2026-08-15T10:00:00.000Z" agent="draw.io" version="24.0.0" type="device">
+  <diagram id="flow-diagram" name="Fingerspot Flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="700" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
         <!-- Title -->
-        <mxCell id="title" value="&lt;b&gt;Fingerspot Console — API &amp; Webhook Flow Diagram&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;" vertex="1" parent="1">
-          <mxGeometry x="400" y="20" width="500" height="40" as="geometry" />
+        <mxCell id="title" value="Fingerspot Console - API &amp; Webhook Flow" style="text;html=0;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="450" y="10" width="380" height="30" as="geometry" />
         </mxCell>
 
-        <!-- ==================== LEFT SIDE: PULL FLOW ==================== -->
-        <mxCell id="pull_title" value="&lt;b&gt;PULL FLOW (Kirim Perintah ke Device)&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#004CCD;" vertex="1" parent="1">
-          <mxGeometry x="30" y="80" width="350" height="30" as="geometry" />
+        <!-- PULL FLOW SECTION -->
+        <mxCell id="pull_section" value="PULL FLOW (Kirim Perintah)" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;fontColor=#0066CC;" vertex="1" parent="1">
+          <mxGeometry x="20" y="50" width="200" height="25" as="geometry" />
         </mxCell>
 
         <!-- Browser -->
-        <mxCell id="browser" value="&lt;b&gt;Browser&lt;/b&gt;&lt;br&gt;(React Dashboard)" style="shape=mxgraph.basic.rounded_frame;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;size=10;arcSize=20;" vertex="1" parent="1">
-          <mxGeometry x="30" y="130" width="160" height="80" as="geometry" />
+        <mxCell id="browser" value="Browser (React)" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="20" y="90" width="120" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Arrow: Browser -> Next.js API -->
-        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#004CCD;strokeWidth=2;" edge="1" parent="1" source="browser" target="next_api">
+        <!-- Next.js API -->
+        <mxCell id="next_api" value="Next.js API Route" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="90" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Fingerspot API -->
+        <mxCell id="fs_api" value="Fingerspot Cloud API" style="shape=cloud;whiteSpace=wrap;html=0;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="200" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Device Pull -->
+        <mxCell id="device_pull" value="Fingerspot Device" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="320" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows Pull -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#0066CC;strokeWidth=2;" edge="1" source="browser" target="next_api" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arrow1_label" value="&lt;b&gt;POST /api/fingerspot/command&lt;/b&gt;&lt;br&gt;{ command, params: { cloud_id } }" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" connectable="0" parent="arrow1">
-          <mxGeometry x="-0.1" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Next.js API Route -->
-        <mxCell id="next_api" value="&lt;b&gt;Next.js API Route&lt;/b&gt;&lt;br&gt;/api/fingerspot/command&lt;br&gt;&lt;hr size=1&gt;1. requireAuth()&lt;br&gt;2. getUserCloudId()&lt;br&gt;3. getUserFingerspotConfig()&lt;br&gt;4. sendFingerspotCommand()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
-          <mxGeometry x="240" y="130" width="250" height="130" as="geometry" />
-        </mxCell>
-
-        <!-- Arrow: Next.js -> Fingerspot API -->
-        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#004CCD;strokeWidth=2;" edge="1" parent="1" source="next_api" target="fs_api">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="arrow2_label" value="&lt;b&gt;POST https://developer.fingerspot.io/api/{command}&lt;/b&gt;&lt;br&gt;Header: Authorization Bearer {API_KEY}&lt;br&gt;Body: { trans_id, cloud_id, ...params }" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" connectable="0" parent="arrow2">
-          <mxGeometry x="-0.1" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Fingerspot Cloud API -->
-        <mxCell id="fs_api" value="&lt;b&gt;Fingerspot Cloud API&lt;/b&gt;&lt;br&gt;https://developer.fingerspot.io/api" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;size=0.15;" vertex="1" parent="1">
-          <mxGeometry x="280" y="310" width="210" height="100" as="geometry" />
-        </mxCell>
-
-        <!-- Arrow: Fingerspot API -> Device -->
-        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#004CCD;strokeWidth=2;" edge="1" parent="1" source="fs_api" target="device_pull">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="arrow3_label" value="Forward perintah ke device" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" connectable="0" parent="arrow3">
-          <mxGeometry x="-0.1" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Device (Pull) -->
-        <mxCell id="device_pull" value="&lt;b&gt;Fingerspot Device&lt;/b&gt;&lt;br&gt;(Fingerprint/Face Scanner)" style="shape=mxgraph.basic.rounded_frame;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;size=10;arcSize=20;" vertex="1" parent="1">
-          <mxGeometry x="290" y="440" width="190" height="70" as="geometry" />
-        </mxCell>
-
-        <!-- Arrow: Device -> Fingerspot API (response) -->
-        <mxCell id="arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;dashed=1;" edge="1" parent="1" source="device_pull" target="fs_api">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="520" y="475" />
-              <mxPoint x="520" y="360" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="arrow4_label" value="Response data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" connectable="0" parent="arrow4">
-          <mxGeometry x="-0.3" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Arrow: Fingerspot API -> Next.js (response) -->
-        <mxCell id="arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;dashed=1;" edge="1" parent="1" source="fs_api" target="next_api">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="540" y="360" />
-              <mxPoint x="540" y="195" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="arrow5_label" value="JSON response" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" connectable="0" parent="arrow5">
-          <mxGeometry x="-0.3" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Arrow: Next.js -> Browser (response) -->
-        <mxCell id="arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;dashed=1;" edge="1" parent="1" source="next_api" target="browser">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="arrow6_label" value="JSON response" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" connectable="0" parent="arrow6">
-          <mxGeometry x="-0.3" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Next.js -> command_logs -->
-        <mxCell id="arrow_cl" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="next_api" target="cmd_logs">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="560" y="260" />
-              <mxPoint x="560" y="685" />
-              <mxPoint x="620" y="685" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="arrow_cl_label" value="Simpan log perintah" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" vertex="1" connectable="0" parent="arrow_cl">
+        <mxCell id="arrow1_label" value="POST /api/command" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow1">
           <mxGeometry x="-0.2" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
 
-        <!-- ==================== RIGHT SIDE: PUSH FLOW ==================== -->
-        <mxCell id="push_title" value="&lt;b&gt;PUSH FLOW (Webhook dari Device)&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#006e2b;" vertex="1" parent="1">
-          <mxGeometry x="700" y="80" width="330" height="30" as="geometry" />
-        </mxCell>
-
-        <!-- Device (Push) -->
-        <mxCell id="device_push" value="&lt;b&gt;Fingerspot Device&lt;/b&gt;&lt;br&gt;(Scan fingerprint/face terdeteksi)" style="shape=mxgraph.basic.rounded_frame;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;size=10;arcSize=20;" vertex="1" parent="1">
-          <mxGeometry x="700" y="130" width="210" height="70" as="geometry" />
-        </mxCell>
-
-        <!-- Arrow: Device -> Edge Function -->
-        <mxCell id="arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#006e2b;strokeWidth=2;" edge="1" parent="1" source="device_push" target="edge_fn">
+        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#0066CC;strokeWidth=2;" edge="1" source="next_api" target="fs_api" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arrow7_label" value="&lt;b&gt;POST webhook&lt;/b&gt;&lt;br&gt;{ type, cloud_id, trans_id, data }" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" connectable="0" parent="arrow7">
-          <mxGeometry x="-0.1" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Supabase Edge Function -->
-        <mxCell id="edge_fn" value="&lt;b&gt;Supabase Edge Function&lt;/b&gt;&lt;br&gt;smart-task/index.ts&lt;br&gt;&lt;hr size=1&gt;1. Parse webhook payload&lt;br&gt;2. Resolve user_id dari cloud_id&lt;br&gt;3. Enrich data dari command_logs&lt;br&gt;4. Simpan ke database" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
-          <mxGeometry x="710" y="250" width="240" height="130" as="geometry" />
-        </mxCell>
-
-        <!-- Arrow: Edge Function -> Database -->
-        <mxCell id="arrow8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="edge_fn" target="db_push">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="arrow8_label" value="Simpan data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;" vertex="1" connectable="0" parent="arrow8">
-          <mxGeometry x="-0.1" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- Database (Push targets) -->
-        <mxCell id="db_push" value="&lt;b&gt;Supabase PostgreSQL&lt;/b&gt;&lt;br&gt;&lt;hr size=1&gt;attlogs — Log absensi&lt;br&gt;userinfos — Data biometrik&lt;br&gt;pins — Daftar PIN&lt;br&gt;webhook_logs — Log webhook" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;size=15;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
-          <mxGeometry x="730" y="420" width="200" height="130" as="geometry" />
-        </mxCell>
-
-        <!-- Arrow: Edge Function -> webhook_logs -->
-        <mxCell id="arrow_wl" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="edge_fn" target="wh_logs">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1000" y="380" />
-              <mxPoint x="1000" y="685" />
-              <mxPoint x="1060" y="685" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="arrow_wl_label" value="Simpan log webhook" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" vertex="1" connectable="0" parent="arrow_wl">
+        <mxCell id="arrow2_label" value="POST API + Token" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow2">
           <mxGeometry x="-0.2" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
 
-        <!-- ==================== BOTTOM: DATABASE ==================== -->
-        <mxCell id="db_title" value="&lt;b&gt;DATABASE (Supabase PostgreSQL)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#9673a6;" vertex="1" parent="1">
-          <mxGeometry x="620" y="600" width="320" height="30" as="geometry" />
+        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#0066CC;strokeWidth=2;" edge="1" source="fs_api" target="device_pull" parent="1">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- Tables -->
-        <mxCell id="cmd_logs" value="&lt;b&gt;command_logs&lt;/b&gt;&lt;br&gt;Log perintah API&lt;br&gt;cloud_id, trans_id,&lt;br&gt;request/response" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="630" y="640" width="150" height="80" as="geometry" />
-        </mxCell>
-
-        <mxCell id="wh_logs" value="&lt;b&gt;webhook_logs&lt;/b&gt;&lt;br&gt;Log webhook masuk&lt;br&gt;webhook_type, cloud_id,&lt;br&gt;raw_payload" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="1060" y="640" width="150" height="80" as="geometry" />
-        </mxCell>
-
-        <mxCell id="attlogs" value="&lt;b&gt;attlogs&lt;/b&gt;&lt;br&gt;Log absensi" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="430" y="640" width="130" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="userinfos" value="&lt;b&gt;userinfos&lt;/b&gt;&lt;br&gt;Data biometrik" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="430" y="700" width="130" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="pins" value="&lt;b&gt;pins&lt;/b&gt;&lt;br&gt;Daftar PIN" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="570" y="700" width="130" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="settings_tbl" value="&lt;b&gt;settings&lt;/b&gt;&lt;br&gt;Key-value per user&lt;br&gt;cloud_id, api_token,&lt;br&gt;theme, language" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="840" y="640" width="160" height="70" as="geometry" />
-        </mxCell>
-
-        <mxCell id="profiles_tbl" value="&lt;b&gt;profiles&lt;/b&gt;&lt;br&gt;User profile" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;rowGrowth=0;align=center;" vertex="1" parent="1">
-          <mxGeometry x="840" y="720" width="160" height="50" as="geometry" />
-        </mxCell>
-
-        <!-- ==================== LEGEND ==================== -->
-        <mxCell id="legend_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="1250" y="130" width="300" height="200" as="geometry" />
-        </mxCell>
-        <mxCell id="legend_title" value="&lt;b&gt;LEGENDA&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="135" width="80" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="leg1" value="Solid line = Request" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="165" width="140" height="25" as="geometry" />
-        </mxCell>
-        <mxCell id="leg2" value="Dashed line = Response / Async" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="190" width="200" height="25" as="geometry" />
-        </mxCell>
-        <mxCell id="leg3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#004CCD;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1270" y="225" as="sourcePoint" />
-            <mxPoint x="1330" y="225" as="targetPoint" />
+        <mxCell id="arrow3_label" value="Forward perintah" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow3">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="leg3_label" value="Pull flow (API command)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="1340" y="213" width="170" height="25" as="geometry" />
-        </mxCell>
-        <mxCell id="leg4" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#006e2b;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1270" y="250" as="sourcePoint" />
-            <mxPoint x="1330" y="250" as="targetPoint" />
+
+        <!-- Response arrows (dashed) -->
+        <mxCell id="arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=1;dashed=1;" edge="1" source="device_pull" target="fs_api" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="345" />
+              <mxPoint x="400" y="235" />
+            </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="leg4_label" value="Push flow (Webhook)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="1340" y="238" width="170" height="25" as="geometry" />
-        </mxCell>
-        <mxCell id="leg5" value="" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#d6b656;dashed=1;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1270" y="275" as="sourcePoint" />
-            <mxPoint x="1330" y="275" as="targetPoint" />
+        <mxCell id="arrow4_label" value="Response" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow4">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="leg5_label" value="Log to database" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="1340" y="263" width="170" height="25" as="geometry" />
+
+        <mxCell id="arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=1;dashed=1;" edge="1" source="fs_api" target="next_api" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="235" />
+              <mxPoint x="420" y="115" />
+            </Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="leg6" value="Biru = User config" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="293" width="130" height="22" as="geometry" />
+        <mxCell id="arrow5_label" value="JSON response" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow5">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="leg7" value="Hijau = Data device" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="315" width="130" height="22" as="geometry" />
+
+        <mxCell id="arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=1;dashed=1;" edge="1" source="next_api" target="browser" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow6_label" value="JSON response" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow6">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- PUSH FLOW SECTION -->
+        <mxCell id="push_section" value="PUSH FLOW (Webhook)" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;fontColor=#006633;" vertex="1" parent="1">
+          <mxGeometry x="500" y="50" width="180" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Device Push -->
+        <mxCell id="device_push" value="Fingerspot Device (Scan)" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="500" y="90" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Edge Function -->
+        <mxCell id="edge_fn" value="Supabase Edge Function" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="500" y="200" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Database -->
+        <mxCell id="database" value="Supabase PostgreSQL" style="shape=cylinder3;whiteSpace=wrap;html=0;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;size=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="310" width="150" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows Push -->
+        <mxCell id="arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#006633;strokeWidth=2;" edge="1" source="device_push" target="edge_fn" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow7_label" value="POST webhook data" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow7">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#B85450;strokeWidth=2;" edge="1" source="edge_fn" target="database" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow8_label" value="Simpan data" style="edgeLabel;html=0;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fillColor=none;strokeColor=none;" vertex="1" connectable="0" parent="arrow8">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DATABASE TABLES SECTION -->
+        <mxCell id="db_section" value="DATABASE TABLES" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;fontColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="750" y="50" width="140" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Table boxes -->
+        <mxCell id="tbl_attlogs" value="attlogs" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="90" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_userinfos" value="userinfos" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="130" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_pins" value="pins" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="170" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_settings" value="settings" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="90" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_profiles" value="profiles" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="130" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_cmd_logs" value="command_logs" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="210" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_wh_logs" value="webhook_logs" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="170" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- LEGEND -->
+        <mxCell id="legend_bg" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f5f5f5;strokeColor=#999999;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="90" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_title" value="LEGENDA" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="95" width="70" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg1" value="Request (solid)" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="120" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1_line" style="endArrow=block;html=0;strokeWidth=2;strokeColor=#0066CC;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="145" as="sourcePoint" />
+            <mxPoint x="1120" y="145" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg1_label" value="Pull (API)" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="135" width="70" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg2_line" style="endArrow=block;html=0;strokeWidth=2;strokeColor=#006633;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="165" as="sourcePoint" />
+            <mxPoint x="1120" y="165" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg2_label" value="Push (Webhook)" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="155" width="90" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg3_line" style="endArrow=block;html=0;strokeWidth=1;strokeColor=#82b366;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="185" as="sourcePoint" />
+            <mxPoint x="1120" y="185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg3_label" value="Response" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="175" width="60" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg4_bg" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="200" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4_label" value="Device data" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1085" y="195" width="70" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg5_bg" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="220" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5_label" value="User config" style="text;html=0;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1085" y="215" width="70" height="20" as="geometry" />
         </mxCell>
 
       </root>
